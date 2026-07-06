@@ -456,6 +456,14 @@ func buy_weapon_black(id: String) -> Dictionary:
 	save_to_disk()
 	return {"ok": true, "price": price, "serial": "none", "roll": r.text("clean", "close", "DEX")}
 
+## Combat power for a Challenge: brawn + speed + experience, plus your best weapon's threat.
+func combat_power() -> int:
+	var base := stat_mod("STR") + stat_mod("DEX") + int(level() / 2)
+	var wep := 0
+	for wid in weapons:
+		wep = maxi(wep, int(Weapons.by_id(String(wid)).get("threat", 0)))
+	return base + wep
+
 # ---- online session: server-authoritative state + economy ------------------
 
 ## Adopt the server's authoritative state from get_my_state. The server owns cash/xp/inventory/etc.,

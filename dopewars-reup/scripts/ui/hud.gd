@@ -60,6 +60,8 @@ func _ready() -> void:
 	PlayerState.busted_at_airport.connect(_on_busted)
 	PlayerState.package_ready.connect(_show_package)
 	PlayerState.street_encounter.connect(_show_encounter)
+	PlayerState.notoriety_changed.connect(func(_n): _refresh())
+	PlayerState.injury_changed.connect(func(_n): _refresh())
 	PlayerState.travel_arrived_clean.connect(_on_clean_arrival)
 	_refresh()
 	# A trip that finished while the app was closed completes before this HUD exists,
@@ -398,12 +400,19 @@ func _refresh() -> void:
 		_action_btn.visible = false
 	if _action_glass:
 		_action_glass.visible = _action_btn.visible
+	# Heat + injury show only when they matter (keeps the line clean when you're low-key + healthy).
+	var flags: Array = []
+	if PlayerState.notoriety > 0:
+		flags.append("heat %d" % PlayerState.notoriety)
+	if PlayerState.injury > 0:
+		flags.append("hurt %d%%" % PlayerState.injury)
+	var extra := ("  ·  " + " · ".join(flags)) if not flags.is_empty() else ""
 	if PlayerState.travel != null:
 		# Travel line has no cash/carry — append them on a second line.
-		_status_label.text = "%s\nCash %s · %s" % [status, cash, lbs]
+		_status_label.text = "%s\nCash %s · %s%s" % [status, cash, lbs, extra]
 	else:
 		# In-city and off-grid status already include cash/carry.
-		_status_label.text = status
+		_status_label.text = status + extra
 
 func _comma(n: int) -> String:
 	var s := str(absi(n))

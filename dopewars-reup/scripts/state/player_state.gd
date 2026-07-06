@@ -529,6 +529,15 @@ func _ready() -> void:
 func _on_signed_in(ok: bool) -> void:
 	if not ok:
 		return
+	# Pay-to-play: only adopt the online (server-authoritative) account if this account is ENTITLED.
+	# Free accounts stay in offline single-player — their local sandbox — and get prompted to buy in.
+	# The server is the real gate (every action RPC rejects the unentitled); this is the client UX.
+	var acc := await Supa.call_rpc("my_online_access")
+	var entitled: bool = acc.get("ok", false) and acc.get("json") == true
+	if not entitled:
+		_online = false
+		Notify.info("Signed in — online play needs access. Playing offline for now.", "Backend")
+		return
 	var res := await Supa.call_rpc("get_my_state")
 	if res.get("ok", false) and typeof(res.get("json")) == TYPE_DICTIONARY:
 		apply_server_state(res["json"])

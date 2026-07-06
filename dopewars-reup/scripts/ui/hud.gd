@@ -2248,19 +2248,25 @@ func _show_encounter(enc: Dictionary) -> void:
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 10)
 	dlg.add_child(col)
-	col.add_child(_sheet_header("Jumped!"))
+	var is_cop: bool = enc.get("kind") == "cop_stop"
+	col.add_child(_sheet_header("Cops" if is_cop else "Jumped!"))
 	var desc := Label.new()
-	desc.text = "%s steps to you as you arrive. Fight, run, or pay them off?" % String(enc.get("name", "A stickup crew"))
+	if is_cop:
+		desc.text = "%s pulls you over as you arrive. Submit to the search, or run?" % String(enc.get("name", "A patrol"))
+	else:
+		desc.text = "%s steps to you as you arrive. Fight, run, or pay them off?" % String(enc.get("name", "A stickup crew"))
 	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	desc.custom_minimum_size = Vector2(get_viewport().get_visible_rect().size.x * 0.8, 0)
 	desc.add_theme_font_size_override("font_size", 24)
 	col.add_child(desc)
-	var pw := Label.new()
-	pw.text = "Your power %d   ·   theirs ~%d" % [PlayerState.combat_power(), int(enc.get("power", 3))]
-	pw.add_theme_font_size_override("font_size", 20)
-	pw.add_theme_color_override("font_color", ACCENT)
-	col.add_child(pw)
-	for act in [["Fight", "fight"], ["Run", "flee"], ["Pay", "comply"]]:
+	if not is_cop:
+		var pw := Label.new()
+		pw.text = "Your power %d   ·   theirs ~%d" % [PlayerState.combat_power(), int(enc.get("power", 3))]
+		pw.add_theme_font_size_override("font_size", 20)
+		pw.add_theme_color_override("font_color", ACCENT)
+		col.add_child(pw)
+	var actions := [["Submit to search", "comply"], ["Run", "flee"]] if is_cop else [["Fight", "fight"], ["Run", "flee"], ["Pay", "comply"]]
+	for act in actions:
 		var b := Button.new()
 		b.theme = ThemeFactory.make(ACCENT)
 		b.text = String(act[0])

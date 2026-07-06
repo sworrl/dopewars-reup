@@ -526,12 +526,17 @@ func roll_encounter() -> Dictionary:
 	var chance := clampf(0.04 + notoriety / 400.0 + (cash / 2000.0) / 50.0 + carry_val / 2000.0, 0.0, 0.55)
 	if randf() > chance:
 		return {}
+	# High heat + carrying product → sometimes it's the cops, not a stickup crew.
+	if notoriety >= 40 and carry_val > 0 and randf() < 0.4:
+		return {"kind": "cop_stop", "name": "a patrol", "dc": 10 + int(notoriety / 8)}
 	var mugger := 2 + int(notoriety / 15) + randi_range(0, 3)   # known earners draw tougher crews
 	return {"kind": "mugging", "power": mugger, "name": "a stickup crew",
 		"threat_cash": int(cash * 0.25)}
 
-## Resolve an encounter by the player's choice: fight (Challenge), flee (stealth), or comply (pay).
+## Resolve an encounter by the player's choice. Muggings: fight/flee/comply. Cop stops: comply/flee.
 func resolve_encounter(enc: Dictionary, action: String) -> Dictionary:
+	if enc.get("kind") == "cop_stop":
+		return _resolve_cop(enc, action)
 	if action == "fight":
 		var o := Challenge.fight(combat_power(), int(enc.get("power", 3)), "You", String(enc.get("name", "them")))
 		if o.winner >= 0:
@@ -569,6 +574,37 @@ func _seize_random_drug() -> String:
 	inventory.erase(d)
 	inventory_changed.emit()
 	return " and %dg of %s" % [g, d]
+
+func _seize_all_drugs() -> String:
+	if inventory.is_empty():
+		return ""
+	var total := grams_carried()
+	inventory.clear()
+	inventory_changed.emit()
+	return " and seized %dg of product" % total
+
+## A police stop (from high heat while carrying). You can submit to the search or run.
+func _resolve_cop(enc: Dictionary, action: String) -> Dictionary:
+	var dc := int(enc.get("dc", 12))
+	if action == "flee":
+		var r := stealth_check(dc + 4)   # running from cops is harder
+		if r.success:
+			add_notoriety(3)
+			return {"ok": true, "won": true, "text": "You bolted and lost them. " + r.text("gone", "caught", "DEX")}
+		var seized := _seize_all_drugs()
+		busted_before = true
+		add_notoriety(8)
+		return {"ok": true, "won": false, "text": "They ran you down%s — and now you've got a record." % seized}
+	# comply / submit to a search — a cool head (WIS) keeps a stash hidden
+	if inventory.is_empty():
+		return {"ok": true, "won": true, "text": "Nothing on you — they wave you on."}
+	var r := perception_check(dc)
+	if r.success:
+		return {"ok": true, "won": true, "text": "The search comes up empty. " + r.text("clean", "found", "WIS")}
+	var seized := _seize_all_drugs()
+	busted_before = true
+	add_notoriety(6)
+	return {"ok": true, "won": false, "text": "The search hits%s — busted, and you've got a record." % seized}
 
 # ---- online session: server-authoritative state + economy ------------------
 

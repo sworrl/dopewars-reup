@@ -938,7 +938,7 @@ func _populate_comms(content: VBoxContainer, state: Dictionary, rebuild: Callabl
 	var chips := HBoxContainer.new()
 	chips.add_theme_constant_override("separation", 6)
 	content.add_child(chips)
-	for tab in ["Crew", "Local", "Whispers"]:
+	for tab in ["Crew", "Local", "Whispers", "Account"]:
 		var chip := Button.new()
 		chip.theme = ThemeFactory.make(ACCENT)
 		chip.text = tab
@@ -954,6 +954,76 @@ func _populate_comms(content: VBoxContainer, state: Dictionary, rebuild: Callabl
 		"Crew": await _comms_crew(content, rebuild)
 		"Local": await _comms_local(content, rebuild)
 		"Whispers": await _comms_whispers(content)
+		"Account": _comms_account(content, rebuild)
+
+## Account management: save/upgrade an anonymous account with an email, change password, sign out.
+func _comms_account(content: VBoxContainer, rebuild: Callable) -> void:
+	var who := Label.new()
+	who.text = "Signed in · id %s…" % Supa.user_id.substr(0, 8) if Supa.is_signed_in() else "Offline (no account)"
+	who.add_theme_font_size_override("font_size", 20)
+	who.add_theme_color_override("font_color", Color(0.72, 0.75, 0.82))
+	content.add_child(who)
+
+	# Save / upgrade: attach an email + password so progress survives and you can pay. PII only here.
+	var save_hdr := Label.new()
+	save_hdr.text = "Save your account (email — needed to pay + recover)"
+	save_hdr.add_theme_font_size_override("font_size", 22)
+	save_hdr.add_theme_color_override("font_color", ACCENT)
+	content.add_child(save_hdr)
+	var email := LineEdit.new()
+	email.placeholder_text = "email"
+	email.add_theme_font_size_override("font_size", 24)
+	content.add_child(email)
+	var pw1 := LineEdit.new()
+	pw1.placeholder_text = "password"
+	pw1.secret = true
+	pw1.add_theme_font_size_override("font_size", 24)
+	content.add_child(pw1)
+	var save := _account_button("Save / upgrade account", func():
+		var r := await Supa.link_email(email.text.strip_edges(), pw1.text)
+		if r.get("ok", false):
+			Notify.good("Account saved. Check your email to confirm.", "Account")
+		else:
+			Notify.warn(_account_err(r), "Account"))
+	content.add_child(save)
+
+	# Change password (for accounts that already have an email).
+	var pw_hdr := Label.new()
+	pw_hdr.text = "Change password"
+	pw_hdr.add_theme_font_size_override("font_size", 22)
+	pw_hdr.add_theme_color_override("font_color", ACCENT)
+	content.add_child(pw_hdr)
+	var pw2 := LineEdit.new()
+	pw2.placeholder_text = "new password"
+	pw2.secret = true
+	pw2.add_theme_font_size_override("font_size", 24)
+	content.add_child(pw2)
+	content.add_child(_account_button("Update password", func():
+		var r := await Supa.update_password(pw2.text)
+		if r.get("ok", false):
+			Notify.good("Password updated.", "Account")
+		else:
+			Notify.warn(_account_err(r), "Account")))
+
+	content.add_child(_account_button("Sign out", func():
+		await Supa.sign_out()
+		Notify.info("Signed out.", "Account")
+		rebuild.call()))
+
+func _account_button(text: String, cb: Callable) -> Button:
+	var b := Button.new()
+	b.theme = ThemeFactory.make(ACCENT)
+	b.custom_minimum_size = Vector2(0, 80)
+	b.add_theme_font_size_override("font_size", 22)
+	b.text = text
+	b.pressed.connect(cb)
+	return b
+
+func _account_err(r: Dictionary) -> String:
+	var j: Variant = r.get("json")
+	if typeof(j) == TYPE_DICTIONARY and (j as Dictionary).has("msg"):
+		return String((j as Dictionary).get("msg"))
+	return String(r.get("error", "something went wrong"))
 
 func _comms_crew(content: VBoxContainer, rebuild: Callable) -> void:
 	var crew := await Comms.my_crew()

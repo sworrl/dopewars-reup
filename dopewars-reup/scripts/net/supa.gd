@@ -54,6 +54,26 @@ func sign_in(email: String, password: String) -> Dictionary:
 func sign_in_anonymous() -> Dictionary:
 	return await _auth("/auth/v1/signup", {})
 
+## Update the signed-in user (GoTrue PUT /user). Used for change-password / change-email, and to
+## LINK an email+password onto an anonymous account (upgrade at billing — captures PII only then).
+func update_password(new_password: String) -> Dictionary:
+	return await _post(Cfg.url() + "/auth/v1/user", {"password": new_password}, true, HTTPClient.METHOD_PUT)
+
+func update_email(new_email: String) -> Dictionary:
+	return await _post(Cfg.url() + "/auth/v1/user", {"email": new_email}, true, HTTPClient.METHOD_PUT)
+
+func link_email(email: String, password: String) -> Dictionary:
+	# Converts an anonymous user into a permanent one without losing their progress.
+	return await _post(Cfg.url() + "/auth/v1/user", {"email": email, "password": password}, true, HTTPClient.METHOD_PUT)
+
+## Sign out: revoke the session server-side and clear local tokens.
+func sign_out() -> void:
+	if access_token != "":
+		await _post(Cfg.url() + "/auth/v1/logout", {}, true)
+	access_token = ""
+	user_id = ""
+	signed_in.emit(false)
+
 func _auth(path: String, body: Dictionary) -> Dictionary:
 	var res := await _post(Cfg.url() + path, body, false)
 	if res.get("ok", false):
@@ -75,7 +95,7 @@ func invoke(fn: String, body: Dictionary = {}) -> Dictionary:
 
 # ---- transport ----------------------------------------------------------
 
-func _post(url: String, body: Dictionary, auth: bool) -> Dictionary:
+func _post(url: String, body: Dictionary, auth: bool, method: int = HTTPClient.METHOD_POST) -> Dictionary:
 	if not configured():
 		return {"ok": false, "error": "offline"}
 	var req := HTTPRequest.new()
@@ -88,7 +108,7 @@ func _post(url: String, body: Dictionary, auth: bool) -> Dictionary:
 		headers.append("Authorization: Bearer " + access_token)
 	elif auth:
 		headers.append("Authorization: Bearer " + Cfg.anon_key())
-	var err := req.request(url, headers, HTTPClient.METHOD_POST, JSON.stringify(body))
+	var err := req.request(url, headers, method, JSON.stringify(body))
 	if err != OK:
 		req.queue_free()
 		return {"ok": false, "error": "request_failed"}

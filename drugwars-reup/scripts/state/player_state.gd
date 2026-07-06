@@ -64,6 +64,11 @@ signal cosmetics_changed()
 # city_id, acquired_at}. Server-authoritative online (acquire_building RPC); local-first here.
 var buildings: Dictionary = {}
 signal buildings_changed()
+
+# Owned general-aviation aircraft (empty = none): {id, name, tier, range_mi, carry_lb, cruise_mph,
+# faa_reg, adsb_on}. Unlocks the GA travel mode. See Aircraft.
+var aircraft: Dictionary = {}
+signal aircraft_changed()
 # Set when a trip completes; the HUD reads it on _ready and shows a "while you were away"
 # report. Transient (not persisted) — the completion happens on the same launch the HUD
 # then reads it, so the live toast and this cold-open report never both fire.
@@ -330,6 +335,51 @@ func release_building(key: String) -> void:
 		buildings_changed.emit()
 		save_to_disk()
 
+# ---- aircraft (general aviation) -------------------------------------------
+
+func has_aircraft() -> bool:
+	return not aircraft.is_empty()
+
+func aircraft_range_mi() -> float:
+	return float(aircraft.get("range_mi", 0.0))
+
+func aircraft_cruise_mph() -> float:
+	return float(aircraft.get("cruise_mph", 120.0))
+
+func aircraft_carry_lb() -> float:
+	return float(aircraft.get("carry_lb", 0.0))
+
+func aircraft_adsb_on() -> bool:
+	return bool(aircraft.get("adsb_on", true))
+
+## Buy a GA aircraft (replaces any current one; no trade-in v1). Assigns a random N-number and turns
+## the transponder on (the legal default). Returns bool.
+func buy_aircraft(listing: Dictionary) -> bool:
+	var price := int(listing.get("price", 0))
+	if not change_cash(-price):
+		return false
+	aircraft = listing.duplicate(true)
+	aircraft["faa_reg"] = _gen_tail_number()
+	aircraft["adsb_on"] = true
+	aircraft_changed.emit()
+	save_to_disk()
+	return true
+
+## Toggle the ADS-B transponder. On = legally trackable. Off = harder to track (advantage evading a
+## ramp check) but running dark is itself a federal violation if you're caught.
+func toggle_adsb() -> void:
+	if not has_aircraft():
+		return
+	aircraft["adsb_on"] = not aircraft_adsb_on()
+	aircraft_changed.emit()
+	save_to_disk()
+
+func _gen_tail_number() -> String:
+	var letters := "ABCDEFGHJKLMNPQRSTUVWXYZ"   # FAA omits I and O
+	var a := letters[randi() % letters.length()]
+	var b := letters[randi() % letters.length()]
+	return "N%d%s%s" % [randi_range(100, 999), a, b]
+
 func _ready() -> void:
 	load_from_disk()
 
@@ -378,6 +428,7 @@ func cancel_travel() -> void:
 func _complete_travel() -> void:
 	var dest_id := travel.dest_city_id
 	var arrived_via_plane := travel.mode == Travel.Mode.PLANE
+	var arrived_via_ga := travel.mode == Travel.Mode.GA
 	var dest_pos := travel.dest_latlon()
 	lat = dest_pos.x
 	lon = dest_pos.y
@@ -402,6 +453,27 @@ func _complete_travel() -> void:
 		var r := Dice.check(stat_mod("DEX"), dc, adv, "TSA")
 		var caught := not r.success
 		var roll_text := r.text("PASSED", "BUSTED", "DEX")
+		if caught:
+			var seized := inventory.duplicate()
+			inventory.clear()
+			inventory_changed.emit()
+			pending_arrival = {"kind": "busted", "city_id": dest_id, "seized": seized, "roll_text": roll_text}
+			busted_at_airport.emit(dest_id, seized, roll_text)
+			save_to_disk()
+			return
+		pending_arrival = {"kind": "clean", "city_id": dest_id, "roll_text": roll_text}
+		travel_arrived_clean.emit(dest_id, roll_text)
+
+	# General aviation: no TSA gate (you fly yourself), but a DEA/FAA ramp check on arrival. ADS-B
+	# ON = trackable; running dark gives advantage evading the check, but being caught dark is worse.
+	if arrived_via_ga and not inventory.is_empty():
+		var heat := Drugs.region_heat(dest_id)
+		var dc := 11 + int(heat / 25) + int(pounds_carried() / 20.0)   # more product = more suspicious
+		var dark := not aircraft_adsb_on()
+		var adv := Dice.ADVANTAGE if dark else Dice.NONE
+		var r := Dice.check(stat_mod("DEX"), dc, adv, "Ramp check")
+		var caught := not r.success
+		var roll_text := r.text("CLEARED", "RAMPED", "DEX") + ("  [flying dark]" if dark else "")
 		if caught:
 			var seized := inventory.duplicate()
 			inventory.clear()
@@ -743,6 +815,7 @@ func to_dict() -> Dictionary:
 		"owned_cosmetics": owned_cosmetics,
 		"equipped": equipped,
 		"buildings": buildings,
+		"aircraft": aircraft,
 		"travel": travel.to_dict() if travel != null else null,
 	}
 
@@ -765,6 +838,7 @@ func load_dict(d: Dictionary) -> void:
 	owned_cosmetics = d.get("owned_cosmetics", [])
 	equipped = d.get("equipped", {})
 	buildings = d.get("buildings", {})
+	aircraft = d.get("aircraft", {})
 	# Derive the modes list from owned_vehicles so the ints stay clean (JSON round-trips numbers
 	# as floats). Fall back to any legacy owned_vehicle_modes for older saves without owned_vehicles.
 	if owned_vehicles.is_empty():

@@ -1,0 +1,9 @@
+{
+ "_comment": "General-aviation aircraft you can own (endgame assets). Flying yourself skips commercial TSA but risks a DEA/FAA ramp check on arrival. ADS-B on = legally trackable; running it dark evades tracking but is a federal violation if you're caught. Prices/ranges are gameplay values.",
+ "aircraft": [
+  {"id": "skyranger_lsa", "name": "SkyRanger LSA",  "tier": 1, "price": 22000,  "range_mi": 260,  "carry_lb": 90,  "cruise_mph": 100, "blurb": "A light sport puddle-jumper. Cheap wings, short legs, small hold."},
+  {"id": "cessna_172",    "name": "Cessna 172",     "tier": 2, "price": 78000,  "range_mi": 640,  "carry_lb": 200, "cruise_mph": 140, "blurb": "The workhorse single. Reliable, unremarkable, everywhere — which is the point."},
+  {"id": "piper_twin",    "name": "Piper Twin",     "tier": 3, "price": 190000, "range_mi": 900,  "carry_lb": 420, "cruise_mph": 200, "blurb": "Two engines, real range, a hold that hides a lot. Draws more attention on the ramp."},
+  {"id": "citation_jet",  "name": "Citation (light jet)", "tier": 4, "price": 950000, "range_mi": 1800, "carry_lb": 600, "cruise_mph": 420, "blurb": "A light jet. Cross-country in an afternoon. Money's own aircraft — and money gets watched."}
+ ]
+}

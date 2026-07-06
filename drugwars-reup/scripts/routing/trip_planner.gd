@@ -52,6 +52,7 @@ const MODE_OVERHEAD_S := {
 	Travel.Mode.BUS: 600.0,
 	Travel.Mode.RIDESHARE: 300.0,
 	Travel.Mode.PLANE: 5400.0,
+	Travel.Mode.GA: 1800.0,          # preflight + fuel; no security line
 }
 
 const MODE_COST_BASE := {
@@ -63,6 +64,7 @@ const MODE_COST_BASE := {
 	Travel.Mode.BUS: 5,
 	Travel.Mode.RIDESHARE: 2,
 	Travel.Mode.PLANE: 50,
+	Travel.Mode.GA: 0,               # you own the plane — pay fuel per mile, not a ticket
 }
 
 const MODE_COST_PER_MILE := {
@@ -74,6 +76,7 @@ const MODE_COST_PER_MILE := {
 	Travel.Mode.BUS: 0.10,
 	Travel.Mode.RIDESHARE: 1.50,
 	Travel.Mode.PLANE: 1.00,
+	Travel.Mode.GA: 1.20,            # avgas + wear
 }
 
 const MODE_LABEL := {
@@ -85,12 +88,14 @@ const MODE_LABEL := {
 	Travel.Mode.BUS: "Bus (Wolfline)",
 	Travel.Mode.RIDESHARE: "Rideshare (Boober/Splift)",
 	Travel.Mode.PLANE: "Flight (commercial)",
+	Travel.Mode.GA: "Fly yourself (GA)",
 }
 
 const MODE_SUBLABEL := {
 	Travel.Mode.WALK: "on roads",
 	Travel.Mode.WALK_OFFROAD: "through woods/fields · slower, no road",
 	Travel.Mode.PLANE: "TSA bag screening at gate",
+	Travel.Mode.GA: "your aircraft · no TSA, but a ramp-check risk",
 }
 
 ## Bespoke transport art (no emoji). Paths to Imagen-generated icons.
@@ -103,6 +108,7 @@ const MODE_ICON := {
 	Travel.Mode.BUS: "res://assets/sprites/transport/bus.png",
 	Travel.Mode.RIDESHARE: "res://assets/sprites/transport/rideshare.png",
 	Travel.Mode.PLANE: "res://assets/sprites/transport/plane.png",
+	Travel.Mode.GA: "res://assets/sprites/transport/plane.png",   # reuse plane art (no bespoke GA art yet)
 }
 
 ## Personal vehicles the player must OWN to use. Services (bus/rideshare/plane) are hireable,
@@ -130,17 +136,21 @@ static func plan(router: Node, origin_lat: float, origin_lon: float,
 		dest_lat: float, dest_lon: float,
 		origin_is_airport: bool = false,
 		dest_is_airport: bool = false,
-		owned_modes: Array = []) -> Array:
+		owned_modes: Array = [],
+		has_aircraft: bool = false,
+		ga_range_mi: float = 0.0,
+		ga_cruise_mph: float = 120.0) -> Array:
 	var routes: Array = await router.fetch_routes("driving", origin_lat, origin_lon, dest_lat, dest_lon)
 	var driving_route: Route = routes[0] if not routes.is_empty() else null
 	return options_for_route(driving_route, origin_lat, origin_lon, dest_lat, dest_lon,
-		origin_is_airport, dest_is_airport, owned_modes)
+		origin_is_airport, dest_is_airport, owned_modes, has_aircraft, ga_range_mi, ga_cruise_mph)
 
 ## Build the per-mode options for a SPECIFIC chosen driving route (road modes follow it;
 ## off-road and plane are straight-line and route-independent).
 static func options_for_route(driving_route: Route, origin_lat: float, origin_lon: float,
 		dest_lat: float, dest_lon: float,
-		origin_is_airport: bool, dest_is_airport: bool, owned_modes: Array) -> Array:
+		origin_is_airport: bool, dest_is_airport: bool, owned_modes: Array,
+		has_aircraft: bool = false, ga_range_mi: float = 0.0, ga_cruise_mph: float = 120.0) -> Array:
 	var options: Array = []
 
 	# Road modes — share the OSRM driving polyline.
@@ -169,6 +179,27 @@ static func options_for_route(driving_route: Route, origin_lat: float, origin_lo
 		else:
 			p.unavailable_reason = "no airport at destination"
 		options.append(p)
+
+	# General aviation — fly your own aircraft (straight-line). Needs an owned aircraft with the
+	# range to reach the destination. No airport requirement (GA fields are everywhere).
+	var ga_route := Route.make_straight(origin_lat, origin_lon, dest_lat, dest_lon, "ga", ga_cruise_mph)
+	var ga_miles: float = ga_route.total_distance_m / 1609.344
+	if has_aircraft and ga_miles <= ga_range_mi:
+		options.append(_build_ga_option(ga_route, ga_cruise_mph, ga_miles))
+	else:
+		var g := TripOption.new()
+		g.mode = Travel.Mode.GA
+		g.label = MODE_LABEL[Travel.Mode.GA]
+		g.sublabel = MODE_SUBLABEL.get(Travel.Mode.GA, "")
+		g.icon = MODE_ICON[Travel.Mode.GA]
+		g.available = false
+		if not has_aircraft:
+			g.needs_purchase = true
+			g.marketplace_query = "aircraft"          # HUD routes this to the hangar, not a web link
+			g.unavailable_reason = "You don't own an aircraft"
+		else:
+			g.unavailable_reason = "Beyond your aircraft's range (%d mi)" % int(ga_range_mi)
+		options.append(g)
 
 	# Access-gating: lock personal vehicles the player doesn't own; offer a marketplace link.
 	for o in options:
@@ -215,4 +246,16 @@ static func _build_plane_option(route: Route) -> TripOption:
 		+ float(MODE_OVERHEAD_S[Travel.Mode.PLANE])
 	o.cost_dollars = int(round(float(MODE_COST_BASE[Travel.Mode.PLANE]) \
 		+ float(MODE_COST_PER_MILE[Travel.Mode.PLANE]) * miles))
+	return o
+
+static func _build_ga_option(route: Route, cruise_mph: float, miles: float) -> TripOption:
+	var o := TripOption.new()
+	o.mode = Travel.Mode.GA
+	o.label = MODE_LABEL[Travel.Mode.GA]
+	o.sublabel = MODE_SUBLABEL.get(Travel.Mode.GA, "")
+	o.icon = MODE_ICON[Travel.Mode.GA]
+	o.route = route
+	o.eta_s = (miles / maxf(cruise_mph, 1.0)) * 3600.0 + float(MODE_OVERHEAD_S[Travel.Mode.GA])
+	o.cost_dollars = int(round(float(MODE_COST_BASE[Travel.Mode.GA]) \
+		+ float(MODE_COST_PER_MILE[Travel.Mode.GA]) * miles))
 	return o

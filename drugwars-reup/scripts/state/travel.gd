@@ -7,7 +7,8 @@ extends Resource
 ## Effective duration is supplied by TripPlanner, which applies mode-specific
 ## multipliers (bus stops, rideshare hail, plane boarding) on top of OSRM's raw estimate.
 
-enum Mode { WALK, BIKE, MOTORCYCLE, CAR, BUS, RIDESHARE, PLANE, WALK_OFFROAD }
+# GA is appended (value 8) so existing saved trips keep their mode ints.
+enum Mode { WALK, BIKE, MOTORCYCLE, CAR, BUS, RIDESHARE, PLANE, WALK_OFFROAD, GA }
 
 const MODE_LABEL := {
 	Mode.WALK: "walking",
@@ -18,6 +19,7 @@ const MODE_LABEL := {
 	Mode.RIDESHARE: "in a ride",
 	Mode.PLANE: "flying",
 	Mode.WALK_OFFROAD: "hiking",
+	Mode.GA: "flying yourself",
 }
 
 @export var mode: Mode = Mode.WALK

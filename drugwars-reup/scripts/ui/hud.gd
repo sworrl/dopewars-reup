@@ -446,7 +446,8 @@ func show_travel_confirm(dest_lat: float, dest_lon: float, dest_city_id: String)
 		for c in modes_box.get_children():
 			c.queue_free()
 		var opts := TripPlanner.options_for_route(route, o_lat, o_lon, dest_lat, dest_lon,
-			origin_is_airport, dest_is_airport, PlayerState.owned_vehicle_modes)
+			origin_is_airport, dest_is_airport, PlayerState.owned_vehicle_modes,
+			PlayerState.has_aircraft(), PlayerState.aircraft_range_mi(), PlayerState.aircraft_cruise_mph())
 		for opt in opts:
 			modes_box.add_child(_build_trip_row(opt, dest_city_id, dlg, refresh))
 	rebuild_modes_ref[0] = rebuild_modes
@@ -720,6 +721,133 @@ func _pick_building_kind(loc: Dictionary, parent_dlg: AcceptDialog, rebuild: Cal
 	var vp := get_viewport().get_visible_rect().size
 	picker.popup_centered(Vector2i(int(vp.x * 0.9), int(vp.y * 0.8)))
 
+# ---- hangar: general-aviation aircraft ----------------------------------
+
+## Buy/manage your GA aircraft and toggle its transponder. `on_change` (optional) re-renders the trip
+## modes so GA unlocks live after a purchase.
+func _show_hangar(on_change: Callable = Callable()) -> void:
+	var dlg := AcceptDialog.new()
+	dlg.title = "Hangar"
+	dlg.ok_button_text = "Close"
+	add_child(dlg)
+	_glassify_dialog(dlg)
+	dlg.confirmed.connect(func(): dlg.queue_free())
+	dlg.canceled.connect(func(): dlg.queue_free())
+
+	var vp := get_viewport().get_visible_rect().size
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.custom_minimum_size = Vector2(vp.x * 0.9, vp.y * 0.74)
+	dlg.add_child(scroll)
+	var content := VBoxContainer.new()
+	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	content.add_theme_constant_override("separation", 10)
+	scroll.add_child(content)
+
+	var rebuild_ref: Array = [null]
+	var rebuild := func() -> void:
+		for c in content.get_children():
+			c.queue_free()
+		_populate_hangar(content, rebuild_ref[0], on_change)
+	rebuild_ref[0] = rebuild
+	rebuild.call()
+	dlg.popup_centered(Vector2i(int(vp.x * 0.96), int(vp.y * 0.92)))
+
+func _populate_hangar(content: VBoxContainer, rebuild: Callable, on_change: Callable) -> void:
+	content.add_child(_sheet_header("Hangar"))
+
+	if PlayerState.has_aircraft():
+		var a: Dictionary = PlayerState.aircraft
+		var card := PanelContainer.new()
+		card.add_theme_stylebox_override("panel", _glass_row_stylebox())
+		var col := VBoxContainer.new()
+		col.add_theme_constant_override("separation", 4)
+		card.add_child(col)
+		var nm := Label.new()
+		nm.text = "%s  ·  %s" % [a.get("name", "?"), a.get("faa_reg", "N-----")]
+		nm.add_theme_font_size_override("font_size", 28)
+		col.add_child(nm)
+		var stats := Label.new()
+		stats.text = "Range %d mi · holds %d lb · cruise %d mph" % [
+			int(a.get("range_mi", 0)), int(a.get("carry_lb", 0)), int(a.get("cruise_mph", 0))]
+		stats.add_theme_font_size_override("font_size", 20)
+		stats.add_theme_color_override("font_color", Color(0.72, 0.75, 0.82))
+		col.add_child(stats)
+		content.add_child(card)
+
+		# ADS-B transponder toggle.
+		var adsb := PlayerState.aircraft_adsb_on()
+		var t := Button.new()
+		t.theme = ThemeFactory.make(ACCENT)
+		t.custom_minimum_size = Vector2(0, 92)
+		t.add_theme_font_size_override("font_size", 24)
+		t.text = "ADS-B: ON (legal, trackable)" if adsb else "ADS-B: OFF (flying dark — federal offense)"
+		t.add_theme_color_override("font_color", Color(0.90, 0.68, 0.20) if adsb else ACCENT)
+		t.pressed.connect(func():
+			PlayerState.toggle_adsb()
+			rebuild.call())
+		content.add_child(t)
+		var note := Label.new()
+		note.text = "Dark = advantage evading a ramp check, but being caught dark is a far worse case."
+		note.add_theme_font_size_override("font_size", 18)
+		note.add_theme_color_override("font_color", Color(0.62, 0.62, 0.66))
+		note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		content.add_child(note)
+
+	var rule := ColorRect.new()
+	rule.color = Color(1, 1, 1, 0.10)
+	rule.custom_minimum_size = Vector2(0, 2)
+	content.add_child(rule)
+	var buy_hdr := Label.new()
+	buy_hdr.text = "Buy an aircraft" if not PlayerState.has_aircraft() else "Replace your aircraft"
+	buy_hdr.add_theme_font_size_override("font_size", 26)
+	buy_hdr.add_theme_color_override("font_color", ACCENT)
+	content.add_child(buy_hdr)
+
+	for a in Aircraft.all():
+		content.add_child(_aircraft_buy_row(a, rebuild, on_change))
+
+func _aircraft_buy_row(a: Dictionary, rebuild: Callable, on_change: Callable) -> Control:
+	var row := PanelContainer.new()
+	row.add_theme_stylebox_override("panel", _glass_row_stylebox())
+	var hb := HBoxContainer.new()
+	hb.add_theme_constant_override("separation", 12)
+	row.add_child(hb)
+	var col := VBoxContainer.new()
+	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hb.add_child(col)
+	var nm := Label.new()
+	nm.text = String(a.get("name", "?"))
+	nm.add_theme_font_size_override("font_size", 25)
+	col.add_child(nm)
+	var stats := Label.new()
+	stats.text = "Range %d mi · holds %d lb · %d mph" % [
+		int(a.get("range_mi", 0)), int(a.get("carry_lb", 0)), int(a.get("cruise_mph", 0))]
+	stats.add_theme_font_size_override("font_size", 18)
+	stats.add_theme_color_override("font_color", Color(0.72, 0.75, 0.82))
+	col.add_child(stats)
+	var owned: bool = PlayerState.has_aircraft() and String(PlayerState.aircraft.get("id", "")) == String(a.get("id", ""))
+	var price := int(a.get("price", 0))
+	var buy := Button.new()
+	buy.theme = ThemeFactory.make(ACCENT)
+	buy.add_theme_font_size_override("font_size", 20)
+	if owned:
+		buy.text = "Owned"
+		buy.disabled = true
+	else:
+		buy.text = "$%s" % _comma(price)
+		buy.disabled = PlayerState.cash < price
+		buy.pressed.connect(func():
+			if PlayerState.buy_aircraft(a):
+				Notify.good("%s acquired — %s." % [a.get("name", ""), PlayerState.aircraft.get("faa_reg", "")], "Hangar")
+				rebuild.call()
+				if on_change.is_valid():
+					on_change.call()
+			else:
+				Notify.warn("Can't afford it.", "Hangar"))
+	hb.add_child(buy)
+	return row
+
 # ---- cosmetics locker / store -------------------------------------------
 
 ## The cosmetics locker: browse the 100-item catalog by category, buy store items with earned CRED,
@@ -883,6 +1011,8 @@ func _mode_carry_lb(mode: int) -> float:
 		Travel.Mode.BIKE, Travel.Mode.MOTORCYCLE, Travel.Mode.CAR:
 			return PlayerState.vehicle_trunk_lb(mode) if PlayerState.owns_vehicle_mode(mode) \
 				else Vehicles.base_trunk_lb(mode)
+		Travel.Mode.GA:
+			return PlayerState.aircraft_carry_lb() if PlayerState.has_aircraft() else 0.0
 	return float(SERVICE_CARRY_LB.get(mode, 9999.0))
 
 func _build_trip_row(opt, dest_city_id: String, dlg: AcceptDialog, refresh: Callable) -> Control:
@@ -950,8 +1080,13 @@ func _build_trip_row(opt, dest_city_id: String, dlg: AcceptDialog, refresh: Call
 		buy.text = "Buy one"
 		buy.custom_minimum_size = Vector2(160, 100)
 		buy.add_theme_font_size_override("font_size", 26)
-		buy.tooltip_text = "Browse used %s listings" % opt.marketplace_query
-		buy.pressed.connect(func(): _show_vehicle_listings(opt.mode, opt.marketplace_query, refresh))
+		if opt.mode == Travel.Mode.GA:
+			buy.text = "Hangar"
+			buy.tooltip_text = "Buy an aircraft in the hangar"
+			buy.pressed.connect(func(): _show_hangar(refresh))
+		else:
+			buy.tooltip_text = "Browse used %s listings" % opt.marketplace_query
+			buy.pressed.connect(func(): _show_vehicle_listings(opt.mode, opt.marketplace_query, refresh))
 		hb.add_child(buy)
 	elif over_capacity:
 		# Can't haul the current stash this way — jump to the market to sell some down.

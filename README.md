@@ -103,13 +103,19 @@ What is built, and what is still locked.
 | Vehicles, per-mode carry limits, buy-in-game | ✅ live |
 | Trap houses + RPG crews + passive economy | ✅ live |
 | Phones as gear, GraphineOS, traceability | ✅ live |
-| Cosmetic economy: cred, 100 items, supporter tiers | ✅ live (art pending) |
+| d20 skill-check engine (perception, stealth, busts) + stat-driven outcomes | ✅ live |
+| Character creation: D&D stats, classes, perks, procedural start | ✅ live |
+| Map intel overlays: perception-gated, decaying danger/market/competition reads | ✅ live |
+| Cosmetics locker: CRED economy, 100-item catalog, buy/equip (flair only) | ✅ live (art pending) |
+| Diegetic phone frame: tier bezel, damage cracks, low-battery pulse + repair | ✅ live |
+| Buildings: occupy REAL OSM map locations as operations (Overpass-backed) | ✅ live |
+| General aviation: own aircraft, fly yourself, ADS-B ramp-check risk | ✅ live |
 | Supabase backend: server-authoritative, RLS, adversarially tested | ✅ live |
 | Branded UI: glass, fonts, animated boot | ✅ live |
 | In-app auto-update: GitHub release → signed + checksum-verified APK, postpone-or-now modal | ✅ client + release pipeline built |
-| Multiplayer backend: crews, presence, earshot/whisper/crew comms | ✅ server built + adversarially tested (client UI pending) |
-| Buildings: occupy real map locations | 🔒 building |
-| Aviation, character phones intercept, map intel overlays | 🔒 designed |
+| Multiplayer backend: crews, presence, earshot/whisper/crew comms | ✅ server built + adversarially tested |
+| Wire the client to the live backend (server-authoritative online play) | 🔒 building |
+| Multiplayer client UI: crews, chat, whispers, presence, proximity awareness | 🔒 building |
 | Human-made art replacing the AI placeholders | 🔒 wanted (see below) |
 
 ---

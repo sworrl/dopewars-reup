@@ -114,8 +114,8 @@ What is built, and what is still locked.
 | Branded UI: glass, fonts, animated boot | ✅ live |
 | In-app auto-update: GitHub release → signed + checksum-verified APK, postpone-or-now modal | ✅ client + release pipeline built |
 | Multiplayer backend: crews, presence, earshot/whisper/crew comms | ✅ server built + adversarially tested |
-| Wire the client to the live backend (server-authoritative online play) | 🔒 building |
-| Multiplayer client UI: crews, chat, whispers, presence, proximity awareness | 🔒 building |
+| Client wired to live backend: server-authoritative market + buildings, state reconcile on login | ✅ live (verified vs live DB) |
+| Multiplayer client UI: crews, local/crew chat, whisper inbox, presence + proximity awareness | ✅ live (RPCs verified vs live DB) |
 | Human-made art replacing the AI placeholders | 🔒 wanted (see below) |
 
 ---

@@ -59,6 +59,11 @@ var owned_cosmetics: Array = []
 var equipped: Dictionary = {}
 signal cred_changed(new_cred: int)
 signal cosmetics_changed()
+
+# Occupied REAL map locations, keyed by Buildings.location_key: {osm_id, name, kind, lat, lon,
+# city_id, acquired_at}. Server-authoritative online (acquire_building RPC); local-first here.
+var buildings: Dictionary = {}
+signal buildings_changed()
 # Set when a trip completes; the HUD reads it on _ready and shows a "while you were away"
 # report. Transient (not persisted) — the completion happens on the same launch the HUD
 # then reads it, so the live toast and this cold-open report never both fire.
@@ -292,6 +297,37 @@ func unequip_category(category: String) -> void:
 	if equipped.has(category):
 		equipped.erase(category)
 		cosmetics_changed.emit()
+		save_to_disk()
+
+# ---- buildings (occupy real map locations) ---------------------------------
+
+func owns_building(key: String) -> bool:
+	return buildings.has(key)
+
+## Occupy a real map location as an operation of `kind`. Cost is set by kind (mirrors the server's
+## server-side pricing, so it can't be forged). Returns {ok, error, cost}.
+func acquire_building(osm_id: String, name: String, lat: float, lon: float, kind: String) -> Dictionary:
+	if not Buildings.KINDS.has(kind):
+		return {"ok": false, "error": "bad kind"}
+	var key := Buildings.location_key(osm_id, lat, lon)
+	if buildings.has(key):
+		return {"ok": false, "error": "already yours"}
+	var c := Buildings.cost(kind)
+	if not change_cash(-c):
+		return {"ok": false, "error": "need $%d" % c}
+	buildings[key] = {
+		"osm_id": osm_id, "name": name, "kind": kind,
+		"lat": lat, "lon": lon, "city_id": current_city_id,
+		"acquired_at": Time.get_unix_time_from_system(),
+	}
+	buildings_changed.emit()
+	save_to_disk()
+	return {"ok": true, "cost": c}
+
+func release_building(key: String) -> void:
+	if buildings.has(key):
+		buildings.erase(key)
+		buildings_changed.emit()
 		save_to_disk()
 
 func _ready() -> void:
@@ -706,6 +742,7 @@ func to_dict() -> Dictionary:
 		"cred": cred,
 		"owned_cosmetics": owned_cosmetics,
 		"equipped": equipped,
+		"buildings": buildings,
 		"travel": travel.to_dict() if travel != null else null,
 	}
 
@@ -727,6 +764,7 @@ func load_dict(d: Dictionary) -> void:
 	cred = int(d.get("cred", 0))
 	owned_cosmetics = d.get("owned_cosmetics", [])
 	equipped = d.get("equipped", {})
+	buildings = d.get("buildings", {})
 	# Derive the modes list from owned_vehicles so the ints stay clean (JSON round-trips numbers
 	# as floats). Fall back to any legacy owned_vehicle_modes for older saves without owned_vehicles.
 	if owned_vehicles.is_empty():

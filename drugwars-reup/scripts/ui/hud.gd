@@ -41,6 +41,7 @@ func _ready() -> void:
 	_build_phone_button()
 	_build_zoom_button()
 	_build_intel_button()
+	_build_turf_button()
 	_build_arrival_toast()
 	# Subtle entrance for the HUD on scene change.
 	Anim.slide_in_from_bottom(_top_panel, 24.0, 0.35)
@@ -515,6 +516,209 @@ func _sheet_header(text: String) -> Control:
 	rule.custom_minimum_size = Vector2(0, 2)
 	v.add_child(rule)
 	return v
+
+# ---- turf: occupy real map locations ------------------------------------
+
+func _build_turf_button() -> void:
+	var btn := Button.new()
+	btn.theme = ThemeFactory.make(ACCENT)
+	btn.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	btn.offset_left = 20
+	btn.offset_right = 250
+	btn.offset_top = 418
+	btn.offset_bottom = 508
+	btn.text = "Turf"
+	btn.add_theme_font_size_override("font_size", 24)
+	btn.pressed.connect(_show_turf)
+	btn.pressed.connect(Anim.tap_press.bind(btn))
+	add_child(btn)
+
+var _turf_scan: Array = []      # last Overpass results, kept across panel rebuilds
+var _turf_scanning := false
+
+## Turf panel: your occupied operations + a scan of REAL nearby OSM locations you can take over.
+func _show_turf() -> void:
+	_turf_scan = []
+	var dlg := AcceptDialog.new()
+	dlg.title = "Turf"
+	dlg.ok_button_text = "Close"
+	add_child(dlg)
+	_glassify_dialog(dlg)
+	dlg.confirmed.connect(func(): dlg.queue_free())
+	dlg.canceled.connect(func(): dlg.queue_free())
+
+	var vp := get_viewport().get_visible_rect().size
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.custom_minimum_size = Vector2(vp.x * 0.9, vp.y * 0.74)
+	dlg.add_child(scroll)
+	var content := VBoxContainer.new()
+	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	content.add_theme_constant_override("separation", 10)
+	scroll.add_child(content)
+
+	var rebuild_ref: Array = [null]
+	var rebuild := func() -> void:
+		for c in content.get_children():
+			c.queue_free()
+		_populate_turf(content, dlg, rebuild_ref[0])
+	rebuild_ref[0] = rebuild
+	rebuild.call()
+	dlg.popup_centered(Vector2i(int(vp.x * 0.96), int(vp.y * 0.92)))
+
+func _populate_turf(content: VBoxContainer, dlg: AcceptDialog, rebuild: Callable) -> void:
+	content.add_child(_sheet_header("Turf · %d held" % PlayerState.buildings.size()))
+
+	# Your operations.
+	if PlayerState.buildings.is_empty():
+		var none := Label.new()
+		none.text = "You hold no locations yet. Scan nearby to take one over."
+		none.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		none.add_theme_font_size_override("font_size", 22)
+		none.add_theme_color_override("font_color", Color(0.7, 0.72, 0.78))
+		content.add_child(none)
+	else:
+		for key in PlayerState.buildings.keys():
+			content.add_child(_owned_building_row(String(key), PlayerState.buildings[key], rebuild))
+
+	var rule := ColorRect.new()
+	rule.color = Color(1, 1, 1, 0.10)
+	rule.custom_minimum_size = Vector2(0, 2)
+	content.add_child(rule)
+
+	var scan_hdr := Label.new()
+	scan_hdr.text = "Locations near you"
+	scan_hdr.add_theme_font_size_override("font_size", 26)
+	scan_hdr.add_theme_color_override("font_color", ACCENT)
+	content.add_child(scan_hdr)
+
+	var scan_btn := Button.new()
+	scan_btn.theme = ThemeFactory.make(ACCENT)
+	scan_btn.text = "Scanning…" if _turf_scanning else "Scan nearby (real map)"
+	scan_btn.disabled = _turf_scanning
+	scan_btn.custom_minimum_size = Vector2(0, 88)
+	scan_btn.add_theme_font_size_override("font_size", 24)
+	scan_btn.pressed.connect(func(): _scan_turf(rebuild))
+	content.add_child(scan_btn)
+
+	for loc in _turf_scan:
+		content.add_child(_nearby_location_row(loc, dlg, rebuild))
+
+	# Always allow occupying the exact spot you're standing on, even if OSM has nothing named there.
+	var here := Button.new()
+	here.theme = ThemeFactory.make(ACCENT)
+	here.text = "Occupy this spot (unnamed)"
+	here.custom_minimum_size = Vector2(0, 80)
+	here.add_theme_font_size_override("font_size", 22)
+	here.pressed.connect(func(): _pick_building_kind(
+		{"osm_id": "", "name": "Unnamed spot", "lat": PlayerState.lat, "lon": PlayerState.lon}, dlg, rebuild))
+	content.add_child(here)
+
+func _scan_turf(rebuild: Callable) -> void:
+	if _turf_scanning:
+		return
+	_turf_scanning = true
+	rebuild.call()
+	var found := await Overpass.fetch_near(self, PlayerState.lat, PlayerState.lon)
+	# Drop anything already occupied so the list only shows takeable spots.
+	_turf_scan = []
+	for loc in found:
+		var key := Buildings.location_key(String(loc.get("osm_id", "")), float(loc.lat), float(loc.lon))
+		if not PlayerState.owns_building(key):
+			_turf_scan.append(loc)
+	if _turf_scan.is_empty():
+		Notify.info("No named locations found nearby. You can still occupy your spot.", "Turf")
+	_turf_scanning = false
+	rebuild.call()
+
+func _owned_building_row(key: String, b: Dictionary, rebuild: Callable) -> Control:
+	var row := PanelContainer.new()
+	row.add_theme_stylebox_override("panel", _glass_row_stylebox())
+	var hb := HBoxContainer.new()
+	hb.add_theme_constant_override("separation", 12)
+	row.add_child(hb)
+	var col := VBoxContainer.new()
+	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hb.add_child(col)
+	var name_lbl := Label.new()
+	name_lbl.text = String(b.get("name", "Spot"))
+	name_lbl.add_theme_font_size_override("font_size", 26)
+	col.add_child(name_lbl)
+	var sub := Label.new()
+	sub.text = Buildings.display_name(String(b.get("kind", "")))
+	sub.add_theme_font_size_override("font_size", 19)
+	sub.add_theme_color_override("font_color", Color(0.72, 0.75, 0.82))
+	col.add_child(sub)
+	var rel := Button.new()
+	rel.theme = ThemeFactory.make(ACCENT)
+	rel.text = "Release"
+	rel.add_theme_font_size_override("font_size", 20)
+	rel.pressed.connect(func():
+		PlayerState.release_building(key)
+		Notify.info("Released %s." % b.get("name", "location"), "Turf")
+		rebuild.call())
+	hb.add_child(rel)
+	return row
+
+func _nearby_location_row(loc: Dictionary, dlg: AcceptDialog, rebuild: Callable) -> Control:
+	var row := PanelContainer.new()
+	row.add_theme_stylebox_override("panel", _glass_row_stylebox())
+	var hb := HBoxContainer.new()
+	hb.add_theme_constant_override("separation", 12)
+	row.add_child(hb)
+	var col := VBoxContainer.new()
+	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hb.add_child(col)
+	var name_lbl := Label.new()
+	name_lbl.text = String(loc.get("name", "?"))
+	name_lbl.add_theme_font_size_override("font_size", 24)
+	col.add_child(name_lbl)
+	var sub := Label.new()
+	sub.text = String(loc.get("category", "place")).capitalize()
+	sub.add_theme_font_size_override("font_size", 18)
+	sub.add_theme_color_override("font_color", Color(0.72, 0.75, 0.82))
+	col.add_child(sub)
+	var take := Button.new()
+	take.theme = ThemeFactory.make(ACCENT)
+	take.text = "Occupy"
+	take.add_theme_font_size_override("font_size", 20)
+	take.pressed.connect(func(): _pick_building_kind(loc, dlg, rebuild))
+	hb.add_child(take)
+	return row
+
+## Kind picker — the 5 operation kinds with their server-mirrored costs. Occupies on tap.
+func _pick_building_kind(loc: Dictionary, parent_dlg: AcceptDialog, rebuild: Callable) -> void:
+	var picker := AcceptDialog.new()
+	picker.title = "Occupy: %s" % loc.get("name", "spot")
+	picker.ok_button_text = "Cancel"
+	add_child(picker)
+	_glassify_dialog(picker)
+	picker.confirmed.connect(func(): picker.queue_free())
+	picker.canceled.connect(func(): picker.queue_free())
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 8)
+	picker.add_child(col)
+	col.add_child(_sheet_header(String(loc.get("name", "spot"))))
+	for kind in Buildings.kind_ids():
+		var cost := Buildings.cost(kind)
+		var b := Button.new()
+		b.theme = ThemeFactory.make(ACCENT)
+		b.custom_minimum_size = Vector2(0, 92)
+		b.add_theme_font_size_override("font_size", 22)
+		b.text = "%s · $%s" % [Buildings.display_name(kind), _comma(cost)]
+		b.disabled = PlayerState.cash < cost
+		b.pressed.connect(func():
+			var r := PlayerState.acquire_building(String(loc.get("osm_id", "")), String(loc.get("name", "Spot")),
+				float(loc.lat), float(loc.lon), kind)
+			if r.get("ok", false):
+				Notify.good("%s is yours — $%s." % [Buildings.display_name(kind), _comma(int(r.get("cost", 0)))], "Turf")
+				picker.queue_free()
+				rebuild.call()
+			else:
+				Notify.warn(String(r.get("error", "can't occupy")), "Turf"))
+		col.add_child(b)
+	var vp := get_viewport().get_visible_rect().size
+	picker.popup_centered(Vector2i(int(vp.x * 0.9), int(vp.y * 0.8)))
 
 # ---- cosmetics locker / store -------------------------------------------
 

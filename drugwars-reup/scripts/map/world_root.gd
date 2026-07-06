@@ -24,6 +24,9 @@ func _ready() -> void:
 	PlayerState.intel_changed.connect(func():
 		if _overlay_dim != 0:
 			map.set_overlay(_overlay_dim))
+	# Owned operations show as gold pins on the map.
+	PlayerState.buildings_changed.connect(_refresh_building_markers)
+	_refresh_building_markers()
 	# When the player's lat/lon changes (travel tick), re-project the marker on the map.
 	PlayerState.position_changed.connect(_on_position_changed)
 	# A city was tapped — open trip mode picker.
@@ -57,6 +60,22 @@ func _load_cities() -> void:
 		marker.label_text = c.name
 		marker.color = Color(0.20, 0.55, 0.95)  # city blue
 		map.add_marker(marker, float(c.lat), float(c.lon), c.id)
+
+var _building_markers: Array = []
+
+func _refresh_building_markers() -> void:
+	for m in _building_markers:
+		if is_instance_valid(m):
+			m.queue_free()
+	_building_markers.clear()
+	for key in PlayerState.buildings.keys():
+		var b: Dictionary = PlayerState.buildings[key]
+		var marker := MapMarker.new()
+		marker.label_text = Buildings.display_name(String(b.get("kind", "")))
+		marker.color = Color(0.95, 0.72, 0.28)   # gold: your operations
+		marker.radius = 6.0
+		map.add_marker(marker, float(b.get("lat", 0.0)), float(b.get("lon", 0.0)))
+		_building_markers.append(marker)
 
 func _spawn_player_marker() -> void:
 	_player_marker = MapMarker.new()

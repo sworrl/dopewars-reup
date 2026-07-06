@@ -1,0 +1,128 @@
+{
+  "_comment": "v0.2-content. Class-locked base stats (all <7). Player gets 1-5 bonus points to allocate (NOT a budget toward a target sum). Starting XP determines starting level (0-3) per class — no level cap, XP curve in player_state.gd::xp_for_level().",
+  "_caps_after_alloc": {"non_primary": 8, "primary": 10},
+  "_base_range": "3-6 (all under 7)",
+  "_bonus_range": "1-5 (varies by class real-life experience)",
+  "classes": [
+    {
+      "id": "hustler",
+      "name": "Street Hustler",
+      "blurb": "Grew up on the corner. Knows everyone, owes everyone.",
+      "base_stats": {"STR": 4, "DEX": 6, "CON": 4, "INT": 4, "WIS": 5, "CHA": 6},
+      "primary_stat": "CHA",
+      "bonus_points": 3,
+      "starting_xp": 100,
+      "starting_cash": 2500,
+      "default_perk": "fast_talker",
+      "tags": ["streetwise"]
+    },
+    {
+      "id": "cook",
+      "name": "Cook",
+      "blurb": "Spent two years in a bio lab. Walked away with the recipes.",
+      "base_stats": {"STR": 3, "DEX": 5, "CON": 5, "INT": 6, "WIS": 5, "CHA": 3},
+      "primary_stat": "INT",
+      "bonus_points": 3,
+      "starting_xp": 100,
+      "starting_cash": 1500,
+      "default_perk": "iron_stomach",
+      "tags": ["chemistry"]
+    },
+    {
+      "id": "muscle",
+      "name": "Muscle",
+      "blurb": "Bouncer turned enforcer. Solves problems with weight.",
+      "base_stats": {"STR": 6, "DEX": 4, "CON": 6, "INT": 3, "WIS": 4, "CHA": 4},
+      "primary_stat": "STR",
+      "bonus_points": 4,
+      "starting_xp": 500,
+      "starting_cash": 1500,
+      "default_perk": "broad_shoulders",
+      "tags": ["intimidation"]
+    },
+    {
+      "id": "hacker",
+      "name": "Hacker",
+      "blurb": "Phones, cameras, transponders — your toys.",
+      "base_stats": {"STR": 3, "DEX": 5, "CON": 4, "INT": 6, "WIS": 5, "CHA": 4},
+      "primary_stat": "INT",
+      "bonus_points": 3,
+      "starting_xp": 100,
+      "starting_cash": 2000,
+      "default_perk": "ghost_in_the_wire",
+      "tags": ["tech"]
+    },
+    {
+      "id": "ex_cop",
+      "name": "Ex-Cop",
+      "blurb": "Took the badge for fifteen years. Crossed the street.",
+      "base_stats": {"STR": 5, "DEX": 5, "CON": 5, "INT": 5, "WIS": 6, "CHA": 4},
+      "primary_stat": "WIS",
+      "bonus_points": 5,
+      "starting_xp": 1500,
+      "starting_cash": 2000,
+      "default_perk": "i_know_their_playbook",
+      "tags": ["police_procedure"]
+    },
+    {
+      "id": "trust_fund",
+      "name": "Trust Fund Kid",
+      "blurb": "Bored. Rich. Curious about the wrong things.",
+      "base_stats": {"STR": 3, "DEX": 4, "CON": 3, "INT": 5, "WIS": 4, "CHA": 6},
+      "primary_stat": "CHA",
+      "bonus_points": 2,
+      "starting_xp": 50,
+      "starting_cash": 6000,
+      "default_perk": "untraceable_money",
+      "tags": ["soft_hands"]
+    },
+    {
+      "id": "veteran",
+      "name": "Veteran",
+      "blurb": "Two tours, an honorable discharge, and a chip the size of a city.",
+      "base_stats": {"STR": 6, "DEX": 5, "CON": 6, "INT": 4, "WIS": 5, "CHA": 4},
+      "primary_stat": "STR",
+      "bonus_points": 5,
+      "starting_xp": 1500,
+      "starting_cash": 1500,
+      "default_perk": "field_medic",
+      "tags": ["combat_trained"]
+    },
+    {
+      "id": "junkie",
+      "name": "Junkie",
+      "blurb": "You know the streets because you live there. Welcome back.",
+      "base_stats": {"STR": 3, "DEX": 5, "CON": 4, "INT": 3, "WIS": 6, "CHA": 3},
+      "primary_stat": "WIS",
+      "bonus_points": 1,
+      "starting_xp": 0,
+      "starting_cash": 400,
+      "default_perk": "junkies_wisdom",
+      "tags": ["addicted", "streetwise", "low_stigma"]
+    },
+    {
+      "id": "pharm_tech",
+      "name": "Pharm Tech",
+      "blurb": "White coat, blue gloves, a key to the cabinet.",
+      "base_stats": {"STR": 3, "DEX": 5, "CON": 4, "INT": 6, "WIS": 5, "CHA": 4},
+      "primary_stat": "INT",
+      "bonus_points": 3,
+      "starting_xp": 100,
+      "starting_cash": 2000,
+      "default_perk": "labelled_for_a_reason",
+      "tags": ["pharma_supply"]
+    },
+    {
+      "id": "biker",
+      "name": "Biker (Outlaw MC)",
+      "blurb": "Patches on, prospect days behind you. Riding for the club.",
+      "base_stats": {"STR": 5, "DEX": 6, "CON": 5, "INT": 3, "WIS": 4, "CHA": 4},
+      "primary_stat": "DEX",
+      "bonus_points": 4,
+      "starting_xp": 500,
+      "starting_cash": 1200,
+      "default_perk": "ride_or_die",
+      "tags": ["club_member", "owns_motorcycle"]
+    }
+  ]
+}

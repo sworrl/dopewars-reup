@@ -1,0 +1,14 @@
+{
+  "_comment": "Trap houses let you stash product off your person (frees carry) and have RPG employees PUSH it remotely while you're elsewhere. Setup cost is one-time to establish the operation in a city. storage_lb is how much product it holds; slots is how many employees can work it. Employees are RPG units: push_per_day = grams sold per in-game day, skim = fraction they pocket, heat = heat they draw. In-game day = 6 real minutes (DAY_SECONDS in trap.gd) so a passive operation pays off across a play session and while away.",
+  "house_tiers": [
+    {"id": "stash_spot", "name": "Stash spot", "setup_cost": 250, "storage_lb": 120, "slots": 1, "note": "A rented room with a hollow door. Holds a little, one worker."},
+    {"id": "trap_house", "name": "Trap house", "setup_cost": 1200, "storage_lb": 600, "slots": 2, "note": "A whole unit off the books. Real volume, two hands."},
+    {"id": "stash_house", "name": "Stash house", "setup_cost": 4000, "storage_lb": 2500, "slots": 4, "note": "A quiet house on a quiet street. Moves weight, crew of four."}
+  ],
+  "employees": [
+    {"id": "corner_kid", "name": "Corner kid", "hire_cost": 150, "push_per_day": 24, "skim": 0.16, "heat": 0.25, "note": "Young, hungry, sloppy. Pockets a little, draws eyes."},
+    {"id": "runner", "name": "Runner", "hire_cost": 350, "push_per_day": 44, "skim": 0.12, "heat": 0.18, "note": "Reliable legs. Knows the blocks."},
+    {"id": "veteran_slinger", "name": "Veteran slinger", "hire_cost": 800, "push_per_day": 72, "skim": 0.08, "heat": 0.10, "note": "Done this for years. Quiet, steady, loyal-ish."},
+    {"id": "lieutenant", "name": "Lieutenant", "hire_cost": 1900, "push_per_day": 130, "skim": 0.05, "heat": 0.06, "note": "Runs the spot like clockwork. Barely skims."}
+  ]
+}

@@ -1,0 +1,135 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/chargen.gd" id="1_cg"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/menu_bg.png" id="2_bg"]
+
+[node name="Chargen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_cg")
+
+[node name="BG" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.04, 0.04, 0.05, 1)
+
+[node name="BgImage" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 6
+modulate = Color(0.5, 0.5, 0.56, 1)
+
+[node name="Scroll" type="ScrollContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="V" type="VBoxContainer" parent="Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 14
+custom_minimum_size = Vector2(0, 4200)
+
+[node name="Pad" type="MarginContainer" parent="Scroll/V"]
+layout_mode = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 28
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 28
+
+[node name="Inner" type="VBoxContainer" parent="Scroll/V/Pad"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Title" type="Label" parent="Scroll/V/Pad/Inner"]
+layout_mode = 2
+text = "Build your character"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 52
+theme_override_colors/font_color = Color(0.92, 0.20, 0.25, 1)
+
+[node name="HandleLabel" type="Label" parent="Scroll/V/Pad/Inner"]
+layout_mode = 2
+text = "Street name"
+theme_override_font_sizes/font_size = 28
+theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
+
+[node name="HandleEdit" type="LineEdit" parent="Scroll/V/Pad/Inner"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "what they call you on the corner"
+custom_minimum_size = Vector2(0, 90)
+theme_override_font_sizes/font_size = 28
+
+[node name="ClassHeader" type="Label" parent="Scroll/V/Pad/Inner"]
+layout_mode = 2
+text = "Class"
+theme_override_font_sizes/font_size = 28
+theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
+
+[node name="ClassList" type="VBoxContainer" parent="Scroll/V/Pad/Inner"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="StatsHeader" type="Label" parent="Scroll/V/Pad/Inner"]
+layout_mode = 2
+text = "Stats — base is locked by class; allocate your budget."
+theme_override_font_sizes/font_size = 28
+theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
+
+[node name="PointsLabel" type="Label" parent="Scroll/V/Pad/Inner"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "(pick a class)"
+theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
+
+[node name="StatsBox" type="VBoxContainer" parent="Scroll/V/Pad/Inner"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="PerkHeader" type="Label" parent="Scroll/V/Pad/Inner"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Starter perk"
+theme_override_font_sizes/font_size = 28
+theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
+
+[node name="PerkList" type="VBoxContainer" parent="Scroll/V/Pad/Inner"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SummaryHeader" type="Label" parent="Scroll/V/Pad/Inner"]
+layout_mode = 2
+text = "Summary"
+theme_override_font_sizes/font_size = 28
+theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
+
+[node name="Summary" type="RichTextLabel" parent="Scroll/V/Pad/Inner"]
+unique_name_in_owner = true
+layout_mode = 2
+bbcode_enabled = true
+fit_content = true
+custom_minimum_size = Vector2(0, 320)
+
+[node name="Begin" type="Button" parent="Scroll/V/Pad/Inner"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Begin"
+disabled = true
+custom_minimum_size = Vector2(0, 130)
+theme_override_font_sizes/font_size = 36

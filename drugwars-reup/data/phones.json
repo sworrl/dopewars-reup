@@ -1,0 +1,12 @@
+{
+  "_comment": "Phones are RPG gear. tier gates smart features (maps/intel/remote ops - future). trace is how easily police can track/intercept you (0-100, higher = worse); a burner is anonymous-but-dumb, a stock smartphone is capable-but-tracked. Only graphene_supported models (Pixhell = Pixel parody, the only phones real GrapheneOS runs on) can flash GraphineOS, which drops trace hard while keeping the tier. battery is % and drains per trip; wired charges faster, wireless is the convenience tradeoff. Parody brand names kept safe + funny.",
+  "graphene_trace": 15,
+  "phones": [
+    {"id": "burner_flip", "name": "Burner flip", "tier": 1, "price": 25, "drain_per_trip": 6, "charge_wired": 70, "charge_wireless": 0, "trace": 30, "graphene_supported": false, "note": "Cash-bought, anonymous. Dumb: no maps, no apps, no wireless charging."},
+    {"id": "prepaid_droid", "name": "Crickett prepaid Android", "tier": 2, "price": 90, "drain_per_trip": 12, "charge_wired": 55, "charge_wireless": 35, "trace": 72, "graphene_supported": false, "note": "Account-linked. The carrier logs every tower you ping."},
+    {"id": "ifruit_se", "name": "iFruit SE", "tier": 3, "price": 230, "drain_per_trip": 10, "charge_wired": 60, "charge_wireless": 40, "trace": 68, "graphene_supported": false, "note": "Locked ecosystem. Cloud backups a DA can subpoena."},
+    {"id": "pixhell_6a", "name": "Pixhell 6a", "tier": 3, "price": 200, "drain_per_trip": 10, "charge_wired": 65, "charge_wireless": 45, "trace": 76, "graphene_supported": true, "note": "Stock OS tracks you hard, but it can run GraphineOS."},
+    {"id": "galaxa_s", "name": "Samsdiscount Galaxa S", "tier": 4, "price": 430, "drain_per_trip": 9, "charge_wired": 70, "charge_wireless": 55, "trace": 80, "graphene_supported": false, "note": "Bloatware phones home constantly. Slick, though."},
+    {"id": "pixhell_9pro", "name": "Pixhell 9 Pro", "tier": 5, "price": 950, "drain_per_trip": 7, "charge_wired": 85, "charge_wireless": 70, "trace": 82, "graphene_supported": true, "note": "Flagship. Flash GraphineOS and you're a ghost with a good camera."}
+  ]
+}

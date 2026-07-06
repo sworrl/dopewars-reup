@@ -1,0 +1,73 @@
+{
+  "_comment": "Per-city demand modifiers + heat (cop pressure) + OD baselines. Real Appalachia HIDTA / CDC pattern: opioid+meth crisis, weed broadly available, cocaine concentrated in metros. Numbers are gameplay multipliers, NOT clinical statistics.",
+  "_seeded_from": [
+    "DEA National Drug Threat Assessment 2024 — Appalachia HIDTA priorities",
+    "CDC WONDER county-level overdose deaths by substance",
+    "Ohio Dept of Health overdose dashboards"
+  ],
+  "_demand_multiplier_meaning": "1.0 = national baseline. 1.5 = 50% above baseline (more demand → higher prices, faster sell-through). 0.7 = 30% below.",
+  "_heat_meaning": "0-100 cop pressure level. Drives bust frequency, evidence accumulation rate, undercover encounter chance.",
+  "_od_baseline_meaning": "Annual OD deaths per 100k (rough scale, drives news-feed events and NPC effects).",
+  "regions": {
+    "steubenville_oh": {
+      "demand": {
+        "weed": 1.10, "hash": 0.70, "cocaine": 0.95, "meth": 1.45,
+        "heroin": 1.30, "fentanyl": 1.55, "oxy": 1.40, "mdma": 0.55,
+        "lsd": 0.40, "shrooms": 0.50
+      },
+      "heat": 35,
+      "od_baseline_per_100k": 47,
+      "_note": "Rust Belt blue-collar small city. Opioid crisis hard. Very high fentanyl + meth demand. Less interest in psychedelics."
+    },
+    "pittsburgh_pa": {
+      "demand": {
+        "weed": 1.30, "hash": 1.05, "cocaine": 1.40, "meth": 1.10,
+        "heroin": 1.35, "fentanyl": 1.50, "oxy": 1.20, "mdma": 1.25,
+        "lsd": 1.15, "shrooms": 1.10
+      },
+      "heat": 60,
+      "od_baseline_per_100k": 38,
+      "_note": "Major metro. Diverse demand profile, higher heat. University population pulls up MDMA/psychedelics."
+    },
+    "wheeling_wv": {
+      "demand": {
+        "weed": 1.05, "hash": 0.65, "cocaine": 0.80, "meth": 1.50,
+        "heroin": 1.40, "fentanyl": 1.65, "oxy": 1.50, "mdma": 0.45,
+        "lsd": 0.35, "shrooms": 0.45
+      },
+      "heat": 30,
+      "od_baseline_per_100k": 52,
+      "_note": "WV opioid epicenter pattern. Highest fentanyl demand in test region."
+    },
+    "morgantown_wv": {
+      "demand": {
+        "weed": 1.45, "hash": 1.10, "cocaine": 1.10, "meth": 0.95,
+        "heroin": 1.05, "fentanyl": 1.20, "oxy": 1.15, "mdma": 1.40,
+        "lsd": 1.30, "shrooms": 1.25
+      },
+      "heat": 45,
+      "od_baseline_per_100k": 35,
+      "_note": "WVU college town — psychedelic + cannabis pull. Still significant opioid presence."
+    },
+    "columbus_oh": {
+      "demand": {
+        "weed": 1.35, "hash": 1.10, "cocaine": 1.45, "meth": 1.05,
+        "heroin": 1.25, "fentanyl": 1.40, "oxy": 1.15, "mdma": 1.35,
+        "lsd": 1.20, "shrooms": 1.15
+      },
+      "heat": 65,
+      "od_baseline_per_100k": 32,
+      "_note": "OSU + state capital + large metro. High heat — both city PD and state-level investigators."
+    },
+    "cleveland_oh": {
+      "demand": {
+        "weed": 1.30, "hash": 1.10, "cocaine": 1.50, "meth": 1.10,
+        "heroin": 1.45, "fentanyl": 1.55, "oxy": 1.20, "mdma": 1.20,
+        "lsd": 1.05, "shrooms": 1.05
+      },
+      "heat": 70,
+      "od_baseline_per_100k": 41,
+      "_note": "Major Lake Erie hub. Heavy cocaine + opioid trafficking corridor."
+    }
+  }
+}

@@ -1,0 +1,47 @@
+# ============================================================================
+# SECRETS — never commit.
+# ============================================================================
+# anon keys + dev creds
+drugwars-reup/scripts/net/supa_local.gd
+# Imagen API key
+drugwars-reup/.gemini_key
+*.keystore
+*.jks
+*.pem
+*.p12
+.env
+.env.*
+
+# ============================================================================
+# Godot engine cache (regenerated on open)
+# ============================================================================
+drugwars-reup/.godot/
+
+# ============================================================================
+# Build artifacts / outputs (APKs ship via Releases, not committed)
+# ============================================================================
+drugwars-reup/builds/
+drugwars-reup/android/build/build/
+drugwars-reup/android/build/.gradle/
+drugwars-reup/android/build/src/main/assets/assets.sparsepck
+# Godot Android template libs — the godot-lib .aar files are >100MB (GitHub's hard limit) and are
+# regenerable. Restore with Godot editor -> Project -> Install Android Build Template (v4.6.2).
+drugwars-reup/android/build/libs/
+*.apk
+*.aab
+*.pck
+aligned.apk
+
+# ============================================================================
+# Tooling / OS
+# ============================================================================
+node_modules/
+.DS_Store
+Thumbs.db
+*.log
+
+# Local AI/session config (not part of the game)
+.claude/
+
+# assets/generated/** (full-res art) and android/build/libs/** (native libs) ARE committed so the
+# repo builds out of the box. Move both to Git LFS if the repo gets unwieldy.

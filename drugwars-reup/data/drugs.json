@@ -1,0 +1,112 @@
+{
+  "_comment": "Drug catalog for v0.1.5+. Prices are baseline $/gram and per-region multipliers + daily volatility shape the actual market price. legal_severity drives evidence weight at sentencing (v0.4+) and TSA catch DC at airports.",
+  "_sources": "Baseline prices reflect aggregate national-level US street pricing per DEA, NIDA, and harm-reduction survey reporting. Treat as in-game canon, not a buying guide.",
+  "drugs": [
+    {
+      "id": "weed",
+      "name": "Weed",
+      "category": "cannabis",
+      "base_price_per_g": 12,
+      "volatility": 0.20,
+      "weight_per_unit_g": 1.0,
+      "legal_severity": 1,
+      "od_risk": 0.0,
+      "_note": "Federally illegal but widely decriminalized; some states legal. Lowest legal severity."
+    },
+    {
+      "id": "hash",
+      "name": "Hash",
+      "category": "cannabis",
+      "base_price_per_g": 35,
+      "volatility": 0.25,
+      "weight_per_unit_g": 1.0,
+      "legal_severity": 1,
+      "od_risk": 0.0
+    },
+    {
+      "id": "cocaine",
+      "name": "Cocaine",
+      "category": "stimulant",
+      "base_price_per_g": 100,
+      "volatility": 0.30,
+      "weight_per_unit_g": 1.0,
+      "legal_severity": 4,
+      "od_risk": 0.05
+    },
+    {
+      "id": "meth",
+      "name": "Meth",
+      "category": "stimulant",
+      "base_price_per_g": 110,
+      "volatility": 0.40,
+      "weight_per_unit_g": 1.0,
+      "legal_severity": 5,
+      "od_risk": 0.06,
+      "_note": "Dominant in Appalachian / Rust Belt. DEA NDTA priority."
+    },
+    {
+      "id": "heroin",
+      "name": "Heroin",
+      "category": "opioid",
+      "base_price_per_g": 150,
+      "volatility": 0.35,
+      "weight_per_unit_g": 1.0,
+      "legal_severity": 5,
+      "od_risk": 0.12,
+      "_note": "DEA priority drug. Steep evidence weight."
+    },
+    {
+      "id": "fentanyl",
+      "name": "Fentanyl",
+      "category": "opioid",
+      "base_price_per_g": 180,
+      "volatility": 0.50,
+      "weight_per_unit_g": 1.0,
+      "legal_severity": 6,
+      "od_risk": 0.45,
+      "_note": "Highest legal severity. OD risk is dominant cause of fatalities in test region. Cutting other product with fentanyl spikes overdoses (modeled v0.3+)."
+    },
+    {
+      "id": "oxy",
+      "name": "Oxycodone",
+      "category": "opioid_pharma",
+      "base_price_per_g": 80,
+      "volatility": 0.25,
+      "weight_per_unit_g": 0.5,
+      "legal_severity": 4,
+      "od_risk": 0.08,
+      "_note": "Pharmaceutical opioid. 30mg pill ≈ 0.5g. Real prescription paper trail in v0.4+ adds evidence."
+    },
+    {
+      "id": "mdma",
+      "name": "MDMA",
+      "category": "psychedelic",
+      "base_price_per_g": 90,
+      "volatility": 0.30,
+      "weight_per_unit_g": 0.1,
+      "legal_severity": 3,
+      "od_risk": 0.03
+    },
+    {
+      "id": "lsd",
+      "name": "LSD",
+      "category": "psychedelic",
+      "base_price_per_g": 4500,
+      "volatility": 0.35,
+      "weight_per_unit_g": 0.0001,
+      "legal_severity": 3,
+      "od_risk": 0.0,
+      "_note": "Sold by tab/dose; weight is nominal. ~100µg per tab."
+    },
+    {
+      "id": "shrooms",
+      "name": "Mushrooms",
+      "category": "psychedelic",
+      "base_price_per_g": 12,
+      "volatility": 0.30,
+      "weight_per_unit_g": 1.0,
+      "legal_severity": 2,
+      "od_risk": 0.0
+    }
+  ]
+}

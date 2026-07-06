@@ -1,0 +1,103 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/boot_reveal.gd" id="1_boot"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/menu_bg.png" id="2_bg"]
+
+[node name="Boot" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_boot")
+
+[node name="BG" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.04, 0.04, 0.05, 1)
+
+[node name="BgImage" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 6
+modulate = Color(0.62, 0.62, 0.68, 1)
+
+[node name="Scroll" type="ScrollContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+horizontal_scroll_mode = 0
+
+[node name="V" type="VBoxContainer" parent="Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 18
+
+[node name="Pad" type="Control" parent="Scroll/V"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 40)
+
+[node name="Title" type="Label" parent="Scroll/V"]
+layout_mode = 2
+text = "Dope Wars: Re-Up Edition"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 56
+theme_override_colors/font_color = Color(0.92, 0.20, 0.25, 1)
+
+[node name="Subtitle" type="Label" parent="Scroll/V"]
+layout_mode = 2
+text = "Where are you?"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 36
+theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
+
+[node name="Stage1" type="VBoxContainer" parent="Scroll/V"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 10
+
+[node name="Note" type="Label" parent="Scroll/V/Stage1"]
+layout_mode = 2
+text = "Pick your starting city. You'll see what's actually happening in that area before you play."
+horizontal_alignment = 1
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+
+[node name="CityList" type="VBoxContainer" parent="Scroll/V/Stage1"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Stage2" type="VBoxContainer" parent="Scroll/V"]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 14
+
+[node name="Stats" type="RichTextLabel" parent="Scroll/V/Stage2"]
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+fit_content = true
+custom_minimum_size = Vector2(0, 600)
+
+[node name="Continue" type="Button" parent="Scroll/V/Stage2"]
+layout_mode = 2
+text = "I understand. Let me play."
+theme_override_font_sizes/font_size = 32
+custom_minimum_size = Vector2(0, 120)
+
+[node name="Disclaimer" type="Label" parent="Scroll/V"]
+layout_mode = 2
+text = "Fiction. AGPLv3. No ads. No pay-to-win. Ever."
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.5, 0.5, 0.5, 1)

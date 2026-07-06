@@ -1,0 +1,71 @@
+{
+  "_comment": "Fictional brand registry. Real brand → in-game replacement. Populate as encountered. Real federal agencies (DEA/FBI/ATF/USPS-Inspection) are kept REAL per project pillars; only corporate/private brands are rebranded.",
+  "_policy": "When in doubt: rebrand. Goal is to remove brand-confusion and trademark risk, not to make every reference unrecognizable.",
+  "rideshare": {
+    "uber": {"name": "Boober", "tagline": "Tap. Ride. Disappear.", "color": "#000000"},
+    "lyft": {"name": "Splift", "tagline": "Your ride, your high road.", "color": "#FF00BF"}
+  },
+  "transit": {
+    "greyhound": {"name": "Wolfline", "tagline": "Cross the country, hide in the pack.", "color": "#5A5A5A"},
+    "megabus": {"name": "OmniCoach", "tagline": "Cheap seats. Long road.", "color": "#0033A0"}
+  },
+  "retail": {
+    "walmart": {"name": "MartCo"},
+    "7eleven": {"name": "24/Seven"},
+    "circle_k": {"name": "Loop K"},
+    "costco": {"name": "Bulksco"},
+    "target": {"name": "Bullseye"}
+  },
+  "food": {
+    "starbucks": {"name": "Sirenade"},
+    "mcdonalds": {"name": "MacRiley's"},
+    "burger_king": {"name": "Burger Royale"},
+    "subway": {"name": "Tunnel Subs"},
+    "chipotle": {"name": "Chiprio"}
+  },
+  "tech": {
+    "iphone": {"name": "Pear Phone"},
+    "android_brand": {"name": "Bot Phone"},
+    "samsung": {"name": "Sungsam"}
+  },
+  "banks": {
+    "chase": {"name": "Vault National"},
+    "wells_fargo": {"name": "Six Wagons"},
+    "bank_of_america": {"name": "Continental Trust"},
+    "us_bank": {"name": "Federal Reserve Bank"},
+    "credit_union_generic": {"name": "Local Mutual"}
+  },
+  "couriers": {
+    "fedex": {"name": "RushEx"},
+    "ups": {"name": "DropShip"},
+    "usps": {"name": "Postmark"},
+    "dhl": {"name": "GlobalGo"}
+  },
+  "vehicles": {
+    "_comment": "Vehicle make/model rebrands — populate as needed. Avoid trademarked silhouettes too.",
+    "honda_civic": {"name": "Hondo Civilian"},
+    "ford_f150": {"name": "Forge F-150"},
+    "toyota_corolla": {"name": "Tonka Coral"},
+    "harley_davidson": {"name": "Hardley Davids"},
+    "chevy_impala": {"name": "Chevy Impalo"}
+  },
+  "law_enforcement": {
+    "_policy": "REAL — kept authentic per project pillars. Listed here only for reference; do not rebrand.",
+    "dea": {"name": "DEA", "real": true},
+    "fbi": {"name": "FBI", "real": true},
+    "atf": {"name": "ATF", "real": true},
+    "usps_inspection": {"name": "USPS Postal Inspection Service", "real": true},
+    "ice_hsi": {"name": "ICE HSI", "real": true},
+    "us_marshals": {"name": "U.S. Marshals", "real": true},
+    "local_pd": {"name": "<city> Police Department", "real": true, "_note": "Use real city names."},
+    "state_police": {"name": "<state> State Police", "real": true}
+  },
+  "real_data_sources": {
+    "_policy": "REAL — these are factual data sources, kept real and credited.",
+    "fbi_ucr": {"name": "FBI UCR", "real": true, "url": "https://crime-data-explorer.fr.cloud.gov/"},
+    "fbi_nibrs": {"name": "FBI NIBRS", "real": true},
+    "cdc_wonder": {"name": "CDC WONDER", "real": true, "url": "https://wonder.cdc.gov/"},
+    "dea_ndta": {"name": "DEA NDTA", "real": true},
+    "samhsa_nsduh": {"name": "SAMHSA NSDUH", "real": true}
+  }
+}

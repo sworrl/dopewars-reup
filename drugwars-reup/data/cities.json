@@ -1,0 +1,64 @@
+{
+  "_comment": "v0.1 test cities. Real coords. Steubenville is the test region center. `commercial_airport` flags cities served by commercial airlines (relevant for the Plane trip mode); `airport_code` is the IATA code of the actual primary airport at/near each city.",
+  "cities": [
+    {
+      "id": "steubenville_oh",
+      "name": "Steubenville",
+      "state": "OH",
+      "lat": 40.3698,
+      "lon": -80.6339,
+      "population": 17479,
+      "is_test_region_center": true,
+      "commercial_airport": false
+    },
+    {
+      "id": "pittsburgh_pa",
+      "name": "Pittsburgh",
+      "state": "PA",
+      "lat": 40.4406,
+      "lon": -79.9959,
+      "population": 302971,
+      "commercial_airport": true,
+      "airport_code": "PIT"
+    },
+    {
+      "id": "wheeling_wv",
+      "name": "Wheeling",
+      "state": "WV",
+      "lat": 40.0639,
+      "lon": -80.7209,
+      "population": 27062,
+      "commercial_airport": false
+    },
+    {
+      "id": "morgantown_wv",
+      "name": "Morgantown",
+      "state": "WV",
+      "lat": 39.6295,
+      "lon": -79.9559,
+      "population": 30347,
+      "commercial_airport": true,
+      "airport_code": "MGW"
+    },
+    {
+      "id": "columbus_oh",
+      "name": "Columbus",
+      "state": "OH",
+      "lat": 39.9612,
+      "lon": -82.9988,
+      "population": 905748,
+      "commercial_airport": true,
+      "airport_code": "CMH"
+    },
+    {
+      "id": "cleveland_oh",
+      "name": "Cleveland",
+      "state": "OH",
+      "lat": 41.4993,
+      "lon": -81.6944,
+      "population": 372624,
+      "commercial_airport": true,
+      "airport_code": "CLE"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+# Godot 4 project ignores
+.godot/
+.import/
+export.cfg
+export_presets.cfg
+*.translation
+
+# Local-only Android signing material (debug keystore lives outside the repo)
+*.keystore
+release.keystore
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# IDE
+.vscode/
+.idea/
+
+# Build outputs
+builds/
+*.apk
+*.aab
+
+# Tile cache (regenerated from OSM)
+assets/tiles/cache/
+
+# Generated character backstory pool (rebuilt by tools/generate-backstories.ts)
+# Keep committed for reproducibility, but allow local override:
+assets/backstories/local_*.json
+
+# local API key — never commit
+.gemini_key

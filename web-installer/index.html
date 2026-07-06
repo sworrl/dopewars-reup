@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Install Dope Wars: Re-Up</title>
+<style>
+  :root{--ink:#0b0c0f;--panel:#15171d;--line:#2a2e39;--text:#e7e8ec;--mut:#8b909c;--red:#eb3340}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ink);color:var(--text);font-family:system-ui,sans-serif;line-height:1.5;
+    display:flex;min-height:100vh;align-items:center;justify-content:center;padding:24px}
+  .card{max-width:560px;width:100%;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:32px}
+  h1{font-weight:800;letter-spacing:.02em;text-transform:uppercase;margin:0 0 4px;font-size:28px}
+  h1 span{color:var(--red)}
+  .sub{color:var(--mut);margin:0 0 24px}
+  button{font:inherit;font-weight:700;border:0;border-radius:10px;padding:14px 20px;cursor:pointer;width:100%}
+  #connect{background:var(--red);color:#fff}
+  #install{background:#22252d;color:var(--text);border:1px solid var(--line);margin-top:10px}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  ol{color:var(--mut);font-size:14px;padding-left:20px}
+  #log{margin-top:18px;background:#0e0f13;border:1px solid var(--line);border-radius:8px;padding:12px;
+    font-family:ui-monospace,monospace;font-size:12px;color:#a8b0bd;max-height:180px;overflow:auto;white-space:pre-wrap}
+  .warn{color:#e6cb3c;font-size:13px}
+  a{color:var(--red)}
+</style>
+</head>
+<body>
+  <main class="card">
+    <h1>Dope Wars: <span>Re-Up</span></h1>
+    <p class="sub">Install straight from your browser over USB — no tools to download.</p>
+
+    <ol>
+      <li>On the phone: <b>Settings → About → tap Build number 7×</b>, then enable <b>USB debugging</b>.</li>
+      <li>Plug the phone into this computer with a USB cable.</li>
+      <li>Click <b>Connect</b> below and approve the prompts (browser + the phone's "Allow USB debugging").</li>
+      <li>Click <b>Install</b>.</li>
+    </ol>
+
+    <button id="connect">Connect phone</button>
+    <button id="install" disabled>Install Dope Wars</button>
+    <div id="log">Ready. Requires desktop Chrome or Edge (WebUSB).</div>
+    <p class="warn" id="unsupported" hidden>⚠ This browser doesn't support WebUSB. Use desktop Chrome/Edge, or sideload manually with <code>adb install</code>.</p>
+    <p class="sub" style="margin-top:16px;font-size:13px">
+      Prefer the command line? Download the APK from
+      <a href="https://github.com/YOURORG/dopewars-reup/releases">Releases</a> and run <code>adb install dopewars-reup.apk</code>.
+    </p>
+  </main>
+
+<script type="module">
+  // WebUSB + WebADB (ya-webadb / Tango). Installs the current signed APK straight from the browser.
+  // NOTE: loading @yume-chan packages from a CDN can be finicky across versions — for production,
+  // bundle them (npm i @yume-chan/adb @yume-chan/adb-daemon-webusb @yume-chan/adb-credential-web
+  // @yume-chan/stream-extra) and deploy the built bundle to Cloudflare Pages. This inline version is
+  // the working scaffold to build on. The manual `adb install` path above always works.
+  const log = (m) => { const el = document.getElementById('log'); el.textContent += "\n" + m; el.scrollTop = el.scrollHeight; };
+  const APK_URL = "https://github.com/YOURORG/dopewars-reup/releases/latest/download/dopewars-reup.apk";
+
+  if (!('usb' in navigator)) {
+    document.getElementById('unsupported').hidden = false;
+    document.getElementById('connect').disabled = true;
+  }
+
+  let adb = null;
+  document.getElementById('connect').addEventListener('click', async () => {
+    try {
+      log("Loading WebADB…");
+      const [{ Adb, AdbDaemonTransport }, { AdbDaemonWebUsbDeviceManager }, credMod] = await Promise.all([
+        import("https://esm.sh/@yume-chan/adb@1"),
+        import("https://esm.sh/@yume-chan/adb-daemon-webusb@1"),
+        import("https://esm.sh/@yume-chan/adb-credential-web@1"),
+      ]);
+      const manager = AdbDaemonWebUsbDeviceManager.BROWSER;
+      if (!manager) throw new Error("WebUSB unavailable");
+      log("Requesting device… (approve the browser prompt)");
+      const device = await manager.requestDevice();
+      if (!device) { log("No device selected."); return; }
+      const connection = await device.connect();
+      const CredentialStore = credMod.AdbWebCredentialStore || credMod.default;
+      log("Authenticating… (tap 'Allow USB debugging' on the phone)");
+      const transport = await AdbDaemonTransport.authenticate({
+        serial: device.serial, connection, credentialStore: new CredentialStore(),
+      });
+      adb = new Adb(transport);
+      log("Connected to " + device.serial + ".");
+      document.getElementById('install').disabled = false;
+    } catch (e) { log("Connect failed: " + (e?.message || e)); }
+  });
+
+  document.getElementById('install').addEventListener('click', async () => {
+    if (!adb) return;
+    try {
+      log("Downloading APK…");
+      const res = await fetch(APK_URL);
+      if (!res.ok) throw new Error("APK download " + res.status);
+      const buf = new Uint8Array(await res.arrayBuffer());
+      log("Installing " + (buf.length/1e6).toFixed(0) + " MB… this can take a minute.");
+      const { PackageManager } = await import("https://esm.sh/@yume-chan/android-bin@1");
+      const pm = new PackageManager(adb);
+      await pm.installStream(buf.length, new Blob([buf]).stream());
+      log("✅ Installed. Open Dope Wars: Re-Up on your phone.");
+    } catch (e) { log("Install failed: " + (e?.message || e) + "\nFallback: adb install dopewars-reup.apk"); }
+  });
+</script>
+</body>
+</html>

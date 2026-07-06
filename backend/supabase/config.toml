@@ -1,0 +1,32 @@
+# Supabase project config for Dope Wars: Re-Up.
+# Link to your cloud project with:  supabase link --project-ref <ref>
+# Push schema with:                 supabase db push
+# Deploy functions with:            supabase functions deploy
+project_id = "dopewars-reup"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public"]
+extra_search_path = ["public"]
+max_rows = 1000
+
+[db]
+port = 54322
+major_version = 15
+
+[auth]
+enabled = true
+site_url = "https://www.dopewars-reup.com"
+# Add your production URLs here before launch.
+additional_redirect_urls = ["http://localhost:3000"]
+jwt_expiry = 3600
+enable_refresh_token_rotation = true
+refresh_token_reuse_interval = 10
+enable_signup = true
+
+[auth.email]
+enable_confirmations = false   # flip on before public launch
+
+[functions.travel]
+verify_jwt = true

@@ -1,0 +1,20 @@
+{
+  "_comment": "Used-vehicle listings for in-game acquisition. mode maps to Travel.Mode (bike/motorcycle/car). trunk_lb is how much product the vehicle lets you HOLD and haul; it raises PlayerState.capacity_lb() when owned and becomes that mode's travel carry limit. Prices reflect rough US used-market floors; condition is plain and honest (no hype).",
+  "listings": {
+    "bike": [
+      {"id": "bmx_beater", "name": "Rusty BMX", "price": 45, "trunk_lb": 25, "condition": "Chain skips. Gets you there."},
+      {"id": "commuter_hybrid", "name": "Commuter hybrid w/ rear rack", "price": 130, "trunk_lb": 45, "condition": "Rear rack and panniers. Room for a duffel."},
+      {"id": "cargo_bike", "name": "Old cargo bike", "price": 260, "trunk_lb": 70, "condition": "Front cargo box. Slow but hauls."}
+    ],
+    "motorcycle": [
+      {"id": "ninja_250", "name": "'08 Ninja 250, high miles", "price": 1600, "trunk_lb": 45, "condition": "Tank bag only. Runs, needs tires."},
+      {"id": "cruiser_saddlebags", "name": "Cruiser with hard saddlebags", "price": 2900, "trunk_lb": 75, "condition": "Lockable bags. Clean title."},
+      {"id": "dual_sport", "name": "Dual-sport with cargo cases", "price": 3800, "trunk_lb": 95, "condition": "Aluminum panniers. Goes off pavement."}
+    ],
+    "car": [
+      {"id": "beater_sedan", "name": "$800 beater sedan", "price": 800, "trunk_lb": 380, "condition": "Check-engine light on. Trunk's clean."},
+      {"id": "hatchback", "name": "High-mile hatchback", "price": 1900, "trunk_lb": 520, "condition": "Seats fold flat. Lots of room."},
+      {"id": "work_pickup", "name": "Old work pickup w/ cap", "price": 4200, "trunk_lb": 900, "condition": "Bed cap, tow package. Hauls weight."}
+    ]
+  }
+}

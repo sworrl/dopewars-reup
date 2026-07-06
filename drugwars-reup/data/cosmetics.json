@@ -1,0 +1,1014 @@
+{
+ "_comment": "Client mirror of the backend cosmetics catalog (0011_cosmetics_seed.sql). Flair only \u2014 no gameplay effect. Kept in sync by id. store=buyable with CRED; supporter/award/earned=granted.",
+ "cost_by_rarity": {
+  "common": 250,
+  "uncommon": 500,
+  "rare": 1200,
+  "epic": 3000,
+  "legendary": 7000,
+  "mythic": 15000,
+  "exclusive": 0
+ },
+ "cosmetics": [
+  {
+   "id": "emblem_corner_crown",
+   "name": "Corner Crown",
+   "category": "emblem",
+   "rarity": "uncommon",
+   "cost": 500,
+   "supporter_only": false,
+   "source": "store",
+   "art": "res://assets/sprites/cosmetics/emblem_corner_crown.png"
+  },
+  {
+   "id": "emblem_the_re_up",
+   "name": "The Re-Up",
+   "category": "emblem",
+   "rarity": "rare",
+   "cost": 1200,
+   "supporter_only": false,
+   "source": "store",
+   "art": "res://assets/sprites/cosmetics/emblem_the_re_up.png"
+  },
+  {
+   "id": "emblem_kilo_club",
+   "name": "Kilo Club",
+   "category": "emblem",
+   "rarity": "epic",
+   "cost": 3000,
+   "supporter_only": false,
+   "source": "store",
+   "art": "res://assets/sprites/cosmetics/emblem_kilo_club.png"
+  },
+  {
+   "id": "emblem_burner",
+   "name": "Burner",
+   "category": "emblem",
+   "rarity": "common",
+   "cost": 250,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "emblem_evidence_bag",
+   "name": "Evidence Bag",
+   "category": "emblem",
+   "rarity": "uncommon",
+   "cost": 500,
+   "supporter_only": false,
+   "source": "store",
+   "art": "res://assets/sprites/cosmetics/emblem_evidence_bag.png"
+  },
+  {
+   "id": "emblem_trap_king",
+   "name": "Trap King",
+   "category": "emblem",
+   "rarity": "legendary",
+   "cost": 7000,
+   "supporter_only": false,
+   "source": "store",
+   "art": "res://assets/sprites/cosmetics/emblem_trap_king.png"
+  },
+  {
+   "id": "emblem_ghost_protocol",
+   "name": "Ghost Protocol",
+   "category": "emblem",
+   "rarity": "epic",
+   "cost": 3000,
+   "supporter_only": false,
+   "source": "store",
+   "art": "res://assets/sprites/cosmetics/emblem_ghost_protocol.png"
+  },
+  {
+   "id": "emblem_wolf_of_wolfline",
+   "name": "Wolf of Wolfline",
+   "category": "emblem",
+   "rarity": "rare",
+   "cost": 1200,
+   "supporter_only": false,
+   "source": "store",
+   "art": "res://assets/sprites/cosmetics/emblem_wolf_of_wolfline.png"
+  },
+  {
+   "id": "emblem_concrete_rose",
+   "name": "Concrete Rose",
+   "category": "emblem",
+   "rarity": "rare",
+   "cost": 1200,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "emblem_rust_belt",
+   "name": "Rust Belt",
+   "category": "emblem",
+   "rarity": "common",
+   "cost": 250,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "emblem_nightshift",
+   "name": "Nightshift",
+   "category": "emblem",
+   "rarity": "uncommon",
+   "cost": 500,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "emblem_the_connect",
+   "name": "The Connect",
+   "category": "emblem",
+   "rarity": "legendary",
+   "cost": 7000,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "emblem_skeleton_key",
+   "name": "Skeleton Key",
+   "category": "emblem",
+   "rarity": "epic",
+   "cost": 3000,
+   "supporter_only": false,
+   "source": "store",
+   "art": "res://assets/sprites/cosmetics/emblem_skeleton_key.png"
+  },
+  {
+   "id": "emblem_dead_presidents",
+   "name": "Dead Presidents",
+   "category": "emblem",
+   "rarity": "rare",
+   "cost": 1200,
+   "supporter_only": false,
+   "source": "store",
+   "art": "res://assets/sprites/cosmetics/emblem_dead_presidents.png"
+  },
+  {
+   "id": "emblem_cut_cook",
+   "name": "Cut & Cook",
+   "category": "emblem",
+   "rarity": "uncommon",
+   "cost": 500,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "emblem_steel_city",
+   "name": "Steel City",
+   "category": "emblem",
+   "rarity": "common",
+   "cost": 250,
+   "supporter_only": false,
+   "source": "store",
+   "art": "res://assets/sprites/cosmetics/emblem_steel_city.png"
+  },
+  {
+   "id": "emblem_bag_secured",
+   "name": "Bag Secured",
+   "category": "emblem",
+   "rarity": "rare",
+   "cost": 1200,
+   "supporter_only": false,
+   "source": "store",
+   "art": "res://assets/sprites/cosmetics/emblem_bag_secured.png"
+  },
+  {
+   "id": "emblem_no_face",
+   "name": "No Face",
+   "category": "emblem",
+   "rarity": "mythic",
+   "cost": 15000,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "emblem_the_ledger",
+   "name": "The Ledger",
+   "category": "emblem",
+   "rarity": "epic",
+   "cost": 3000,
+   "supporter_only": false,
+   "source": "store",
+   "art": "res://assets/sprites/cosmetics/emblem_the_ledger.png"
+  },
+  {
+   "id": "emblem_off_the_books",
+   "name": "Off the Books",
+   "category": "emblem",
+   "rarity": "uncommon",
+   "cost": 500,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "title_the_connect",
+   "name": "The Connect",
+   "category": "title",
+   "rarity": "legendary",
+   "cost": 7000,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "title_ghost",
+   "name": "Ghost",
+   "category": "title",
+   "rarity": "epic",
+   "cost": 3000,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "title_trap_star",
+   "name": "Trap Star",
+   "category": "title",
+   "rarity": "rare",
+   "cost": 1200,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "title_made",
+   "name": "Made",
+   "category": "title",
+   "rarity": "legendary",
+   "cost": 7000,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "title_kingpin",
+   "name": "Kingpin",
+   "category": "title",
+   "rarity": "mythic",
+   "cost": 15000,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "title_corner_boy",
+   "name": "Corner Boy",
+   "category": "title",
+   "rarity": "common",
+   "cost": 250,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "title_the_plug",
+   "name": "The Plug",
+   "category": "title",
+   "rarity": "epic",
+   "cost": 3000,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "title_wholesale",
+   "name": "Wholesale",
+   "category": "title",
+   "rarity": "rare",
+   "cost": 1200,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "title_untouchable",
+   "name": "Untouchable",
+   "category": "title",
+   "rarity": "mythic",
+   "cost": 15000,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "title_snitch_s_nightmare",
+   "name": "Snitch's Nightmare",
+   "category": "title",
+   "rarity": "rare",
+   "cost": 1200,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "title_certified",
+   "name": "Certified",
+   "category": "title",
+   "rarity": "uncommon",
+   "cost": 500,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "title_heavy",
+   "name": "Heavy",
+   "category": "title",
+   "rarity": "uncommon",
+   "cost": 500,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "title_on_sight",
+   "name": "On Sight",
+   "category": "title",
+   "rarity": "common",
+   "cost": 250,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "title_the_chemist",
+   "name": "The Chemist",
+   "category": "title",
+   "rarity": "epic",
+   "cost": 3000,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "title_numbers_man",
+   "name": "Numbers Man",
+   "category": "title",
+   "rarity": "rare",
+   "cost": 1200,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "title_weight_class",
+   "name": "Weight Class",
+   "category": "title",
+   "rarity": "uncommon",
+   "cost": 500,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "title_first_of_the_month",
+   "name": "First of the Month",
+   "category": "title",
+   "rarity": "common",
+   "cost": 250,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "title_franchise",
+   "name": "Franchise",
+   "category": "title",
+   "rarity": "legendary",
+   "cost": 7000,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "title_the_fixer",
+   "name": "The Fixer",
+   "category": "title",
+   "rarity": "epic",
+   "cost": 3000,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "title_retired_allegedly",
+   "name": "Retired (Allegedly)",
+   "category": "title",
+   "rarity": "legendary",
+   "cost": 0,
+   "supporter_only": false,
+   "source": "earned",
+   "art": ""
+  },
+  {
+   "id": "nameplate_concrete",
+   "name": "Concrete",
+   "category": "nameplate",
+   "rarity": "common",
+   "cost": 250,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "nameplate_neon_alley",
+   "name": "Neon Alley",
+   "category": "nameplate",
+   "rarity": "uncommon",
+   "cost": 500,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "nameplate_evidence_locker",
+   "name": "Evidence Locker",
+   "category": "nameplate",
+   "rarity": "rare",
+   "cost": 1200,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "nameplate_rust_rain",
+   "name": "Rust & Rain",
+   "category": "nameplate",
+   "rarity": "uncommon",
+   "cost": 500,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "nameplate_blacktop",
+   "name": "Blacktop",
+   "category": "nameplate",
+   "rarity": "common",
+   "cost": 250,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "nameplate_pill_bottle",
+   "name": "Pill Bottle",
+   "category": "nameplate",
+   "rarity": "rare",
+   "cost": 1200,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "nameplate_turnpike",
+   "name": "Turnpike",
+   "category": "nameplate",
+   "rarity": "common",
+   "cost": 250,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "nameplate_riverfront",
+   "name": "Riverfront",
+   "category": "nameplate",
+   "rarity": "uncommon",
+   "cost": 500,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "nameplate_section_8",
+   "name": "Section 8",
+   "category": "nameplate",
+   "rarity": "rare",
+   "cost": 1200,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "nameplate_cut_corners",
+   "name": "Cut Corners",
+   "category": "nameplate",
+   "rarity": "uncommon",
+   "cost": 500,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "nameplate_cold_open",
+   "name": "Cold Open",
+   "category": "nameplate",
+   "rarity": "epic",
+   "cost": 3000,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "nameplate_static",
+   "name": "Static",
+   "category": "nameplate",
+   "rarity": "common",
+   "cost": 250,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "nameplate_burner_static",
+   "name": "Burner Static",
+   "category": "nameplate",
+   "rarity": "uncommon",
+   "cost": 500,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "nameplate_trap_house_3am",
+   "name": "Trap House 3AM",
+   "category": "nameplate",
+   "rarity": "epic",
+   "cost": 3000,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "nameplate_gold_foil",
+   "name": "Gold Foil",
+   "category": "nameplate",
+   "rarity": "legendary",
+   "cost": 0,
+   "supporter_only": true,
+   "source": "supporter",
+   "art": ""
+  },
+  {
+   "id": "frame_barbed_wire",
+   "name": "Barbed Wire",
+   "category": "frame",
+   "rarity": "common",
+   "cost": 250,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "frame_chain_link",
+   "name": "Chain Link",
+   "category": "frame",
+   "rarity": "common",
+   "cost": 250,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "frame_gold_chain",
+   "name": "Gold Chain",
+   "category": "frame",
+   "rarity": "legendary",
+   "cost": 0,
+   "supporter_only": true,
+   "source": "supporter",
+   "art": ""
+  },
+  {
+   "id": "frame_police_tape",
+   "name": "Police Tape",
+   "category": "frame",
+   "rarity": "uncommon",
+   "cost": 500,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "frame_duct_tape",
+   "name": "Duct Tape",
+   "category": "frame",
+   "rarity": "common",
+   "cost": 250,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "frame_neon_trim",
+   "name": "Neon Trim",
+   "category": "frame",
+   "rarity": "rare",
+   "cost": 1200,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "frame_brick",
+   "name": "Brick",
+   "category": "frame",
+   "rarity": "uncommon",
+   "cost": 500,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "frame_chrome",
+   "name": "Chrome",
+   "category": "frame",
+   "rarity": "epic",
+   "cost": 3000,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "frame_blood_money",
+   "name": "Blood Money",
+   "category": "frame",
+   "rarity": "mythic",
+   "cost": 0,
+   "supporter_only": true,
+   "source": "supporter",
+   "art": ""
+  },
+  {
+   "id": "frame_founder_s_laurel",
+   "name": "Founder's Laurel",
+   "category": "frame",
+   "rarity": "exclusive",
+   "cost": 0,
+   "supporter_only": true,
+   "source": "supporter",
+   "art": ""
+  },
+  {
+   "id": "accent_re_up_red",
+   "name": "Re-Up Red",
+   "category": "accent",
+   "rarity": "uncommon",
+   "cost": 500,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "accent_evidence_yellow",
+   "name": "Evidence Yellow",
+   "category": "accent",
+   "rarity": "uncommon",
+   "cost": 500,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "accent_money_green",
+   "name": "Money Green",
+   "category": "accent",
+   "rarity": "rare",
+   "cost": 1200,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "accent_cold_blue",
+   "name": "Cold Blue",
+   "category": "accent",
+   "rarity": "common",
+   "cost": 250,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "accent_bruise_purple",
+   "name": "Bruise Purple",
+   "category": "accent",
+   "rarity": "rare",
+   "cost": 1200,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "accent_ash_grey",
+   "name": "Ash Grey",
+   "category": "accent",
+   "rarity": "common",
+   "cost": 250,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "accent_uncut_white",
+   "name": "Uncut White",
+   "category": "accent",
+   "rarity": "epic",
+   "cost": 3000,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "accent_hazard_orange",
+   "name": "Hazard Orange",
+   "category": "accent",
+   "rarity": "uncommon",
+   "cost": 500,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "accent_solid_gold",
+   "name": "Solid Gold",
+   "category": "accent",
+   "rarity": "legendary",
+   "cost": 0,
+   "supporter_only": true,
+   "source": "supporter",
+   "art": ""
+  },
+  {
+   "id": "accent_blackout",
+   "name": "Blackout",
+   "category": "accent",
+   "rarity": "mythic",
+   "cost": 15000,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "badge_first_kilo",
+   "name": "First Kilo",
+   "category": "badge",
+   "rarity": "common",
+   "cost": 0,
+   "supporter_only": false,
+   "source": "earned",
+   "art": ""
+  },
+  {
+   "id": "badge_clean_record",
+   "name": "Clean Record",
+   "category": "badge",
+   "rarity": "rare",
+   "cost": 0,
+   "supporter_only": false,
+   "source": "earned",
+   "art": ""
+  },
+  {
+   "id": "badge_ten_trips",
+   "name": "Ten Trips",
+   "category": "badge",
+   "rarity": "uncommon",
+   "cost": 0,
+   "supporter_only": false,
+   "source": "earned",
+   "art": ""
+  },
+  {
+   "id": "badge_marathon",
+   "name": "Marathon",
+   "category": "badge",
+   "rarity": "epic",
+   "cost": 0,
+   "supporter_only": false,
+   "source": "earned",
+   "art": ""
+  },
+  {
+   "id": "badge_made_man",
+   "name": "Made Man",
+   "category": "badge",
+   "rarity": "legendary",
+   "cost": 0,
+   "supporter_only": false,
+   "source": "earned",
+   "art": ""
+  },
+  {
+   "id": "badge_survivor",
+   "name": "Survivor",
+   "category": "badge",
+   "rarity": "epic",
+   "cost": 0,
+   "supporter_only": false,
+   "source": "earned",
+   "art": ""
+  },
+  {
+   "id": "badge_high_roller",
+   "name": "High Roller",
+   "category": "badge",
+   "rarity": "rare",
+   "cost": 0,
+   "supporter_only": false,
+   "source": "earned",
+   "art": ""
+  },
+  {
+   "id": "badge_beta_pioneer",
+   "name": "Beta Pioneer",
+   "category": "badge",
+   "rarity": "exclusive",
+   "cost": 0,
+   "supporter_only": false,
+   "source": "award",
+   "art": ""
+  },
+  {
+   "id": "badge_bug_bounty",
+   "name": "Bug Bounty",
+   "category": "badge",
+   "rarity": "exclusive",
+   "cost": 0,
+   "supporter_only": false,
+   "source": "award",
+   "art": ""
+  },
+  {
+   "id": "badge_community_award",
+   "name": "Community Award",
+   "category": "badge",
+   "rarity": "exclusive",
+   "cost": 0,
+   "supporter_only": false,
+   "source": "award",
+   "art": ""
+  },
+  {
+   "id": "badge_ghost_never_seen",
+   "name": "Ghost (Never Seen)",
+   "category": "badge",
+   "rarity": "mythic",
+   "cost": 0,
+   "supporter_only": false,
+   "source": "earned",
+   "art": ""
+  },
+  {
+   "id": "badge_founder",
+   "name": "Founder",
+   "category": "badge",
+   "rarity": "exclusive",
+   "cost": 0,
+   "supporter_only": true,
+   "source": "supporter",
+   "art": ""
+  },
+  {
+   "id": "marker_red_dot",
+   "name": "Red Dot",
+   "category": "marker",
+   "rarity": "common",
+   "cost": 250,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "marker_crosshair",
+   "name": "Crosshair",
+   "category": "marker",
+   "rarity": "uncommon",
+   "cost": 500,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "marker_skull_pin",
+   "name": "Skull Pin",
+   "category": "marker",
+   "rarity": "rare",
+   "cost": 1200,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "marker_dollar_pin",
+   "name": "Dollar Pin",
+   "category": "marker",
+   "rarity": "uncommon",
+   "cost": 500,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "marker_ghost_pin",
+   "name": "Ghost Pin",
+   "category": "marker",
+   "rarity": "epic",
+   "cost": 3000,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "tag_re_up_tag",
+   "name": "RE-UP Tag",
+   "category": "tag",
+   "rarity": "uncommon",
+   "cost": 500,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "tag_crown_tag",
+   "name": "Crown Tag",
+   "category": "tag",
+   "rarity": "rare",
+   "cost": 1200,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "tag_wolf_tag",
+   "name": "Wolf Tag",
+   "category": "tag",
+   "rarity": "rare",
+   "cost": 1200,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "tag_skull_tag",
+   "name": "Skull Tag",
+   "category": "tag",
+   "rarity": "uncommon",
+   "cost": 500,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "tag_dollar_tag",
+   "name": "Dollar Tag",
+   "category": "tag",
+   "rarity": "common",
+   "cost": 250,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "charm_burner_charm",
+   "name": "Burner Charm",
+   "category": "charm",
+   "rarity": "common",
+   "cost": 250,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  },
+  {
+   "id": "charm_gold_grillz_charm",
+   "name": "Gold Grillz Charm",
+   "category": "charm",
+   "rarity": "legendary",
+   "cost": 0,
+   "supporter_only": true,
+   "source": "supporter",
+   "art": ""
+  },
+  {
+   "id": "charm_evidence_tag_charm",
+   "name": "Evidence Tag Charm",
+   "category": "charm",
+   "rarity": "uncommon",
+   "cost": 500,
+   "supporter_only": false,
+   "source": "store",
+   "art": ""
+  }
+ ]
+}

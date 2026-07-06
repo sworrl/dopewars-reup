@@ -50,6 +50,15 @@ signal trap_houses_changed()
 # acc}. A remembered, decaying, perception-blurred read of each city — never the raw truth. See Intel.
 var intel: Dictionary = {}
 signal intel_changed()
+
+# Cosmetics — flair ONLY, no gameplay effect (no-pay-to-win). CRED is an earned currency; `store`
+# items cost it, `supporter`/`award`/`earned` items are granted. equipped holds one active id per
+# category. See Cosmetics; mirrors the server's cred/owned/equipped model for later sync.
+var cred: int = 0
+var owned_cosmetics: Array = []
+var equipped: Dictionary = {}
+signal cred_changed(new_cred: int)
+signal cosmetics_changed()
 # Set when a trip completes; the HUD reads it on _ready and shows a "while you were away"
 # report. Transient (not persisted) — the completion happens on the same launch the HUD
 # then reads it, so the live toast and this cold-open report never both fire.
@@ -130,8 +139,12 @@ func add_xp(amount: int) -> void:
 	xp_changed.emit(xp)
 	var new_level := level()
 	if new_level > prev_level:
+		var earned := 0
 		for l in range(prev_level + 1, new_level + 1):
 			level_up.emit(l)
+			earned += 100 + 25 * l     # CRED is earned by playing — leveling grants flair currency
+		cred += earned
+		cred_changed.emit(cred)
 	save_to_disk()
 
 func add_perk(perk_id: String) -> void:
@@ -219,6 +232,67 @@ func intel_snapshot(city_id: String) -> Dictionary:
 		"competition": float(snap.get("competition", 0.0)),
 		"confidence": conf,
 	}
+
+# ---- cosmetics (flair only, CRED-earned) -----------------------------------
+
+func owns_cosmetic(id: String) -> bool:
+	return id in owned_cosmetics
+
+func equipped_in(category: String) -> String:
+	return String(equipped.get(category, ""))
+
+func add_cred(amount: int) -> void:
+	if amount <= 0:
+		return
+	cred += amount
+	cred_changed.emit(cred)
+	save_to_disk()
+
+## Grant an owned cosmetic (award/earned/supporter, or a completed purchase). Idempotent.
+func grant_cosmetic(id: String) -> bool:
+	if id == "" or Cosmetics.by_id(id).is_empty() or id in owned_cosmetics:
+		return false
+	owned_cosmetics.append(id)
+	cosmetics_changed.emit()
+	save_to_disk()
+	return true
+
+## Buy a store cosmetic with CRED. Only source=="store" items are purchasable — mirrors the server's
+## buy_cosmetic block on non-store items, so money can never buy an advantage or a granted-only item.
+func buy_cosmetic(id: String) -> Dictionary:
+	var item := Cosmetics.by_id(id)
+	if item.is_empty():
+		return {"ok": false, "error": "no such item"}
+	if not Cosmetics.is_purchasable(item):
+		return {"ok": false, "error": "not for sale"}
+	if id in owned_cosmetics:
+		return {"ok": false, "error": "already owned"}
+	var cost := int(item.get("cost", 0))
+	if cred < cost:
+		return {"ok": false, "error": "not enough CRED"}
+	cred -= cost
+	owned_cosmetics.append(id)
+	cred_changed.emit(cred)
+	cosmetics_changed.emit()
+	save_to_disk()
+	return {"ok": true}
+
+func equip_cosmetic(id: String) -> bool:
+	if not owns_cosmetic(id):
+		return false
+	var item := Cosmetics.by_id(id)
+	if item.is_empty():
+		return false
+	equipped[item.category] = id
+	cosmetics_changed.emit()
+	save_to_disk()
+	return true
+
+func unequip_category(category: String) -> void:
+	if equipped.has(category):
+		equipped.erase(category)
+		cosmetics_changed.emit()
+		save_to_disk()
 
 func _ready() -> void:
 	load_from_disk()
@@ -599,6 +673,9 @@ func to_dict() -> Dictionary:
 		"phone": phone,
 		"trap_houses": trap_houses,
 		"intel": intel,
+		"cred": cred,
+		"owned_cosmetics": owned_cosmetics,
+		"equipped": equipped,
 		"travel": travel.to_dict() if travel != null else null,
 	}
 
@@ -617,6 +694,9 @@ func load_dict(d: Dictionary) -> void:
 	phone = d.get("phone", {})
 	trap_houses = d.get("trap_houses", {})
 	intel = d.get("intel", {})
+	cred = int(d.get("cred", 0))
+	owned_cosmetics = d.get("owned_cosmetics", [])
+	equipped = d.get("equipped", {})
 	# Derive the modes list from owned_vehicles so the ints stay clean (JSON round-trips numbers
 	# as floats). Fall back to any legacy owned_vehicle_modes for older saves without owned_vehicles.
 	if owned_vehicles.is_empty():

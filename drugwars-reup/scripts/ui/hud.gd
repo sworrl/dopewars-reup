@@ -229,6 +229,21 @@ func _build_phone_button() -> void:
 	trap_btn.pressed.connect(Anim.tap_press.bind(trap_btn))
 	add_child(trap_btn)
 
+	var locker_btn := Button.new()
+	locker_btn.theme = ThemeFactory.make(ACCENT)
+	locker_btn.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	locker_btn.anchor_left = 1.0
+	locker_btn.anchor_right = 1.0
+	locker_btn.offset_left = -230
+	locker_btn.offset_right = -20
+	locker_btn.offset_top = 418
+	locker_btn.offset_bottom = 508
+	locker_btn.text = "Locker"
+	locker_btn.add_theme_font_size_override("font_size", 24)
+	locker_btn.pressed.connect(_show_locker)
+	locker_btn.pressed.connect(Anim.tap_press.bind(locker_btn))
+	add_child(locker_btn)
+
 func _refresh_phone_btn() -> void:
 	if not is_instance_valid(_phone_btn):
 		return
@@ -500,6 +515,149 @@ func _sheet_header(text: String) -> Control:
 	rule.custom_minimum_size = Vector2(0, 2)
 	v.add_child(rule)
 	return v
+
+# ---- cosmetics locker / store -------------------------------------------
+
+## The cosmetics locker: browse the 100-item catalog by category, buy store items with earned CRED,
+## and equip what you own. Flair only — nothing here touches gameplay (no pay-to-win).
+func _show_locker() -> void:
+	var dlg := AcceptDialog.new()
+	dlg.title = "Locker"
+	dlg.ok_button_text = "Close"
+	add_child(dlg)
+	_glassify_dialog(dlg)
+	dlg.confirmed.connect(func(): dlg.queue_free())
+	dlg.canceled.connect(func(): dlg.queue_free())
+
+	var vp := get_viewport().get_visible_rect().size
+	var root := VBoxContainer.new()
+	root.add_theme_constant_override("separation", 10)
+	dlg.add_child(root)
+
+	var header := Label.new()
+	header.add_theme_font_size_override("font_size", 34)
+	header.add_theme_color_override("font_color", ACCENT)
+	root.add_child(header)
+	var rule := ColorRect.new()
+	rule.color = Color(1, 1, 1, 0.12)
+	rule.custom_minimum_size = Vector2(0, 2)
+	root.add_child(rule)
+
+	# Category chips.
+	var chips := HFlowContainer.new()
+	chips.add_theme_constant_override("h_separation", 6)
+	chips.add_theme_constant_override("v_separation", 6)
+	root.add_child(chips)
+
+	var list_scroll := ScrollContainer.new()
+	list_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	list_scroll.custom_minimum_size = Vector2(vp.x * 0.9, vp.y * 0.62)
+	root.add_child(list_scroll)
+	var list := VBoxContainer.new()
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	list.add_theme_constant_override("separation", 8)
+	list_scroll.add_child(list)
+
+	var state := {"cat": Cosmetics.categories()[0]}
+
+	var rebuild := func() -> void:
+		header.text = "Locker · CRED %s" % _comma(PlayerState.cred)
+		for c in list.get_children():
+			c.queue_free()
+		for item in Cosmetics.by_category(state["cat"]):
+			list.add_child(_build_cosmetic_row(item, rebuild_cb))
+
+	# chips need `rebuild` to exist; wire after definition
+	for cat in Cosmetics.categories():
+		var chip := Button.new()
+		chip.theme = ThemeFactory.make(ACCENT)
+		chip.text = cat.capitalize()
+		chip.add_theme_font_size_override("font_size", 20)
+		chip.toggle_mode = false
+		chip.pressed.connect(func() -> void:
+			state["cat"] = cat
+			rebuild.call())
+		chips.add_child(chip)
+
+	rebuild_cb = rebuild
+	rebuild.call()
+	dlg.popup_centered(Vector2i(int(vp.x * 0.96), int(vp.y * 0.92)))
+
+var rebuild_cb: Callable   # lets a row's buy/equip trigger a full list rebuild
+
+func _build_cosmetic_row(item: Dictionary, refresh: Callable) -> Control:
+	var id := String(item.get("id", ""))
+	var rarity := String(item.get("rarity", "common"))
+	var rar_col := Cosmetics.rarity_color(rarity)
+	var owned := PlayerState.owns_cosmetic(id)
+	var equipped := PlayerState.equipped_in(String(item.get("category", ""))) == id
+
+	var row := PanelContainer.new()
+	row.add_theme_stylebox_override("panel", _glass_row_stylebox())
+	var hb := HBoxContainer.new()
+	hb.add_theme_constant_override("separation", 12)
+	row.add_child(hb)
+
+	# Thumbnail (art if present, else a rarity-colored dot).
+	var art := String(item.get("art", ""))
+	if art != "" and ResourceLoader.exists(art):
+		var tex := TextureRect.new()
+		tex.texture = load(art)
+		tex.custom_minimum_size = Vector2(56, 56)
+		tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		hb.add_child(tex)
+	else:
+		var dot := ColorRect.new()
+		dot.color = rar_col
+		dot.custom_minimum_size = Vector2(56, 56)
+		hb.add_child(dot)
+
+	var col := VBoxContainer.new()
+	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	col.add_theme_constant_override("separation", 2)
+	hb.add_child(col)
+	var name_lbl := Label.new()
+	name_lbl.text = String(item.get("name", "?"))
+	name_lbl.add_theme_font_size_override("font_size", 26)
+	name_lbl.add_theme_color_override("font_color", rar_col)
+	col.add_child(name_lbl)
+	var sub := Label.new()
+	var src := String(item.get("source", "store"))
+	sub.text = "%s · %s" % [rarity.capitalize(), src.capitalize()]
+	sub.add_theme_font_size_override("font_size", 18)
+	sub.add_theme_color_override("font_color", Color(0.72, 0.75, 0.82))
+	col.add_child(sub)
+
+	# Action / status on the right.
+	var action := Button.new()
+	action.theme = ThemeFactory.make(ACCENT)
+	action.add_theme_font_size_override("font_size", 22)
+	if equipped:
+		action.text = "Equipped"
+		action.disabled = true
+	elif owned:
+		action.text = "Equip"
+		action.pressed.connect(func() -> void:
+			PlayerState.equip_cosmetic(id)
+			Notify.good("%s equipped" % item.get("name", ""), "Locker")
+			refresh.call())
+	elif Cosmetics.is_purchasable(item):
+		var cost := int(item.get("cost", 0))
+		action.text = "Buy · %s CR" % _comma(cost)
+		action.disabled = PlayerState.cred < cost
+		action.pressed.connect(func() -> void:
+			var r := PlayerState.buy_cosmetic(id)
+			if r.get("ok", false):
+				Notify.good("Bought %s" % item.get("name", ""), "Locker")
+			else:
+				Notify.warn(String(r.get("error", "can't buy")), "Locker")
+			refresh.call())
+	else:
+		action.text = "Granted only"
+		action.disabled = true
+	hb.add_child(action)
+	return row
 
 ## Translucent glass slab for list rows inside dialogs.
 func _glass_row_stylebox() -> StyleBoxFlat:

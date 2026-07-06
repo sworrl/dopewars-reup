@@ -548,6 +548,30 @@ func _on_signed_in(ok: bool) -> void:
 	var res := await Supa.call_rpc("get_my_state")
 	if res.get("ok", false) and typeof(res.get("json")) == TYPE_DICTIONARY:
 		apply_server_state(res["json"])
+	await _check_packages()
+
+signal package_ready(pkg: Dictionary)   # {id, name, description, contents} — a welcome/care package to claim
+
+## After login, surface any packages waiting to be claimed (welcome kit, care drops, event rewards).
+func _check_packages() -> void:
+	if not _online:
+		return
+	var r := await Supa.call_rpc("my_pending_packages")
+	var j: Variant = r.get("json")
+	if r.get("ok", false) and typeof(j) == TYPE_ARRAY:
+		for pkg in j:
+			package_ready.emit(pkg)
+
+## Claim a queued package — the server applies the contents; we re-sync authoritative state after.
+func claim_package(pkg_id: int) -> Dictionary:
+	var r := await Supa.call_rpc("claim_package", {"p_id": pkg_id})
+	var j: Variant = r.get("json")
+	if r.get("ok", false) and typeof(j) == TYPE_DICTIONARY and (j as Dictionary).get("ok", false):
+		var st := await Supa.call_rpc("get_my_state")
+		if st.get("ok", false) and typeof(st.get("json")) == TYPE_DICTIONARY:
+			apply_server_state(st["json"])
+		return {"ok": true, "contents": (j as Dictionary).get("contents", {})}
+	return {"ok": false, "error": _rpc_err(r)}
 
 func _process(_dt: float) -> void:
 	if travel == null:

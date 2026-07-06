@@ -57,6 +57,7 @@ func _ready() -> void:
 	PlayerState.travel_canceled.connect(_refresh)
 	PlayerState.travel_arrived.connect(_on_arrived)
 	PlayerState.busted_at_airport.connect(_on_busted)
+	PlayerState.package_ready.connect(_show_package)
 	PlayerState.travel_arrived_clean.connect(_on_clean_arrival)
 	_refresh()
 	# A trip that finished while the app was closed completes before this HUD exists,
@@ -2031,6 +2032,47 @@ func show_market() -> void:
 	# logical width (window/stretch/scale=1.3) and pushed Sell off-screen.
 	var vp := get_viewport().get_visible_rect().size
 	dlg.popup_centered(Vector2i(int(vp.x * 0.96), int(vp.y * 0.92)))
+
+## A welcome/care package landed — show what's inside and claim it.
+func _show_package(pkg: Dictionary) -> void:
+	var dlg := AcceptDialog.new()
+	dlg.title = String(pkg.get("name", "Package"))
+	dlg.ok_button_text = "Claim it"
+	add_child(dlg)
+	_glassify_dialog(dlg)
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 10)
+	dlg.add_child(col)
+	col.add_child(_sheet_header(String(pkg.get("name", "Package"))))
+	var desc := Label.new()
+	desc.text = String(pkg.get("description", ""))
+	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	desc.custom_minimum_size = Vector2(get_viewport().get_visible_rect().size.x * 0.8, 0)
+	desc.add_theme_font_size_override("font_size", 24)
+	col.add_child(desc)
+	# Contents summary.
+	var c: Dictionary = pkg.get("contents", {})
+	var parts: Array = []
+	if int(c.get("cash", 0)) > 0: parts.append("$%s" % _comma(int(c.get("cash", 0))))
+	if int(c.get("cred", 0)) > 0: parts.append("%s CRED" % _comma(int(c.get("cred", 0))))
+	if int(c.get("xp", 0)) > 0: parts.append("%d XP" % int(c.get("xp", 0)))
+	if c.get("cosmetics") is Array and not (c.get("cosmetics") as Array).is_empty():
+		parts.append("%d cosmetic(s)" % (c.get("cosmetics") as Array).size())
+	if not parts.is_empty():
+		var cl := Label.new()
+		cl.text = "Inside: " + ", ".join(parts)
+		cl.add_theme_font_size_override("font_size", 22)
+		cl.add_theme_color_override("font_color", ACCENT)
+		col.add_child(cl)
+	dlg.confirmed.connect(func():
+		var r: Dictionary = await PlayerState.claim_package(int(pkg.get("id", 0)))
+		if r.get("ok", false):
+			Notify.good("Claimed — enjoy.", String(pkg.get("name", "Package")))
+		else:
+			Notify.warn(String(r.get("error", "couldn't claim")), "Package")
+		dlg.queue_free())
+	dlg.canceled.connect(func(): dlg.queue_free())
+	dlg.popup_centered()
 
 ## A free player who hit today's cap gets nudged to upgrade instead of a raw error.
 func _market_error(e: String) -> void:

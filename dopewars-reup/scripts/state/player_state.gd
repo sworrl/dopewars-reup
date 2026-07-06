@@ -69,6 +69,11 @@ signal buildings_changed()
 # faa_reg, adsb_on}. Unlocks the GA travel mode. See Aircraft.
 var aircraft: Dictionary = {}
 signal aircraft_changed()
+
+# Owned weapons (ids from Weapons). busted_before = a record (fails the NICS legal background check).
+var weapons: Array = []
+var busted_before: bool = false
+signal weapons_changed()
 # Set when a trip completes; the HUD reads it on _ready and shows a "while you were away"
 # report. Transient (not persisted) — the completion happens on the same launch the HUD
 # then reads it, so the live toast and this cold-open report never both fire.
@@ -402,6 +407,55 @@ func _gen_tail_number() -> String:
 	var b := letters[randi() % letters.length()]
 	return "N%d%s%s" % [randi_range(100, 999), a, b]
 
+# ---- weapons (legal FFL vs black market) -----------------------------------
+
+func owns_weapon(id: String) -> bool:
+	return id in weapons
+
+## Buy legally from an FFL / knife shop: NICS background check (a record = auto-deny, like real life),
+## serial goes on record (traceable), NFA classes add the $200 stamp. Returns {ok, price, error}.
+func buy_weapon_legal(id: String) -> Dictionary:
+	var w := Weapons.by_id(id)
+	if w.is_empty():
+		return {"ok": false, "error": "no such weapon"}
+	if id in weapons:
+		return {"ok": false, "error": "you already own that"}
+	if not Weapons.legal_available(w):
+		return {"ok": false, "error": "not sold legally — try the black market"}
+	if busted_before:
+		return {"ok": false, "error": "background check DENIED — you have a record"}
+	var price := int(Weapons.legal_price(w))
+	if Weapons.is_nfa(w):
+		price += int(w.get("legal", {}).get("tax_stamp", 0))   # Form 4 + $200 stamp
+	if not change_cash(-price):
+		return {"ok": false, "error": "need $%d" % price}
+	weapons.append(id)
+	weapons_changed.emit()
+	save_to_disk()
+	return {"ok": true, "price": price, "serial": "on record", "nfa": Weapons.is_nfa(w)}
+
+## Buy off the black market: no check, no serial — but illegal iron draws heat, and the buy can go
+## bad (sting/scam): a failed stealth/streetwise roll loses the cash AND gives you a record.
+func buy_weapon_black(id: String) -> Dictionary:
+	var w := Weapons.by_id(id)
+	if w.is_empty():
+		return {"ok": false, "error": "no such weapon"}
+	if id in weapons:
+		return {"ok": false, "error": "you already own that"}
+	var price := Weapons.black_price(w)
+	if not change_cash(-price):
+		return {"ok": false, "error": "need $%d" % price}
+	var r := stealth_check(10 + Weapons.black_heat(w))   # DEX/streetwise vs how hot the piece is
+	if not r.success:
+		busted_before = true                              # sting → you've got a record now
+		save_to_disk()
+		return {"ok": false, "busted": true, "roll": r.text("clean", "BUSTED", "DEX"),
+			"error": "the buy went bad — cash gone, and now you're on the radar"}
+	weapons.append(id)
+	weapons_changed.emit()
+	save_to_disk()
+	return {"ok": true, "price": price, "serial": "none", "roll": r.text("clean", "close", "DEX")}
+
 # ---- online session: server-authoritative state + economy ------------------
 
 ## Adopt the server's authoritative state from get_my_state. The server owns cash/xp/inventory/etc.,
@@ -648,6 +702,7 @@ func _complete_travel() -> void:
 			inventory.clear()
 			inventory_changed.emit()
 			pending_arrival = {"kind": "busted", "city_id": dest_id, "seized": seized, "roll_text": roll_text}
+			busted_before = true
 			busted_at_airport.emit(dest_id, seized, roll_text)
 			save_to_disk()
 			return
@@ -669,6 +724,7 @@ func _complete_travel() -> void:
 			inventory.clear()
 			inventory_changed.emit()
 			pending_arrival = {"kind": "busted", "city_id": dest_id, "seized": seized, "roll_text": roll_text}
+			busted_before = true
 			busted_at_airport.emit(dest_id, seized, roll_text)
 			save_to_disk()
 			return
@@ -1006,6 +1062,8 @@ func to_dict() -> Dictionary:
 		"equipped": equipped,
 		"buildings": buildings,
 		"aircraft": aircraft,
+		"weapons": weapons,
+		"busted_before": busted_before,
 		"travel": travel.to_dict() if travel != null else null,
 	}
 
@@ -1029,6 +1087,8 @@ func load_dict(d: Dictionary) -> void:
 	equipped = d.get("equipped", {})
 	buildings = d.get("buildings", {})
 	aircraft = d.get("aircraft", {})
+	weapons = d.get("weapons", [])
+	busted_before = bool(d.get("busted_before", false))
 	# Derive the modes list from owned_vehicles so the ints stay clean (JSON round-trips numbers
 	# as floats). Fall back to any legacy owned_vehicle_modes for older saves without owned_vehicles.
 	if owned_vehicles.is_empty():

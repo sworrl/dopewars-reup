@@ -42,6 +42,7 @@ func _ready() -> void:
 	_build_zoom_button()
 	_build_intel_button()
 	_build_turf_button()
+	_build_arms_button()
 	_build_arrival_toast()
 	# Subtle entrance for the HUD on scene change.
 	Anim.slide_in_from_bottom(_top_panel, 24.0, 0.35)
@@ -736,6 +737,127 @@ func _pick_building_kind(loc: Dictionary, parent_dlg: AcceptDialog, rebuild: Cal
 		col.add_child(b)
 	var vp := get_viewport().get_visible_rect().size
 	picker.popup_centered(Vector2i(int(vp.x * 0.9), int(vp.y * 0.8)))
+
+# ---- arms: weapons (legal FFL vs black market) --------------------------
+
+func _build_arms_button() -> void:
+	var btn := Button.new()
+	btn.theme = ThemeFactory.make(ACCENT)
+	btn.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	btn.offset_left = 20
+	btn.offset_right = 250
+	btn.offset_top = 522
+	btn.offset_bottom = 612
+	btn.text = "Arms"
+	btn.add_theme_font_size_override("font_size", 24)
+	btn.pressed.connect(_show_arms)
+	btn.pressed.connect(Anim.tap_press.bind(btn))
+	add_child(btn)
+
+var _arms_rebuild: Callable
+
+func _show_arms() -> void:
+	var dlg := AcceptDialog.new()
+	dlg.title = "Arms"
+	dlg.ok_button_text = "Close"
+	add_child(dlg)
+	_glassify_dialog(dlg)
+	dlg.confirmed.connect(func(): dlg.queue_free())
+	dlg.canceled.connect(func(): dlg.queue_free())
+	var vp := get_viewport().get_visible_rect().size
+	var root := VBoxContainer.new()
+	root.add_theme_constant_override("separation", 10)
+	dlg.add_child(root)
+	root.add_child(_sheet_header("Arms"))
+	var note := Label.new()
+	note.text = "Legal (FFL): background check + serial on record. A record = auto-denied.\nBlack market: no serial, no check — but it's illegal, draws heat, and the buy can go bad."
+	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	note.add_theme_font_size_override("font_size", 18)
+	note.add_theme_color_override("font_color", Color(0.7, 0.72, 0.78))
+	root.add_child(note)
+	var chips := HFlowContainer.new()
+	chips.add_theme_constant_override("h_separation", 6)
+	chips.add_theme_constant_override("v_separation", 6)
+	root.add_child(chips)
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.custom_minimum_size = Vector2(vp.x * 0.9, vp.y * 0.58)
+	root.add_child(scroll)
+	var list := VBoxContainer.new()
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	list.add_theme_constant_override("separation", 8)
+	scroll.add_child(list)
+	var state := {"cat": Weapons.categories()[0]}
+	var rebuild := func() -> void:
+		for c in list.get_children():
+			c.queue_free()
+		for w in Weapons.by_category(state["cat"]):
+			list.add_child(_arms_row(w, _arms_rebuild))
+	for cat in Weapons.categories():
+		var chip := Button.new()
+		chip.theme = ThemeFactory.make(ACCENT)
+		chip.text = cat.capitalize()
+		chip.add_theme_font_size_override("font_size", 20)
+		chip.pressed.connect(func():
+			state["cat"] = cat
+			rebuild.call())
+		chips.add_child(chip)
+	_arms_rebuild = rebuild
+	rebuild.call()
+	dlg.popup_centered(Vector2i(int(vp.x * 0.96), int(vp.y * 0.92)))
+
+func _arms_row(w: Dictionary, refresh: Callable) -> Control:
+	var row := PanelContainer.new()
+	row.add_theme_stylebox_override("panel", _glass_row_stylebox())
+	var hb := HBoxContainer.new()
+	hb.add_theme_constant_override("separation", 10)
+	row.add_child(hb)
+	var col := VBoxContainer.new()
+	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hb.add_child(col)
+	var owned: bool = PlayerState.owns_weapon(String(w.id))
+	var nm := Label.new()
+	nm.text = String(w.name) + (" ✓" if owned else "")
+	nm.add_theme_font_size_override("font_size", 24)
+	col.add_child(nm)
+	var sub := Label.new()
+	var legal_txt := ("$%s legal" % _comma(int(Weapons.legal_price(w)))) if Weapons.legal_available(w) else "no legal sale"
+	if Weapons.is_nfa(w) and Weapons.legal_available(w):
+		legal_txt += " (NFA)"
+	sub.text = "%s  ·  $%s black (heat %d)" % [legal_txt, _comma(Weapons.black_price(w)), Weapons.black_heat(w)]
+	sub.add_theme_font_size_override("font_size", 18)
+	sub.add_theme_color_override("font_color", Color(0.72, 0.75, 0.82))
+	col.add_child(sub)
+	if not owned:
+		var btns := VBoxContainer.new()
+		btns.add_theme_constant_override("separation", 4)
+		hb.add_child(btns)
+		if Weapons.legal_available(w):
+			var lb := Button.new()
+			lb.theme = ThemeFactory.make(ACCENT)
+			lb.text = "Legal"
+			lb.add_theme_font_size_override("font_size", 18)
+			lb.pressed.connect(func():
+				var r := PlayerState.buy_weapon_legal(String(w.id))
+				if r.get("ok", false):
+					Notify.good("%s — serial on record." % w.name, "Arms")
+				else:
+					Notify.warn(String(r.get("error", "can't buy")), "Arms")
+				refresh.call())
+			btns.add_child(lb)
+		var bb := Button.new()
+		bb.theme = ThemeFactory.make(ACCENT)
+		bb.text = "Black"
+		bb.add_theme_font_size_override("font_size", 18)
+		bb.pressed.connect(func():
+			var r := PlayerState.buy_weapon_black(String(w.id))
+			if r.get("ok", false):
+				Notify.good("%s — no serial." % w.name, "Arms")
+			else:
+				Notify.warn(String(r.get("error", "can't buy")), "Arms")
+			refresh.call())
+		btns.add_child(bb)
+	return row
 
 # ---- hangar: general-aviation aircraft ----------------------------------
 

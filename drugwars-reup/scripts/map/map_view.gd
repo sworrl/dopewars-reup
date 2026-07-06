@@ -101,6 +101,27 @@ func _try_tap(screen_pos: Vector2) -> void:
 	if best_id != "":
 		city_tapped.emit(best_id)
 
+var _overlay_dim: int = 0   # Intel.Dim.NONE
+
+## Apply a map-intel overlay dimension (Intel.Dim) to every city marker, reading the player's
+## perceived, decaying snapshots. NONE clears the halos; unknown cities get no halo either.
+func set_overlay(dim: int) -> void:
+	_overlay_dim = dim
+	for m in marker_root.get_children():
+		if not (m is MapMarker) or not m.has_meta("city_id"):
+			continue
+		var marker := m as MapMarker
+		if dim == 0:
+			marker.set_intel(0, 0.0, 0.0, Color.WHITE)
+			continue
+		var snap := PlayerState.intel_snapshot(String(m.get_meta("city_id")))
+		if snap.is_empty():
+			marker.set_intel(0, 0.0, 0.0, Color.WHITE)   # never scouted → shows nothing
+			continue
+		var key := Intel.dim_name(dim).to_lower()        # danger / market / competition
+		marker.set_intel(dim, float(snap.get(key, 0.0)),
+			float(snap.get("confidence", 0.0)), Intel.dim_color(dim))
+
 func center_on(lat: float, lon: float) -> void:
 	camera.position = Geo.latlon_to_world_px(lat, lon, zoom)
 	_reposition_markers()

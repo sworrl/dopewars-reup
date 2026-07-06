@@ -45,6 +45,11 @@ signal phone_changed()
 var trap_houses: Dictionary = {}
 
 signal trap_houses_changed()
+
+# Map intel the player has gathered, keyed by city_id: {t:unix_learned, danger, market, competition,
+# acc}. A remembered, decaying, perception-blurred read of each city — never the raw truth. See Intel.
+var intel: Dictionary = {}
+signal intel_changed()
 # Set when a trip completes; the HUD reads it on _ready and shows a "while you were away"
 # report. Transient (not persisted) — the completion happens on the same launch the HUD
 # then reads it, so the live toast and this cold-open report never both fire.
@@ -178,6 +183,43 @@ func perception_check(dc: int, extra_mod: int = 0) -> Dice.Result:
 func stealth_check(dc: int, extra_mod: int = 0) -> Dice.Result:
 	return skill_check("stealth", "DEX", dc, extra_mod, "Stealth")
 
+# ---- map intel (perception-gated, decaying) --------------------------------
+
+## Read a city's streets and store a perceived intel snapshot. Being present is a strong read;
+## WIS/perception sharpens it (a crit is near-perfect, a fumble a bad read); a smarter phone helps.
+func gather_intel(city_id: String, present: bool = true) -> void:
+	if city_id == "":
+		return
+	var r := perception_check(12)
+	var quality := (0.55 if present else 0.30)   # you simply see more when you're standing there
+	if r.crit_succeed:
+		quality += 0.35
+	elif r.success:
+		quality += 0.03 * float(r.margin)
+	elif r.crit_fail:
+		quality -= 0.25
+	else:
+		quality += 0.02 * float(r.margin)          # margin is negative on a miss
+	quality += 0.04 * float(int(phone.get("tier", 0)))   # smart phone pulls supplementary intel
+	var snap := Intel.observe(city_id, clampf(quality, 0.1, 1.0))
+	snap["t"] = Time.get_unix_time_from_system()
+	intel[city_id] = snap
+	intel_changed.emit()
+	save_to_disk()
+
+## Current perceived snapshot for a city with live (decayed) confidence, or {} if never gathered.
+func intel_snapshot(city_id: String) -> Dictionary:
+	if not intel.has(city_id):
+		return {}
+	var snap: Dictionary = intel[city_id]
+	var conf := Intel.confidence(snap, float(snap.get("t", 0.0)), Time.get_unix_time_from_system())
+	return {
+		"danger": float(snap.get("danger", 0.0)),
+		"market": float(snap.get("market", 0.0)),
+		"competition": float(snap.get("competition", 0.0)),
+		"confidence": conf,
+	}
+
 func _ready() -> void:
 	load_from_disk()
 
@@ -232,6 +274,9 @@ func _complete_travel() -> void:
 	current_city_id = dest_id
 	travel = null
 	position_changed.emit(lat, lon)
+
+	# Arriving, you read the local scene — a fresh, present intel gather on the new city.
+	gather_intel(dest_id, true)
 
 	# A trip drains the phone battery.
 	drain_phone()
@@ -553,6 +598,7 @@ func to_dict() -> Dictionary:
 		"owned_vehicles": owned_vehicles,
 		"phone": phone,
 		"trap_houses": trap_houses,
+		"intel": intel,
 		"travel": travel.to_dict() if travel != null else null,
 	}
 
@@ -570,6 +616,7 @@ func load_dict(d: Dictionary) -> void:
 	owned_vehicles = d.get("owned_vehicles", {})
 	phone = d.get("phone", {})
 	trap_houses = d.get("trap_houses", {})
+	intel = d.get("intel", {})
 	# Derive the modes list from owned_vehicles so the ints stay clean (JSON round-trips numbers
 	# as floats). Fall back to any legacy owned_vehicle_modes for older saves without owned_vehicles.
 	if owned_vehicles.is_empty():

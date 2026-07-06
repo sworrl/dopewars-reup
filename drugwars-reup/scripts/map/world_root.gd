@@ -11,11 +11,19 @@ const REGION_ZOOM := 9   # regional — cities + travel routes
 var _player_marker: MapMarker
 var _hud  # CanvasLayer with hud.gd
 var _view_mode := "town"
+var _overlay_dim := 0   # Intel.Dim: NONE → DANGER → MARKET → COMPETITION → …
 
 func _ready() -> void:
+	# Make sure the city you're standing in has intel (new game / pre-intel saves).
+	if PlayerState.intel_snapshot(PlayerState.current_city_id).is_empty():
+		PlayerState.gather_intel(PlayerState.current_city_id, true)
 	_load_cities()
 	_spawn_player_marker()
 	_spawn_hud()
+	# Re-apply the active overlay whenever intel changes (e.g. a fresh gather on arrival).
+	PlayerState.intel_changed.connect(func():
+		if _overlay_dim != 0:
+			map.set_overlay(_overlay_dim))
 	# When the player's lat/lon changes (travel tick), re-project the marker on the map.
 	PlayerState.position_changed.connect(_on_position_changed)
 	# A city was tapped — open trip mode picker.
@@ -66,6 +74,14 @@ func _spawn_hud() -> void:
 	_hud.market_requested.connect(_on_market_requested)
 	_hud.cancel_travel_requested.connect(_on_cancel_travel)
 	_hud.zoom_toggle_requested.connect(_toggle_view)
+	_hud.intel_overlay_requested.connect(_cycle_overlay)
+
+## Cycle the map-intel overlay: Off → Danger → Market → Competition → Off.
+func _cycle_overlay() -> void:
+	_overlay_dim = (_overlay_dim + 1) % 4
+	map.set_overlay(_overlay_dim)
+	if _hud != null:
+		_hud.set_overlay_label(Intel.dim_name(_overlay_dim))
 
 func _on_position_changed(lat: float, lon: float) -> void:
 	map.update_marker_position(_player_marker, lat, lon)

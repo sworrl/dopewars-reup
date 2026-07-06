@@ -7,6 +7,7 @@ extends CanvasLayer
 signal market_requested()
 signal cancel_travel_requested()
 signal zoom_toggle_requested()
+signal intel_overlay_requested()
 
 const PANEL_BG := Color(0.05, 0.05, 0.05, 0.78)
 const TEXT     := Color(0.95, 0.95, 0.95)
@@ -39,6 +40,7 @@ func _ready() -> void:
 	_build_action_button()
 	_build_phone_button()
 	_build_zoom_button()
+	_build_intel_button()
 	_build_arrival_toast()
 	# Subtle entrance for the HUD on scene change.
 	Anim.slide_in_from_bottom(_top_panel, 24.0, 0.35)
@@ -160,6 +162,36 @@ func set_view_mode(mode: String) -> void:
 	if not is_instance_valid(_zoom_btn):
 		return
 	_zoom_btn.text = "Region ⤢" if mode == "town" else "My town ⤡"
+
+# ---- intel overlay toggle -----------------------------------------------
+
+var _intel_btn: Button
+
+func _build_intel_button() -> void:
+	_intel_btn = Button.new()
+	_intel_btn.theme = ThemeFactory.make(ACCENT)
+	_intel_btn.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	_intel_btn.offset_left = 20
+	_intel_btn.offset_right = 250
+	_intel_btn.offset_top = 314
+	_intel_btn.offset_bottom = 404
+	_intel_btn.add_theme_font_size_override("font_size", 22)
+	_intel_btn.pressed.connect(func(): intel_overlay_requested.emit())
+	_intel_btn.pressed.connect(Anim.tap_press.bind(_intel_btn))
+	add_child(_intel_btn)
+	set_overlay_label("Off")
+
+## Called by world_root as the overlay cycles. Shows the active dimension, tinted to its color.
+func set_overlay_label(dim_name: String) -> void:
+	if not is_instance_valid(_intel_btn):
+		return
+	_intel_btn.text = "Intel: %s" % dim_name
+	var tint := TEXT
+	match dim_name:
+		"Danger":      tint = Color(0.95, 0.45, 0.48)
+		"Market":      tint = Color(0.50, 0.85, 0.58)
+		"Competition": tint = Color(0.95, 0.78, 0.42)
+	_intel_btn.add_theme_color_override("font_color", tint)
 
 # ---- phone button -------------------------------------------------------
 

@@ -134,8 +134,8 @@ func _sha256(path: String) -> String:
 	return ctx.finish().hex_encode()
 
 ## Launch the system package installer on the downloaded APK via a FileProvider content URI.
-## Uses AndroidRuntime + JavaClassWrapper (no custom plugin). The <provider> + file_paths.xml in the
-## Android manifest expose user:// (the app's internal files dir) as "<pkg>.fileprovider".
+## Uses AndroidRuntime + JavaClassWrapper (no custom plugin). Godot's built-in FileProvider
+## (authority "<pkg>.fileprovider") already shares the whole files dir where user://update.apk lands.
 func _install_apk() -> void:
 	var rt: Object = Engine.get_singleton("AndroidRuntime")
 	if rt == null:

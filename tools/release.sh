@@ -14,6 +14,9 @@
 set -euo pipefail
 
 VERSION="${1:?usage: release.sh <version>}"
+# versionCode: monotonic from semver (major*10000 + minor*100 + patch), overridable via $VERSION_CODE.
+IFS=. read -r _MA _MI _PA <<< "${VERSION%%-*}"
+VERSION_CODE="${VERSION_CODE:-$(( ${_MA:-0} * 10000 + ${_MI:-0} * 100 + ${_PA:-0} ))}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 APP="$ROOT/dopewars-reup"
 GODOT="${GODOT:-$HOME/.local/bin/godot}"
@@ -25,18 +28,19 @@ APK="$OUT/dopewars-reup-$VERSION.apk"
 KEYSTORE="${KEYSTORE:-$HOME/.local/share/godot/keystores/debug.keystore}"
 KS_PASS="${KS_PASS:-android}"; KEY_ALIAS="${KEY_ALIAS:-androiddebugkey}"; KEY_PASS="${KEY_PASS:-android}"
 
-echo ">> 1/5 export game pack"
+echo ">> 1/6 export game pack"
 "$GODOT" --headless --path "$APP" --export-pack "Android" "$OUT/dwreup.pck" >/dev/null
 cp "$OUT/dwreup.pck" "$APP/android/build/src/main/assets/assets.sparsepck"
 
-echo ">> 2/5 gradle build"
+echo ">> 2/6 gradle build (release variant, arm64)"
 ( cd "$APP/android/build"
   export JAVA_HOME="${JAVA_HOME:-/home/linuxbrew/.linuxbrew/Cellar/openjdk@17/17.0.19/libexec}"
   export PATH="$JAVA_HOME/bin:$PATH" ANDROID_HOME="$SDK"
-  ./gradlew assembleStandardDebug --no-daemon -q )
+  ./gradlew assembleStandardRelease --no-daemon -q -Pexport_enabled_abis="arm64-v8a|" \
+    -Pexport_version_name="$VERSION" -Pexport_version_code="$VERSION_CODE" )
 
-echo ">> 3/5 zipalign + sign"
-"$BT/zipalign" -p -f 4 "$APP/android/build/build/outputs/apk/standard/debug/android_debug.apk" /tmp/dwreup-aligned.apk
+echo ">> 3/6 zipalign + sign"
+"$BT/zipalign" -p -f 4 "$APP/android/build/build/outputs/apk/standard/release/android_release.apk" /tmp/dwreup-aligned.apk
 "$BT/apksigner" sign --ks "$KEYSTORE" --ks-pass "pass:$KS_PASS" \
   --ks-key-alias "$KEY_ALIAS" --key-pass "pass:$KEY_PASS" --out "$APK" /tmp/dwreup-aligned.apk
 

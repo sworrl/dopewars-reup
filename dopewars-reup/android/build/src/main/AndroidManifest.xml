@@ -56,17 +56,9 @@
             android:configChanges="layoutDirection|locale|orientation|keyboardHidden|screenSize|smallestScreenSize|density|keyboard|navigation|screenLayout|uiMode"
             android:resizeableActivity="true"
             tools:ignore="UnusedAttribute" />
-        <!-- Grants the package installer temporary read access to the downloaded APK. Authority
-             matches Updater's `<pkg>.fileprovider`; file_paths.xml exposes the app's files dir. -->
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.fileprovider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths" />
-        </provider>
+        <!-- The self-updater hands the downloaded APK to the package installer via Godot's built-in
+             FileProvider (authority ${applicationId}.fileprovider), which already shares the whole
+             files dir where user://update.apk lands. No extra provider needed — see Updater. -->
 
         <activity-alias
             android:name=".GodotAppLauncher"

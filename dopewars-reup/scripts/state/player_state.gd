@@ -80,6 +80,11 @@ signal weapons_changed()
 var notoriety: int = 0
 signal notoriety_changed(n: int)
 signal street_encounter(enc: Dictionary)
+
+# Injury (0-100): taken from losing fights. Weakens combat power until it heals — a trip's rest chips
+# it away, or pay a street doc to patch up. Lasting stakes on a bad fight.
+var injury: int = 0
+signal injury_changed(n: int)
 # Set when a trip completes; the HUD reads it on _ready and shows a "while you were away"
 # report. Transient (not persisted) — the completion happens on the same launch the HUD
 # then reads it, so the live toast and this cold-open report never both fire.
@@ -464,13 +469,30 @@ func buy_weapon_black(id: String) -> Dictionary:
 	save_to_disk()
 	return {"ok": true, "price": price, "serial": "none", "roll": r.text("clean", "close", "DEX")}
 
-## Combat power for a Challenge: brawn + speed + experience, plus your best weapon's threat.
+## Combat power for a Challenge: brawn + speed + experience, plus your best weapon's threat, minus how
+## hurt you are (a bad injury takes the fight out of you).
 func combat_power() -> int:
 	var base := stat_mod("STR") + stat_mod("DEX") + int(level() / 2)
 	var wep := 0
 	for wid in weapons:
 		wep = maxi(wep, int(Weapons.by_id(String(wid)).get("threat", 0)))
-	return base + wep
+	return base + wep - int(injury / 15)
+
+func add_injury(n: int) -> void:
+	injury = clampi(injury + n, 0, 100)
+	injury_changed.emit(injury)
+
+## Pay a street doc to patch up. Cost scales with how hurt you are. Returns {ok, cost, error}.
+func patch_up() -> Dictionary:
+	if injury <= 0:
+		return {"ok": false, "error": "not hurt"}
+	var cost := 50 + injury * 4
+	if not change_cash(-cost):
+		return {"ok": false, "error": "can't afford $%d" % cost}
+	injury = 0
+	injury_changed.emit(injury)
+	save_to_disk()
+	return {"ok": true, "cost": cost}
 
 # ---- notoriety + street encounters -----------------------------------------
 
@@ -497,12 +519,14 @@ func resolve_encounter(enc: Dictionary, action: String) -> Dictionary:
 			var take := randi_range(50, 400)
 			change_cash(take)
 			add_notoriety(3)
+			add_injury(randi_range(0, 8))                 # even a win leaves a mark
 			return {"ok": true, "won": true, "log": o.log,
 				"text": "%s You held them off — grabbed $%d." % [o.summary(), take]}
 		var lost := mini(int(enc.get("threat_cash", 0)), cash)
 		change_cash(-lost)
 		var seized := _seize_random_drug()
 		add_notoriety(-4)
+		add_injury(randi_range(12, 28))                    # losing a fight leaves you hurt
 		return {"ok": true, "won": false, "log": o.log,
 			"text": "%s They rolled you for $%d%s." % [o.summary(), lost, seized]}
 	elif action == "flee":
@@ -805,6 +829,7 @@ func _complete_travel() -> void:
 		pending_arrival = {"kind": "arrived", "city_id": dest_id}
 	travel_arrived.emit(dest_id)
 	add_notoriety(-2)                        # a trip is time to cool off a little
+	add_injury(-8)                           # ...and to heal up a bit
 	var enc := roll_encounter()              # ...but you might get jumped on arrival
 	if not enc.is_empty():
 		street_encounter.emit(enc)
@@ -1139,6 +1164,7 @@ func to_dict() -> Dictionary:
 		"weapons": weapons,
 		"busted_before": busted_before,
 		"notoriety": notoriety,
+		"injury": injury,
 		"travel": travel.to_dict() if travel != null else null,
 	}
 
@@ -1165,6 +1191,7 @@ func load_dict(d: Dictionary) -> void:
 	weapons = d.get("weapons", [])
 	busted_before = bool(d.get("busted_before", false))
 	notoriety = int(d.get("notoriety", 0))
+	injury = int(d.get("injury", 0))
 	# Derive the modes list from owned_vehicles so the ints stay clean (JSON round-trips numbers
 	# as floats). Fall back to any legacy owned_vehicle_modes for older saves without owned_vehicles.
 	if owned_vehicles.is_empty():

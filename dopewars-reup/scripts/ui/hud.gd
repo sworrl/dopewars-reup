@@ -776,6 +776,24 @@ func _show_arms() -> void:
 	note.add_theme_font_size_override("font_size", 18)
 	note.add_theme_color_override("font_color", Color(0.7, 0.72, 0.78))
 	root.add_child(note)
+	# Street doc — patch up injuries (they weaken your combat power).
+	var doc := Button.new()
+	doc.theme = ThemeFactory.make(ACCENT)
+	doc.custom_minimum_size = Vector2(0, 72)
+	doc.add_theme_font_size_override("font_size", 22)
+	var refresh_doc := func() -> void:
+		var inj := PlayerState.injury
+		doc.text = "Not hurt ✓" if inj <= 0 else "Get patched up (%d%% hurt) — $%s" % [inj, _comma(50 + inj * 4)]
+		doc.disabled = inj <= 0
+	refresh_doc.call()
+	doc.pressed.connect(func():
+		var r := PlayerState.patch_up()
+		if r.get("ok", false):
+			Notify.good("Patched up — $%s." % _comma(int(r.get("cost", 0))), "Doc")
+		else:
+			Notify.warn(String(r.get("error", "")), "Doc")
+		refresh_doc.call())
+	root.add_child(doc)
 	var chips := HFlowContainer.new()
 	chips.add_theme_constant_override("h_separation", 6)
 	chips.add_theme_constant_override("v_separation", 6)

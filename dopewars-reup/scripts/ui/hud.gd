@@ -1216,6 +1216,9 @@ func _show_locker() -> void:
 	rule.custom_minimum_size = Vector2(0, 2)
 	root.add_child(rule)
 
+	# Your profile: avatar (class portrait) wearing the equipped frame embellishment + title.
+	root.add_child(_profile_card())
+
 	# Category chips.
 	var chips := HFlowContainer.new()
 	chips.add_theme_constant_override("h_separation", 6)
@@ -1257,6 +1260,57 @@ func _show_locker() -> void:
 	dlg.popup_centered(Vector2i(int(vp.x * 0.96), int(vp.y * 0.92)))
 
 var rebuild_cb: Callable   # lets a row's buy/equip trigger a full list rebuild
+
+## Profile card: the class-portrait avatar with the equipped FRAME cosmetic overlaid (the profile
+## embellishment), plus handle, equipped title, and level. Shows off what's equipped.
+func _profile_card() -> Control:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 16)
+
+	var av := Control.new()
+	av.custom_minimum_size = Vector2(150, 150)
+	var portrait := TextureRect.new()
+	portrait.set_anchors_preset(Control.PRESET_FULL_RECT)
+	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	var cp := "res://assets/sprites/classes/%s.png" % PlayerState.class_id
+	if ResourceLoader.exists(cp):
+		portrait.texture = load(cp)
+	av.add_child(portrait)
+	var frame_id := PlayerState.equipped_in("frame")
+	if frame_id != "":
+		var fp := Cosmetics.art_path(frame_id)
+		if fp != "" and ResourceLoader.exists(fp):
+			var fr := TextureRect.new()
+			fr.set_anchors_preset(Control.PRESET_FULL_RECT)
+			fr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			fr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+			fr.texture = load(fp)
+			av.add_child(fr)
+	row.add_child(av)
+
+	var col := VBoxContainer.new()
+	col.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	col.add_theme_constant_override("separation", 4)
+	var name_lbl := Label.new()
+	name_lbl.text = PlayerState.handle if PlayerState.handle != "" else "operator"
+	name_lbl.add_theme_font_override("font", FONT_DISPLAY)
+	name_lbl.add_theme_font_size_override("font_size", 34)
+	col.add_child(name_lbl)
+	var title_id := PlayerState.equipped_in("title")
+	if title_id != "":
+		var tl := Label.new()
+		tl.text = String(Cosmetics.by_id(title_id).get("name", ""))
+		tl.add_theme_font_size_override("font_size", 22)
+		tl.add_theme_color_override("font_color", ACCENT)
+		col.add_child(tl)
+	var lvl := Label.new()
+	lvl.text = "Level %d" % PlayerState.level()
+	lvl.add_theme_font_size_override("font_size", 20)
+	lvl.add_theme_color_override("font_color", Color(0.72, 0.75, 0.82))
+	col.add_child(lvl)
+	row.add_child(col)
+	return row
 
 func _build_cosmetic_row(item: Dictionary, refresh: Callable) -> Control:
 	var id := String(item.get("id", ""))

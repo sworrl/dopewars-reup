@@ -31,14 +31,19 @@ STYLE = {
   "tag":     lambda n: f"A single spray-paint GRAFFITI mark evoking '{n}' on grimy concrete, "
                        f"no legible letters. {BASE}",
   "charm":   lambda n: f"A small dangling phone CHARM / keychain trinket object of '{n}'. {BASE}",
+  "nameplate": lambda n: (f"A wide horizontal NAMEPLATE background banner texture evoking '{n}' — a "
+                       f"subtle grimy surface (concrete, metal, neon-lit brick) with empty center space "
+                       f"for a name to sit over. {BASE}"),
 }
+# Aspect ratio per category (nameplates are wide banners; everything else is a square icon).
+ASPECT = {"nameplate": "16:9"}
 
-def gen(prompt, out_path):
+def gen(prompt, out_path, aspect="1:1"):
     key = os.environ.get("GEMINI_API_KEY")
     if not key:
         sys.exit("GEMINI_API_KEY not set")
     body = json.dumps({"instances": [{"prompt": prompt}],
-        "parameters": {"sampleCount": 1, "aspectRatio": "1:1", "personGeneration": "dont_allow"}}).encode()
+        "parameters": {"sampleCount": 1, "aspectRatio": aspect, "personGeneration": "dont_allow"}}).encode()
     req = urllib.request.Request(URL, data=body, method="POST",
         headers={"Content-Type": "application/json", "x-goog-api-key": key})
     try:
@@ -68,10 +73,11 @@ def main():
             continue                                  # already has art
         print(f"[{category}] {cid} — {c['name']}")
         full = os.path.join(GEN_DIR, f"{cid}.png")
-        if not gen(STYLE[category](c["name"]), full):
+        if not gen(STYLE[category](c["name"]), full, ASPECT.get(category, "1:1")):
             continue
         os.makedirs(SPR_DIR, exist_ok=True)
-        subprocess.run(["convert", full, "-resize", "256x256", spr], check=False)
+        rz = "512x160" if category == "nameplate" else "256x256"
+        subprocess.run(["convert", full, "-resize", rz, spr], check=False)
         if not os.path.exists(spr):                   # convert missing -> ship the full res
             subprocess.run(["cp", full, spr], check=False)
         c["art"] = f"res://assets/sprites/cosmetics/{cid}.png"

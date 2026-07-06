@@ -74,6 +74,12 @@ signal aircraft_changed()
 var weapons: Array = []
 var busted_before: bool = false
 signal weapons_changed()
+
+# Street notoriety (0-100): rises with crime (black-market buys, busts, big sales), decays as you lie
+# low. Drives street-encounter chance + difficulty — the higher you climb, the more you get tested.
+var notoriety: int = 0
+signal notoriety_changed(n: int)
+signal street_encounter(enc: Dictionary)
 # Set when a trip completes; the HUD reads it on _ready and shows a "while you were away"
 # report. Transient (not persisted) — the completion happens on the same launch the HUD
 # then reads it, so the live toast and this cold-open report never both fire.
@@ -448,10 +454,12 @@ func buy_weapon_black(id: String) -> Dictionary:
 	var r := stealth_check(10 + Weapons.black_heat(w))   # DEX/streetwise vs how hot the piece is
 	if not r.success:
 		busted_before = true                              # sting → you've got a record now
+		add_notoriety(8)
 		save_to_disk()
 		return {"ok": false, "busted": true, "roll": r.text("clean", "BUSTED", "DEX"),
 			"error": "the buy went bad — cash gone, and now you're on the radar"}
 	weapons.append(id)
+	add_notoriety(3)                                      # moving illegal iron gets you noticed
 	weapons_changed.emit()
 	save_to_disk()
 	return {"ok": true, "price": price, "serial": "none", "roll": r.text("clean", "close", "DEX")}
@@ -463,6 +471,60 @@ func combat_power() -> int:
 	for wid in weapons:
 		wep = maxi(wep, int(Weapons.by_id(String(wid)).get("threat", 0)))
 	return base + wep
+
+# ---- notoriety + street encounters -----------------------------------------
+
+func add_notoriety(n: int) -> void:
+	notoriety = clampi(notoriety + n, 0, 100)
+	notoriety_changed.emit(notoriety)
+
+## Rolled on arrival. Chance scales with what you're visibly holding (cash + product) and your
+## notoriety. Returns an encounter dict, or {} for a quiet arrival.
+func roll_encounter() -> Dictionary:
+	var carry_val := grams_carried()
+	var chance := clampf(0.04 + notoriety / 400.0 + (cash / 2000.0) / 50.0 + carry_val / 2000.0, 0.0, 0.55)
+	if randf() > chance:
+		return {}
+	var mugger := 2 + int(notoriety / 15) + randi_range(0, 3)   # known earners draw tougher crews
+	return {"kind": "mugging", "power": mugger, "name": "a stickup crew",
+		"threat_cash": int(cash * 0.25)}
+
+## Resolve an encounter by the player's choice: fight (Challenge), flee (stealth), or comply (pay).
+func resolve_encounter(enc: Dictionary, action: String) -> Dictionary:
+	if action == "fight":
+		var o := Challenge.fight(combat_power(), int(enc.get("power", 3)), "You", String(enc.get("name", "them")))
+		if o.winner >= 0:
+			var take := randi_range(50, 400)
+			change_cash(take)
+			add_notoriety(3)
+			return {"ok": true, "won": true, "log": o.log,
+				"text": "%s You held them off — grabbed $%d." % [o.summary(), take]}
+		var lost := mini(int(enc.get("threat_cash", 0)), cash)
+		change_cash(-lost)
+		var seized := _seize_random_drug()
+		add_notoriety(-4)
+		return {"ok": true, "won": false, "log": o.log,
+			"text": "%s They rolled you for $%d%s." % [o.summary(), lost, seized]}
+	elif action == "flee":
+		var r := stealth_check(12 + int(enc.get("power", 3)))
+		if r.success:
+			return {"ok": true, "won": true, "text": "You slipped away clean. " + r.text("gone", "caught", "DEX")}
+		var lost := mini(int(int(enc.get("threat_cash", 0)) * 0.6), cash)
+		change_cash(-lost)
+		return {"ok": true, "won": false, "text": "Couldn't shake them — lost $%d. %s" % [lost, r.text("gone", "caught", "DEX")]}
+	else:  # comply
+		var pay := mini(int(int(enc.get("threat_cash", 0)) * 0.5), cash)
+		change_cash(-pay)
+		return {"ok": true, "won": false, "text": "You paid them off — $%d, no blood." % pay}
+
+func _seize_random_drug() -> String:
+	if inventory.is_empty():
+		return ""
+	var d = inventory.keys()[randi() % inventory.size()]
+	var g := int(inventory[d])
+	inventory.erase(d)
+	inventory_changed.emit()
+	return " and %dg of %s" % [g, d]
 
 # ---- online session: server-authoritative state + economy ------------------
 
@@ -742,6 +804,10 @@ func _complete_travel() -> void:
 	if pending_arrival.is_empty():
 		pending_arrival = {"kind": "arrived", "city_id": dest_id}
 	travel_arrived.emit(dest_id)
+	add_notoriety(-2)                        # a trip is time to cool off a little
+	var enc := roll_encounter()              # ...but you might get jumped on arrival
+	if not enc.is_empty():
+		street_encounter.emit(enc)
 	save_to_disk()
 
 func change_cash(delta: int) -> bool:
@@ -1072,6 +1138,7 @@ func to_dict() -> Dictionary:
 		"aircraft": aircraft,
 		"weapons": weapons,
 		"busted_before": busted_before,
+		"notoriety": notoriety,
 		"travel": travel.to_dict() if travel != null else null,
 	}
 
@@ -1097,6 +1164,7 @@ func load_dict(d: Dictionary) -> void:
 	aircraft = d.get("aircraft", {})
 	weapons = d.get("weapons", [])
 	busted_before = bool(d.get("busted_before", false))
+	notoriety = int(d.get("notoriety", 0))
 	# Derive the modes list from owned_vehicles so the ints stay clean (JSON round-trips numbers
 	# as floats). Fall back to any legacy owned_vehicle_modes for older saves without owned_vehicles.
 	if owned_vehicles.is_empty():

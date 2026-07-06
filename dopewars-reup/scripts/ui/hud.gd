@@ -59,6 +59,7 @@ func _ready() -> void:
 	PlayerState.travel_arrived.connect(_on_arrived)
 	PlayerState.busted_at_airport.connect(_on_busted)
 	PlayerState.package_ready.connect(_show_package)
+	PlayerState.street_encounter.connect(_show_encounter)
 	PlayerState.travel_arrived_clean.connect(_on_clean_arrival)
 	_refresh()
 	# A trip that finished while the app was closed completes before this HUD exists,
@@ -2194,6 +2195,44 @@ func _show_package(pkg: Dictionary) -> void:
 			Notify.warn(String(r.get("error", "couldn't claim")), "Package")
 		dlg.queue_free())
 	dlg.canceled.connect(func(): dlg.queue_free())
+	dlg.popup_centered()
+
+## You got jumped on arrival — Fight (your weapons + power), Run (stealth), or Pay.
+func _show_encounter(enc: Dictionary) -> void:
+	var dlg := AcceptDialog.new()
+	dlg.title = "Trouble"
+	add_child(dlg)
+	_glassify_dialog(dlg)
+	dlg.get_ok_button().visible = false
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 10)
+	dlg.add_child(col)
+	col.add_child(_sheet_header("Jumped!"))
+	var desc := Label.new()
+	desc.text = "%s steps to you as you arrive. Fight, run, or pay them off?" % String(enc.get("name", "A stickup crew"))
+	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	desc.custom_minimum_size = Vector2(get_viewport().get_visible_rect().size.x * 0.8, 0)
+	desc.add_theme_font_size_override("font_size", 24)
+	col.add_child(desc)
+	var pw := Label.new()
+	pw.text = "Your power %d   ·   theirs ~%d" % [PlayerState.combat_power(), int(enc.get("power", 3))]
+	pw.add_theme_font_size_override("font_size", 20)
+	pw.add_theme_color_override("font_color", ACCENT)
+	col.add_child(pw)
+	for act in [["Fight", "fight"], ["Run", "flee"], ["Pay", "comply"]]:
+		var b := Button.new()
+		b.theme = ThemeFactory.make(ACCENT)
+		b.text = String(act[0])
+		b.custom_minimum_size = Vector2(0, 84)
+		b.add_theme_font_size_override("font_size", 26)
+		b.pressed.connect(func():
+			var r: Dictionary = PlayerState.resolve_encounter(enc, String(act[1]))
+			if r.get("won", false):
+				Notify.good(String(r.get("text", "")), "Street")
+			else:
+				Notify.warn(String(r.get("text", "")), "Street")
+			dlg.queue_free())
+		col.add_child(b)
 	dlg.popup_centered()
 
 ## A free player who hit today's cap gets nudged to upgrade instead of a raw error.

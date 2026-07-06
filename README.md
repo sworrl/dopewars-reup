@@ -84,11 +84,12 @@ Flair only, and never for sale with real money. **Cred** is an earned currency y
 cosmetic items: emblems, titles, callsign nameplates, badges. Supporter tiers and admin awards grant
 the exclusive ones. Real money buys playtime access, never an advantage.
 
-### Multiplayer (in progress)
-Opted-in players share the map. You do not see each other from proximity alone. Awareness triggers
-when someone does something criminal in front of you, or your perception check catches a subtle tell.
-Talking out loud is heard within earshot; a whisper is quieter but may still be noticed; a phone call
-is private from players but interceptable by police unless your OS is hardened.
+### Multiplayer
+Opted-in players share the map. You don't see each other from proximity alone. You notice someone
+when they do something criminal in front of you, or when a perception check catches a subtle tell.
+Talking out loud carries to anyone in earshot. A whisper is quieter, but a nearby player might still
+catch it. A phone call stays private from players, though police can tap it unless your OS is
+hardened. Crews, crew chat, and a whisper inbox run on a server-authoritative backend.
 
 ---
 
@@ -146,7 +147,7 @@ apksigner verify --print-certs dopewars-reup.apk   # compare the SHA-256 to the 
 
 ## ▚ Under the hood
 
-- **Client:** `drugwars-reup/` — Godot 4.6.2, GDScript, GL Compatibility. Android now; desktop and
+- **Client:** `dopewars-reup/` — Godot 4.6.2, GDScript, GL Compatibility. Android now; desktop and
   Steam to follow from the same code.
 - **Backend:** `backend/` — Supabase (Postgres, Auth, Realtime, Edge Functions). Server-authoritative:
   the client sends intents, the server sets prices, cash, and time. Nothing a client says is trusted.
@@ -162,7 +163,7 @@ apksigner verify --print-certs dopewars-reup.apk   # compare the SHA-256 to the 
 ## ▚ The art is AI-generated (placeholder)
 
 All 57 images in the game were made with Google Imagen 4 Ultra
-(`imagen-4.0-ultra-generate-001`), using the scripts in `drugwars-reup/tools/`. The 100 cosmetic items
+(`imagen-4.0-ultra-generate-001`), using the scripts in `dopewars-reup/tools/`. The 100 cosmetic items
 have no art yet. Fonts are licensed typefaces (SIL OFL), not AI. `ASSETS.md` tracks every asset and
 its status. The direction is documentary and anti-glorification: product shown as sealed evidence,
 worn gear, a desaturated rust-belt tone.
@@ -178,7 +179,7 @@ the AI version. (Contribution licensing is being finalized; see `LICENSING.md`.)
 
 ## ▚ Build from source
 
-The client is a Godot 4.6.2 project in `drugwars-reup/`. The Android native libraries
+The client is a Godot 4.6.2 project in `dopewars-reup/`. The Android native libraries
 (`android/build/libs/`, over 100 MB) are not committed; restore them once in the Godot editor under
 Project, Install Android Build Template. Then `tools/release.sh <version>` runs the full signed build
 and emits the checksums. The backend deploy steps are in `backend/README.md`.

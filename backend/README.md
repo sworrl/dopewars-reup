@@ -5,7 +5,7 @@ only their own rows (RLS) and can write *nothing* directly — every mutation go
 `SECURITY DEFINER` function that validates against server-owned state and the **server clock**.
 See the full posture in the Threat & Realism doc.
 
-This directory is **firewalled from the game client** (the Godot project in `../drugwars-reup`): no
+This directory is **firewalled from the game client** (the Godot project in `../dopewars-reup`): no
 shared authoritative code path, so reverse-engineering the open client teaches nothing about how the
 server validates.
 

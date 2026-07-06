@@ -4,7 +4,7 @@ Every image in the game is currently AI-generated. This file tracks each asset g
 made, and whether it still needs a human-made replacement. Fonts are licensed typefaces, not AI.
 
 **How the art was made:** Google Imagen 4 Ultra (`imagen-4.0-ultra-generate-001`), called from the
-`drugwars-reup/tools/gen_*.py` scripts. Full-resolution outputs live in `assets/generated/`; the
+`dopewars-reup/tools/gen_*.py` scripts. Full-resolution outputs live in `assets/generated/`; the
 downscaled versions the game ships are in `assets/sprites/`. The art direction is documentary and
 anti-glorification: sealed evidence bags for product, worn gear, desaturated rust-belt tone. The
 game does not depict or glamorize drug use.

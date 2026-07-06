@@ -15,7 +15,7 @@ set -euo pipefail
 
 VERSION="${1:?usage: release.sh <version>}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-APP="$ROOT/drugwars-reup"
+APP="$ROOT/dopewars-reup"
 GODOT="${GODOT:-$HOME/.local/bin/godot}"
 SDK="${ANDROID_HOME:-$HOME/Android/Sdk}"
 BT="${BT:-$SDK/build-tools/37.0.0}"

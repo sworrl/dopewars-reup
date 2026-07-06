@@ -61,8 +61,8 @@ jobs:
           # godot-lib*.aar are >100MB, gitignored, and ship inside the export templates.
           TPL_DIR="$HOME/.local/share/godot/export_templates/${GODOT_VERSION%-stable}.stable"
           unzip -oq "$TPL_DIR/android_source.zip" -d /tmp/android_source
-          mkdir -p drugwars-reup/android/build/libs
-          cp /tmp/android_source/libs/*.aar drugwars-reup/android/build/libs/ 2>/dev/null || true
+          mkdir -p dopewars-reup/android/build/libs
+          cp /tmp/android_source/libs/*.aar dopewars-reup/android/build/libs/ 2>/dev/null || true
 
       - name: Decode release keystore
         run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > /tmp/release.jks
@@ -84,6 +84,6 @@ jobs:
         with:
           name: "Dope Wars: Re-Up ${{ github.ref_name }}"
           files: |
-            drugwars-reup/builds/dopewars-reup-*.apk
-            drugwars-reup/builds/SHA256SUMS.txt
-            drugwars-reup/builds/latest.json
+            dopewars-reup/builds/dopewars-reup-*.apk
+            dopewars-reup/builds/SHA256SUMS.txt
+            dopewars-reup/builds/latest.json

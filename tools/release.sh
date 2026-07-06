@@ -18,7 +18,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 APP="$ROOT/drugwars-reup"
 GODOT="${GODOT:-$HOME/.local/bin/godot}"
 SDK="${ANDROID_HOME:-$HOME/Android/Sdk}"
-BT="$SDK/build-tools/37.0.0"
+BT="${BT:-$SDK/build-tools/37.0.0}"
 OUT="$APP/builds"; mkdir -p "$OUT"
 APK="$OUT/dopewars-reup-$VERSION.apk"
 
@@ -40,15 +40,29 @@ echo ">> 3/5 zipalign + sign"
 "$BT/apksigner" sign --ks "$KEYSTORE" --ks-pass "pass:$KS_PASS" \
   --ks-key-alias "$KEY_ALIAS" --key-pass "pass:$KEY_PASS" --out "$APK" /tmp/dwreup-aligned.apk
 
-echo ">> 4/5 checksums"
+echo ">> 4/6 checksums"
 ( cd "$OUT" && sha256sum "$(basename "$APK")" > SHA256SUMS.txt )
 
-echo ">> 5/5 signing certificate (publish this fingerprint so users can verify the signer)"
+echo ">> 5/6 update manifest (latest.json — the in-app Updater polls this)"
+REPO="${REPO:-sworrl/dopewars-reup}"
+APK_SHA="$(sha256sum "$APK" | cut -d' ' -f1)"
+NOTES="${NOTES:-See the release notes on GitHub.}"
+cat > "$OUT/latest.json" <<JSON
+{
+  "version": "$VERSION",
+  "url": "https://github.com/$REPO/releases/download/v$VERSION/$(basename "$APK")",
+  "sha256": "$APK_SHA",
+  "notes": "$NOTES"
+}
+JSON
+
+echo ">> 6/6 signing certificate (publish this fingerprint so users can verify the signer)"
 "$BT/apksigner" verify --print-certs "$APK" | grep -i "SHA-256"
 
 echo
 echo "Built  $APK"
 echo "Sums   $OUT/SHA256SUMS.txt"
-echo "Attach both to the GitHub Release. Users verify with:"
+echo "Manif  $OUT/latest.json  (attach as a release asset named exactly latest.json)"
+echo "Attach all three to the GitHub Release. Users verify with:"
 echo "  sha256sum -c SHA256SUMS.txt"
 echo "  apksigner verify --print-certs dopewars-reup-$VERSION.apk   # compare SHA-256 to the published cert"

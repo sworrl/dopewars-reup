@@ -655,7 +655,7 @@ func _owned_building_row(key: String, b: Dictionary, rebuild: Callable) -> Contr
 	rel.text = "Release"
 	rel.add_theme_font_size_override("font_size", 20)
 	rel.pressed.connect(func():
-		PlayerState.release_building(key)
+		await PlayerState.release_building(key)
 		Notify.info("Released %s." % b.get("name", "location"), "Turf")
 		rebuild.call())
 	hb.add_child(rel)
@@ -709,7 +709,7 @@ func _pick_building_kind(loc: Dictionary, parent_dlg: AcceptDialog, rebuild: Cal
 		b.text = "%s · $%s" % [Buildings.display_name(kind), _comma(cost)]
 		b.disabled = PlayerState.cash < cost
 		b.pressed.connect(func():
-			var r := PlayerState.acquire_building(String(loc.get("osm_id", "")), String(loc.get("name", "Spot")),
+			var r: Dictionary = await PlayerState.acquire_building(String(loc.get("osm_id", "")), String(loc.get("name", "Spot")),
 				float(loc.lat), float(loc.lon), kind)
 			if r.get("ok", false):
 				Notify.good("%s is yours — $%s." % [Buildings.display_name(kind), _comma(int(r.get("cost", 0)))], "Turf")
@@ -1711,34 +1711,19 @@ func _build_market_row(city_id: String, drug: Dictionary, refresh_status: Callab
 		if c == city_id and d == drug.id:
 			refresh_row.call())
 
+	# Buy/sell route through PlayerState's choke point: server-authoritative when online, local sim
+	# offline. Await handles both (offline returns immediately).
 	buy.pressed.connect(func():
-		var grams := int(amt.value)
-		var p: int = Market.price_per_gram(city_id, drug.id)
-		var cost := grams * p
-		if not PlayerState.can_carry_more(grams):
-			refresh_status.call()
-			return
-		if not PlayerState.change_cash(-cost):
-			refresh_status.call()
-			return
-		PlayerState.adjust_inventory(drug.id, grams)
-		Market.record_buy(city_id, drug.id, grams)
+		var res: Dictionary = await PlayerState.buy_drug(drug.id, int(amt.value), city_id)
+		if not res.get("ok", false):
+			Notify.warn(String(res.get("error", "can't buy")), "Market")
 		refresh_row.call()
 		refresh_status.call())
 
 	sell.pressed.connect(func():
-		var grams := int(amt.value)
-		var have := int(PlayerState.inventory.get(drug.id, 0))
-		if grams > have:
-			refresh_status.call()
-			return
-		PlayerState.adjust_inventory(drug.id, -grams)
-		var p: int = Market.price_per_gram(city_id, drug.id)
-		var revenue := grams * p
-		PlayerState.change_cash(revenue)
-		Market.record_sell(city_id, drug.id, grams)
-		# Moving product is how you level: XP scales with the money you actually realize.
-		PlayerState.add_xp(maxi(1, revenue / 40))
+		var res: Dictionary = await PlayerState.sell_drug(drug.id, int(amt.value), city_id)
+		if not res.get("ok", false):
+			Notify.warn(String(res.get("error", "can't sell")), "Market")
 		refresh_row.call()
 		refresh_status.call())
 

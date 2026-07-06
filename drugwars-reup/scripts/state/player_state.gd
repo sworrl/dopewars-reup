@@ -317,6 +317,23 @@ func acquire_building(osm_id: String, name: String, lat: float, lon: float, kind
 	var key := Buildings.location_key(osm_id, lat, lon)
 	if buildings.has(key):
 		return {"ok": false, "error": "already yours"}
+	if _online:
+		var r := await Supa.call_rpc("acquire_building",
+			{"p_lat": lat, "p_lon": lon, "p_city": current_city_id, "p_kind": kind})
+		var j: Variant = r.get("json")
+		if r.get("ok", false) and typeof(j) == TYPE_DICTIONARY and (j as Dictionary).get("ok", false):
+			var sc := int((j as Dictionary).get("cost", Buildings.cost(kind)))
+			cash -= sc
+			cash_changed.emit(cash)
+			buildings[key] = {
+				"osm_id": osm_id, "name": name, "kind": kind, "lat": lat, "lon": lon,
+				"city_id": current_city_id, "acquired_at": 0,
+				"server_id": int((j as Dictionary).get("building", 0)),
+			}
+			buildings_changed.emit()
+			return {"ok": true, "cost": sc}
+		return {"ok": false, "error": _rpc_err(r)}
+	# offline
 	var c := Buildings.cost(kind)
 	if not change_cash(-c):
 		return {"ok": false, "error": "need $%d" % c}
@@ -330,10 +347,15 @@ func acquire_building(osm_id: String, name: String, lat: float, lon: float, kind
 	return {"ok": true, "cost": c}
 
 func release_building(key: String) -> void:
-	if buildings.has(key):
-		buildings.erase(key)
-		buildings_changed.emit()
-		save_to_disk()
+	if not buildings.has(key):
+		return
+	if _online:
+		var sid := int((buildings[key] as Dictionary).get("server_id", 0))
+		if sid > 0:
+			await Supa.call_rpc("release_building", {"p_id": sid})
+	buildings.erase(key)
+	buildings_changed.emit()
+	save_to_disk()
 
 # ---- aircraft (general aviation) -------------------------------------------
 
@@ -380,8 +402,136 @@ func _gen_tail_number() -> String:
 	var b := letters[randi() % letters.length()]
 	return "N%d%s%s" % [randi_range(100, 999), a, b]
 
+# ---- online session: server-authoritative state + economy ------------------
+
+## Adopt the server's authoritative state from get_my_state. The server owns cash/xp/inventory/etc.,
+## so this OVERWRITES local fields — the online account is a separate identity from the offline save.
+func apply_server_state(s: Dictionary) -> void:
+	_online = true
+	var prof: Dictionary = s.get("profile", {})
+	cash = int(prof.get("cash", cash))
+	xp = int(prof.get("xp", xp))
+	cred = int(prof.get("cred", cred))
+	if prof.has("lat"): lat = float(prof.get("lat", lat))
+	if prof.has("lon"): lon = float(prof.get("lon", lon))
+	if String(prof.get("current_city_id", "")) != "": current_city_id = String(prof.get("current_city_id"))
+	if String(prof.get("handle", "")) != "": handle = String(prof.get("handle"))
+	if typeof(prof.get("stats")) == TYPE_DICTIONARY and not (prof.get("stats") as Dictionary).is_empty():
+		stats = prof.get("stats")
+	if typeof(prof.get("equipped")) == TYPE_DICTIONARY:
+		equipped = prof.get("equipped")
+
+	var inv: Variant = s.get("inventory", {})
+	if typeof(inv) == TYPE_DICTIONARY:
+		inventory = {}
+		for k in inv:
+			inventory[k] = int(inv[k])
+
+	var cos: Variant = s.get("cosmetics", [])
+	if typeof(cos) == TYPE_ARRAY:
+		owned_cosmetics = (cos as Array).duplicate()
+
+	# Server buildings rows (no name column) → local keyed dict; synthesize a name from the kind.
+	var blds: Variant = s.get("buildings", [])
+	if typeof(blds) == TYPE_ARRAY:
+		buildings = {}
+		for b in blds:
+			var kind := String(b.get("kind", "trap_house"))
+			var key := Buildings.location_key(String(b.get("osm_id", "")), float(b.get("lat", 0.0)), float(b.get("lon", 0.0)))
+			buildings[key] = {
+				"osm_id": b.get("osm_id", ""), "name": Buildings.display_name(kind), "kind": kind,
+				"lat": float(b.get("lat", 0.0)), "lon": float(b.get("lon", 0.0)),
+				"city_id": b.get("city_id", ""), "acquired_at": 0,
+				"server_id": int(b.get("id", 0)),   # for release_building online
+			}
+
+	_perk_cache_dirty = true
+	cash_changed.emit(cash)
+	xp_changed.emit(xp)
+	cred_changed.emit(cred)
+	inventory_changed.emit()
+	cosmetics_changed.emit()
+	buildings_changed.emit()
+	position_changed.emit(lat, lon)
+	Notify.good("Online account synced — %s" % handle, "Backend")
+
+func _rpc_err(r: Dictionary) -> String:
+	var j: Variant = r.get("json")
+	if typeof(j) == TYPE_DICTIONARY and (j as Dictionary).has("message"):
+		return String((j as Dictionary).get("message"))
+	return String(r.get("error", "server error"))
+
+## Buy grams of a drug. ONLINE = server-authoritative (server sets price + validates funds); OFFLINE
+## = local sim (client Market price). Same return shape either way: {ok, cost, unit_price} or {ok:false, error}.
+func buy_drug(drug_id: String, grams: int, city_id: String) -> Dictionary:
+	if grams <= 0:
+		return {"ok": false, "error": "bad quantity"}
+	if not can_carry_more(grams):
+		return {"ok": false, "error": "can't carry that much"}
+	if _online:
+		var r := await Supa.call_rpc("buy", {"p_drug": drug_id, "p_grams": grams})
+		var j: Variant = r.get("json")
+		if r.get("ok", false) and typeof(j) == TYPE_DICTIONARY and (j as Dictionary).get("ok", false):
+			var cost := int((j as Dictionary).get("cost", 0))
+			cash -= cost
+			cash_changed.emit(cash)
+			adjust_inventory(drug_id, grams)
+			return {"ok": true, "cost": cost, "unit_price": float((j as Dictionary).get("unit_price", 0.0))}
+		return {"ok": false, "error": _rpc_err(r)}
+	# offline
+	var p := Market.price_per_gram(city_id, drug_id)
+	var cost := grams * p
+	if not change_cash(-cost):
+		return {"ok": false, "error": "insufficient funds"}
+	adjust_inventory(drug_id, grams)
+	Market.record_buy(city_id, drug_id, grams)
+	return {"ok": true, "cost": cost, "unit_price": p}
+
+## Sell grams of a drug. ONLINE = server sets revenue + XP; OFFLINE = local sim. Returns {ok, revenue, xp}.
+func sell_drug(drug_id: String, grams: int, city_id: String) -> Dictionary:
+	var have := int(inventory.get(drug_id, 0))
+	if grams <= 0 or grams > have:
+		return {"ok": false, "error": "not enough to sell"}
+	if _online:
+		var r := await Supa.call_rpc("sell", {"p_drug": drug_id, "p_grams": grams})
+		var j: Variant = r.get("json")
+		if r.get("ok", false) and typeof(j) == TYPE_DICTIONARY and (j as Dictionary).get("ok", false):
+			adjust_inventory(drug_id, -grams)
+			var revenue := int((j as Dictionary).get("revenue", 0))
+			cash += revenue
+			cash_changed.emit(cash)
+			var gx := int((j as Dictionary).get("xp", 0))
+			if gx > 0:
+				xp += gx
+				xp_changed.emit(xp)
+			return {"ok": true, "revenue": revenue, "xp": gx}
+		return {"ok": false, "error": _rpc_err(r)}
+	# offline
+	adjust_inventory(drug_id, -grams)
+	var p := Market.price_per_gram(city_id, drug_id)
+	var revenue := grams * p
+	change_cash(revenue)
+	Market.record_sell(city_id, drug_id, grams)
+	add_xp(maxi(1, revenue / 40))
+	return {"ok": true, "revenue": revenue, "xp": 0}
+
+## True once we've synced an online (server-authoritative) account. Offline = local single-player.
+var _online := false
+func is_online() -> bool:
+	return _online
+
 func _ready() -> void:
 	load_from_disk()
+	# When the backend signs us in, adopt the server's authoritative state. The online account is a
+	# separate identity from the local sandbox — see apply_server_state / the save_to_disk guard.
+	Supa.signed_in.connect(_on_signed_in)
+
+func _on_signed_in(ok: bool) -> void:
+	if not ok:
+		return
+	var res := await Supa.call_rpc("get_my_state")
+	if res.get("ok", false) and typeof(res.get("json")) == TYPE_DICTIONARY:
+		apply_server_state(res["json"])
 
 func _process(_dt: float) -> void:
 	if travel == null:
@@ -852,6 +1002,10 @@ func load_dict(d: Dictionary) -> void:
 	travel = Travel.from_dict(t) if typeof(t) == TYPE_DICTIONARY else null
 
 func save_to_disk() -> void:
+	# Online play is server-authoritative and server-persisted — don't clobber the local offline
+	# sandbox save with online state (they're separate identities; see the design pillar).
+	if _online:
+		return
 	var f := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if f == null:
 		push_warning("[player] cannot write " + SAVE_PATH)

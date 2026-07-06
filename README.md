@@ -106,7 +106,7 @@ What is built, and what is still locked.
 | Cosmetic economy: cred, 100 items, supporter tiers | ✅ live (art pending) |
 | Supabase backend: server-authoritative, RLS, adversarially tested | ✅ live |
 | Branded UI: glass, fonts, animated boot | ✅ live |
-| Multiplayer presence, crews, chat, whispers | 🔒 building |
+| Multiplayer backend: crews, presence, earshot/whisper/crew comms | ✅ server built + adversarially tested (client UI pending) |
 | Buildings: occupy real map locations | 🔒 building |
 | Aviation, character phones intercept, map intel overlays | 🔒 designed |
 | Human-made art replacing the AI placeholders | 🔒 wanted (see below) |

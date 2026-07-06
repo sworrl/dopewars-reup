@@ -66,9 +66,54 @@
     <a class="btn ghost" style="display:inline;padding:2px 8px" data-link="STRIPE_LINK_BETA_YEARLY" href="#">beta yearly</a>
   </div>
 
+  <div id="paypal-wrap" style="margin-top:32px" hidden>
+    <h2 style="font-size:1.2rem;margin:0 0 12px">Or pay with PayPal</h2>
+    <div class="grid">
+      <div class="card"><div class="tag">Monthly</div><div id="pp-monthly" style="margin-top:12px"></div></div>
+      <div class="card"><div class="tag">Yearly</div><div id="pp-yearly" style="margin-top:12px"></div></div>
+      <div class="card"><div class="tag">Lifetime</div><div id="pp-lifetime" style="margin-top:12px"></div></div>
+    </div>
+  </div>
+
   <p class="note" id="acct"></p>
-  <p class="note">Payment is handled by <b>Stripe</b>. We only capture billing details at purchase — free play needs no email or personal info.</p>
+  <p class="note">Payment is handled by <b>PayPal</b> or <b>Stripe</b>. We only capture billing details at purchase — free play needs no email or personal info.</p>
 </div>
+
+<!-- PayPal: replace PAYPAL_CLIENT_ID + the plan ids. Loads the SDK + renders subscription/one-time
+     buttons that tag the account id as custom_id so the webhook grants the right player. -->
+<script>
+  (function () {
+    var CLIENT_ID = "PAYPAL_CLIENT_ID";
+    var PLAN_MONTHLY = "PAYPAL_PLAN_MONTHLY", PLAN_YEARLY = "PAYPAL_PLAN_YEARLY";
+    var LIFETIME_USD = "79.00";
+    if (CLIENT_ID.indexOf("PAYPAL_") === 0) return;                 // not configured yet
+    var uid = new URLSearchParams(location.search).get("u") || "";
+    document.getElementById("paypal-wrap").hidden = false;
+    var s = document.createElement("script");
+    s.src = "https://www.paypal.com/sdk/js?client-id=" + CLIENT_ID + "&vault=true&intent=subscription&components=buttons";
+    s.onload = function () {
+      function sub(planId, mount) {
+        if (planId.indexOf("PAYPAL_") === 0) return;
+        paypal.Buttons({
+          style: { color: "black", label: "subscribe" },
+          createSubscription: function (d, actions) { return actions.subscription.create({ plan_id: planId, custom_id: uid }); },
+          onApprove: function () { alert("Subscribed! Your account unlocks shortly."); }
+        }).render(mount);
+      }
+      sub(PLAN_MONTHLY, "#pp-monthly");
+      sub(PLAN_YEARLY, "#pp-yearly");
+      // Lifetime = one-time order (custom_id on the purchase unit).
+      paypal.Buttons({
+        style: { color: "black", label: "buynow" },
+        createOrder: function (d, actions) {
+          return actions.order.create({ purchase_units: [{ amount: { value: LIFETIME_USD }, custom_id: uid, description: "Dope Wars: Re-Up — Lifetime" }] });
+        },
+        onApprove: function (d, actions) { return actions.order.capture().then(function () { alert("Lifetime unlocked shortly."); }); }
+      }).render("#pp-lifetime");
+    };
+    document.body.appendChild(s);
+  })();
+</script>
 
 <script>
   // The app opens this page as pricing.html?u=<your-account-id>. We attach it to Stripe as the

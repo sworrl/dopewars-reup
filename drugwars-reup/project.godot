@@ -36,6 +36,7 @@ AndroidNotify="*res://scripts/util/android_notify.gd"
 AppNav="*res://scripts/util/app_nav.gd"
 Supa="*res://scripts/net/supa.gd"
 Updater="*res://scripts/net/updater.gd"
+Comms="*res://scripts/net/comms.gd"
 PhoneFrame="*res://scripts/ui/phone_frame.gd"
 
 [display]

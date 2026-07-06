@@ -245,6 +245,21 @@ func _build_phone_button() -> void:
 	locker_btn.pressed.connect(Anim.tap_press.bind(locker_btn))
 	add_child(locker_btn)
 
+	var comms_btn := Button.new()
+	comms_btn.theme = ThemeFactory.make(ACCENT)
+	comms_btn.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	comms_btn.anchor_left = 1.0
+	comms_btn.anchor_right = 1.0
+	comms_btn.offset_left = -230
+	comms_btn.offset_right = -20
+	comms_btn.offset_top = 522
+	comms_btn.offset_bottom = 612
+	comms_btn.text = "Comms"
+	comms_btn.add_theme_font_size_override("font_size", 24)
+	comms_btn.pressed.connect(_show_comms)
+	comms_btn.pressed.connect(Anim.tap_press.bind(comms_btn))
+	add_child(comms_btn)
+
 func _refresh_phone_btn() -> void:
 	if not is_instance_valid(_phone_btn):
 		return
@@ -847,6 +862,238 @@ func _aircraft_buy_row(a: Dictionary, rebuild: Callable, on_change: Callable) ->
 				Notify.warn("Can't afford it.", "Hangar"))
 	hb.add_child(buy)
 	return row
+
+# ---- multiplayer comms (crews / local / whispers) -----------------------
+
+## Comms panel over the multiplayer backend: crew management + chat, local (earshot) chat, and a
+## whisper inbox. Online only — the channel you use IS your exposure (see the comms design).
+func _show_comms() -> void:
+	var dlg := AcceptDialog.new()
+	dlg.title = "Comms"
+	dlg.ok_button_text = "Close"
+	add_child(dlg)
+	_glassify_dialog(dlg)
+	dlg.confirmed.connect(func(): dlg.queue_free())
+	dlg.canceled.connect(func(): dlg.queue_free())
+
+	var vp := get_viewport().get_visible_rect().size
+
+	if not Comms.online():
+		var col := VBoxContainer.new()
+		col.add_theme_constant_override("separation", 12)
+		dlg.add_child(col)
+		col.add_child(_sheet_header("Comms"))
+		var msg := Label.new()
+		msg.text = "Sign in to an online account to use crews, chat, and whispers."
+		msg.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		msg.custom_minimum_size = Vector2(vp.x * 0.8, 0)
+		msg.add_theme_font_size_override("font_size", 24)
+		col.add_child(msg)
+		dlg.popup_centered()
+		return
+
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.custom_minimum_size = Vector2(vp.x * 0.9, vp.y * 0.74)
+	dlg.add_child(scroll)
+	var content := VBoxContainer.new()
+	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	content.add_theme_constant_override("separation", 10)
+	scroll.add_child(content)
+
+	var state := {"tab": "Crew"}
+	var rebuild_ref: Array = [null]
+	var rebuild := func() -> void:
+		for c in content.get_children():
+			c.queue_free()
+		await _populate_comms(content, state, rebuild_ref[0])
+	rebuild_ref[0] = rebuild
+	await rebuild.call()
+	dlg.popup_centered(Vector2i(int(vp.x * 0.96), int(vp.y * 0.92)))
+
+func _populate_comms(content: VBoxContainer, state: Dictionary, rebuild: Callable) -> void:
+	# Header + presence toggle.
+	content.add_child(_sheet_header("Comms"))
+	var pres := Button.new()
+	pres.theme = ThemeFactory.make(ACCENT)
+	pres.custom_minimum_size = Vector2(0, 80)
+	pres.add_theme_font_size_override("font_size", 22)
+	pres.text = "Presence: ON (visible when observed)" if Comms.opted_in else "Presence: OFF (dark)"
+	pres.add_theme_color_override("font_color", Color(0.35, 0.75, 0.45) if Comms.opted_in else Color(0.72, 0.75, 0.82))
+	pres.pressed.connect(func():
+		await Comms.set_presence(not Comms.opted_in)
+		await rebuild.call())
+	content.add_child(pres)
+
+	# Tabs.
+	var chips := HBoxContainer.new()
+	chips.add_theme_constant_override("separation", 6)
+	content.add_child(chips)
+	for tab in ["Crew", "Local", "Whispers"]:
+		var chip := Button.new()
+		chip.theme = ThemeFactory.make(ACCENT)
+		chip.text = tab
+		chip.add_theme_font_size_override("font_size", 20)
+		if tab == state["tab"]:
+			chip.add_theme_color_override("font_color", ACCENT)
+		chip.pressed.connect(func():
+			state["tab"] = tab
+			await rebuild.call())
+		chips.add_child(chip)
+
+	match state["tab"]:
+		"Crew": await _comms_crew(content, rebuild)
+		"Local": await _comms_local(content, rebuild)
+		"Whispers": await _comms_whispers(content)
+
+func _comms_crew(content: VBoxContainer, rebuild: Callable) -> void:
+	var crew := await Comms.my_crew()
+	if crew.is_empty():
+		var nm := LineEdit.new()
+		nm.placeholder_text = "Crew name"
+		nm.add_theme_font_size_override("font_size", 24)
+		content.add_child(nm)
+		var tag := LineEdit.new()
+		tag.placeholder_text = "Tag (e.g. TST)"
+		tag.max_length = 5
+		tag.add_theme_font_size_override("font_size", 24)
+		content.add_child(tag)
+		var create := Button.new()
+		create.theme = ThemeFactory.make(ACCENT)
+		create.text = "Create crew"
+		create.custom_minimum_size = Vector2(0, 84)
+		create.add_theme_font_size_override("font_size", 24)
+		create.pressed.connect(func():
+			var r := await Comms.create_crew(nm.text.strip_edges(), tag.text.strip_edges())
+			if not r.get("ok", false):
+				Notify.warn(String(r.get("error", "couldn't create")), "Crew")
+			await rebuild.call())
+		content.add_child(create)
+
+		var jid := LineEdit.new()
+		jid.placeholder_text = "Join by crew ID"
+		jid.add_theme_font_size_override("font_size", 24)
+		content.add_child(jid)
+		var join := Button.new()
+		join.theme = ThemeFactory.make(ACCENT)
+		join.text = "Join crew"
+		join.custom_minimum_size = Vector2(0, 84)
+		join.add_theme_font_size_override("font_size", 24)
+		join.pressed.connect(func():
+			var r := await Comms.join_crew(int(jid.text))
+			if not r.get("ok", false):
+				Notify.warn(String(r.get("error", "couldn't join")), "Crew")
+			await rebuild.call())
+		content.add_child(join)
+		return
+
+	# In a crew: header + roster + leave + crew chat.
+	var hdr := Label.new()
+	hdr.text = "%s  [%s]  ·  #%d" % [crew.get("name", "?"), crew.get("tag", "?"), int(crew.get("id", 0))]
+	hdr.add_theme_font_size_override("font_size", 26)
+	hdr.add_theme_color_override("font_color", ACCENT)
+	content.add_child(hdr)
+	for m in crew.get("roster", []):
+		var r := Label.new()
+		r.text = "  %s · %s" % [m.get("handle", "?"), m.get("role", "member")]
+		r.add_theme_font_size_override("font_size", 20)
+		r.add_theme_color_override("font_color", Color(0.78, 0.80, 0.85))
+		content.add_child(r)
+	var leave := Button.new()
+	leave.theme = ThemeFactory.make(ACCENT)
+	leave.text = "Leave crew"
+	leave.custom_minimum_size = Vector2(0, 76)
+	leave.add_theme_font_size_override("font_size", 22)
+	leave.pressed.connect(func():
+		await Comms.leave_crew()
+		await rebuild.call())
+	content.add_child(leave)
+
+	_comms_message_list(content, await Comms.crew_chat())
+	_comms_composer(content, rebuild, func(body): return await Comms.send_crew(body))
+
+func _comms_local(content: VBoxContainer, rebuild: Callable) -> void:
+	var note := Label.new()
+	note.text = "Talking out loud — anyone within earshot hears it."
+	note.add_theme_font_size_override("font_size", 19)
+	note.add_theme_color_override("font_color", Color(0.7, 0.72, 0.78))
+	content.add_child(note)
+	_comms_message_list(content, await Comms.hear_local())
+	_comms_composer(content, rebuild, func(body): return await Comms.send_local(body))
+
+func _comms_whispers(content: VBoxContainer) -> void:
+	var note := Label.new()
+	note.text = "Private DMs — only you and the other end can read them."
+	note.add_theme_font_size_override("font_size", 19)
+	note.add_theme_color_override("font_color", Color(0.7, 0.72, 0.78))
+	content.add_child(note)
+	var rows := await Comms.whispers()
+	if rows.is_empty():
+		var none := Label.new()
+		none.text = "No whispers."
+		none.add_theme_font_size_override("font_size", 22)
+		none.add_theme_color_override("font_color", Color(0.6, 0.62, 0.66))
+		content.add_child(none)
+		return
+	for row in rows:
+		var arrow := "→" if bool(row.get("mine", false)) else "←"
+		_comms_line(content, "%s %s" % [arrow, row.get("handle", "?")], String(row.get("body", "")))
+
+func _comms_message_list(content: VBoxContainer, rows: Array) -> void:
+	if rows.is_empty():
+		var none := Label.new()
+		none.text = "Quiet in here."
+		none.add_theme_font_size_override("font_size", 20)
+		none.add_theme_color_override("font_color", Color(0.6, 0.62, 0.66))
+		content.add_child(none)
+		return
+	for row in rows:
+		_comms_line(content, String(row.get("handle", "?")), String(row.get("body", "")))
+
+func _comms_line(content: VBoxContainer, who: String, body: String) -> void:
+	var row := PanelContainer.new()
+	row.add_theme_stylebox_override("panel", _glass_row_stylebox())
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 2)
+	row.add_child(col)
+	var w := Label.new()
+	w.text = who
+	w.add_theme_font_size_override("font_size", 18)
+	w.add_theme_color_override("font_color", ACCENT)
+	col.add_child(w)
+	var b := Label.new()
+	b.text = body
+	b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	b.add_theme_font_size_override("font_size", 22)
+	col.add_child(b)
+	content.add_child(row)
+
+## A text input + Send button. `sender` is a Callable(body) -> Dictionary({ok,...}).
+func _comms_composer(content: VBoxContainer, rebuild: Callable, sender: Callable) -> void:
+	var hb := HBoxContainer.new()
+	hb.add_theme_constant_override("separation", 8)
+	content.add_child(hb)
+	var input := LineEdit.new()
+	input.placeholder_text = "Say something…"
+	input.max_length = 500
+	input.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	input.add_theme_font_size_override("font_size", 24)
+	hb.add_child(input)
+	var send := Button.new()
+	send.theme = ThemeFactory.make(ACCENT)
+	send.text = "Send"
+	send.add_theme_font_size_override("font_size", 22)
+	var do_send := func():
+		var body: String = input.text.strip_edges()
+		if body == "":
+			return
+		var r: Dictionary = await sender.call(body)
+		if not r.get("ok", false):
+			Notify.warn(String(r.get("error", "not sent")), "Comms")
+		await rebuild.call()
+	send.pressed.connect(do_send)
+	input.text_submitted.connect(func(_t): do_send.call())
+	hb.add_child(send)
 
 # ---- cosmetics locker / store -------------------------------------------
 

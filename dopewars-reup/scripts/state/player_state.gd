@@ -85,6 +85,14 @@ signal street_encounter(enc: Dictionary)
 # it away, or pay a street doc to patch up. Lasting stakes on a bad fight.
 var injury: int = 0
 signal injury_changed(n: int)
+
+# Respect (0-100): street standing earned by winning fights. The positive counterpart to notoriety —
+# builds your rep. (Hook for better connects / crew recruitment later.)
+var respect: int = 0
+signal respect_changed(n: int)
+func add_respect(n: int) -> void:
+	respect = clampi(respect + n, 0, 100)
+	respect_changed.emit(respect)
 # Set when a trip completes; the HUD reads it on _ready and shows a "while you were away"
 # report. Transient (not persisted) — the completion happens on the same launch the HUD
 # then reads it, so the live toast and this cold-open report never both fire.
@@ -469,6 +477,17 @@ func buy_weapon_black(id: String) -> Dictionary:
 	save_to_disk()
 	return {"ok": true, "price": price, "serial": "none", "roll": r.text("clean", "close", "DEX")}
 
+## Sell a weapon to a fence — no questions, but they take a cut (~45% of street value).
+func sell_weapon(id: String) -> Dictionary:
+	if id not in weapons:
+		return {"ok": false, "error": "you don't own that"}
+	var payout := int(Weapons.black_price(Weapons.by_id(id)) * 0.45)
+	weapons.erase(id)
+	change_cash(payout)
+	weapons_changed.emit()
+	save_to_disk()
+	return {"ok": true, "payout": payout}
+
 ## Combat power for a Challenge: brawn + speed + experience, plus your best weapon's threat, minus how
 ## hurt you are (a bad injury takes the fight out of you).
 func combat_power() -> int:
@@ -519,6 +538,7 @@ func resolve_encounter(enc: Dictionary, action: String) -> Dictionary:
 			var take := randi_range(50, 400)
 			change_cash(take)
 			add_notoriety(3)
+			add_respect(randi_range(2, 6))                # winning builds your rep
 			add_injury(randi_range(0, 8))                 # even a win leaves a mark
 			return {"ok": true, "won": true, "log": o.log,
 				"text": "%s You held them off — grabbed $%d." % [o.summary(), take]}
@@ -1165,6 +1185,7 @@ func to_dict() -> Dictionary:
 		"busted_before": busted_before,
 		"notoriety": notoriety,
 		"injury": injury,
+		"respect": respect,
 		"travel": travel.to_dict() if travel != null else null,
 	}
 
@@ -1192,6 +1213,7 @@ func load_dict(d: Dictionary) -> void:
 	busted_before = bool(d.get("busted_before", false))
 	notoriety = int(d.get("notoriety", 0))
 	injury = int(d.get("injury", 0))
+	respect = int(d.get("respect", 0))
 	# Derive the modes list from owned_vehicles so the ints stay clean (JSON round-trips numbers
 	# as floats). Fall back to any legacy owned_vehicle_modes for older saves without owned_vehicles.
 	if owned_vehicles.is_empty():

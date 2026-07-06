@@ -62,6 +62,7 @@ func _ready() -> void:
 	PlayerState.street_encounter.connect(_show_encounter)
 	PlayerState.notoriety_changed.connect(func(_n): _refresh())
 	PlayerState.injury_changed.connect(func(_n): _refresh())
+	PlayerState.respect_changed.connect(func(_n): _refresh())
 	PlayerState.travel_arrived_clean.connect(_on_clean_arrival)
 	_refresh()
 	# A trip that finished while the app was closed completes before this HUD exists,
@@ -402,6 +403,8 @@ func _refresh() -> void:
 		_action_glass.visible = _action_btn.visible
 	# Heat + injury show only when they matter (keeps the line clean when you're low-key + healthy).
 	var flags: Array = []
+	if PlayerState.respect > 0:
+		flags.append("rep %d" % PlayerState.respect)
 	if PlayerState.notoriety > 0:
 		flags.append("heat %d" % PlayerState.notoriety)
 	if PlayerState.injury > 0:
@@ -885,6 +888,17 @@ func _arms_row(w: Dictionary, refresh: Callable) -> Control:
 				Notify.warn(String(r.get("error", "can't buy")), "Arms")
 			refresh.call())
 		btns.add_child(bb)
+	else:
+		var sell := Button.new()
+		sell.theme = ThemeFactory.make(ACCENT)
+		sell.text = "Fence"
+		sell.add_theme_font_size_override("font_size", 18)
+		sell.pressed.connect(func():
+			var r := PlayerState.sell_weapon(String(w.id))
+			if r.get("ok", false):
+				Notify.good("Fenced %s for $%s." % [w.name, _comma(int(r.get("payout", 0)))], "Arms")
+			refresh.call())
+		hb.add_child(sell)
 	return row
 
 # ---- hangar: general-aviation aircraft ----------------------------------

@@ -148,6 +148,36 @@ func _ensure_perk_effects() -> Dictionary:
 func perk_effect(key: String, default = null):
 	return _ensure_perk_effects().get(key, default)
 
+# ---- skill checks (the shared way stats affect outcomes) --------------------
+# Every gameplay check — perception, stealth, negotiation, searches — routes through here so the
+# Dice engine, ability modifiers, and perk advantage/disadvantage all apply consistently. Perks
+# grant `skill_advantage`/`skill_disadvantage` naming a skill (e.g. Cold Read → "insight").
+
+func _perk_grants(key: String, skill: String) -> bool:
+	var v = perk_effect(key, null)
+	if v == null:
+		return false
+	if v is Array:
+		return skill in v
+	return String(v) == skill
+
+## Named skill check tied to an ability score. `extra_mod` folds in situational bonuses (heat, gear).
+func skill_check(skill: String, ability: String, dc: int, extra_mod: int = 0, label: String = "") -> Dice.Result:
+	var adv := Dice.NONE
+	if _perk_grants("skill_advantage", skill):
+		adv = Dice.ADVANTAGE
+	elif _perk_grants("skill_disadvantage", skill):
+		adv = Dice.DISADVANTAGE
+	return Dice.check(stat_mod(ability) + extra_mod, dc, adv, label if label != "" else skill.capitalize())
+
+## Perception (WIS) — noticing subtle tells: another operator's shady move, an ambush, thin intel.
+func perception_check(dc: int, extra_mod: int = 0) -> Dice.Result:
+	return skill_check("perception", "WIS", dc, extra_mod, "Perception")
+
+## Stealth (DEX) — not being noticed while doing something illegal in the open.
+func stealth_check(dc: int, extra_mod: int = 0) -> Dice.Result:
+	return skill_check("stealth", "DEX", dc, extra_mod, "Stealth")
+
 func _ready() -> void:
 	load_from_disk()
 
@@ -206,27 +236,17 @@ func _complete_travel() -> void:
 	# A trip drains the phone battery.
 	drain_phone()
 
-	# Commercial flight drug screening — D&D-style stealth DC roll.
+	# Commercial flight drug screening — D&D-style stealth DC roll via the shared Dice engine.
 	# DC scales with regional heat AND phone traceability (a tracked phone tips the cops off;
 	# a burner or GraphineOS keeps you quieter). Player rolls d20 + DEX modifier.
 	# Perks: tsa_check_advantage rolls 2d20 keep-higher.
 	if arrived_via_plane and not inventory.is_empty():
 		var heat := Drugs.region_heat(dest_id)
 		var dc := 14 + int(heat / 20) + int(phone_trace() / 40)   # +0..+2 from a tracked phone
-		var advantage: bool = bool(perk_effect("tsa_check_advantage", false))
-		var d20a := randi_range(1, 20)
-		var d20b := randi_range(1, 20)
-		var d20: int = (max(d20a, d20b) if advantage else d20a)
-		var dex_mod := stat_mod("DEX")
-		var roll_total := d20 + dex_mod
-		var crit_fail := d20 == 1
-		var crit_succeed := d20 == 20
-		var caught := crit_fail or (not crit_succeed and roll_total < dc)
-		var adv_str := " adv(%d,%d)" % [d20a, d20b] if advantage else ""
-		var roll_text := "TSA: d20(%d)%s %+d DEX = %d vs DC %d → %s%s" % [
-			d20, adv_str, dex_mod, roll_total, dc,
-			"BUSTED" if caught else "PASSED",
-			"!" if crit_fail or crit_succeed else ""]
+		var adv := Dice.ADVANTAGE if bool(perk_effect("tsa_check_advantage", false)) else Dice.NONE
+		var r := Dice.check(stat_mod("DEX"), dc, adv, "TSA")
+		var caught := not r.success
+		var roll_text := r.text("PASSED", "BUSTED", "DEX")
 		if caught:
 			var seized := inventory.duplicate()
 			inventory.clear()

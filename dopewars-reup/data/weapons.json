@@ -1,0 +1,2015 @@
+{
+ "_comment": "Weapon catalog with real US legal mechanics. legal = FFL/knife-shop path (NICS check, serial on record, age gate, NFA = Form 4 + $200 stamp + ~10mo wait, transferable-only). black_market = no/filed serial, illegal, adds heat + bust/scam risk. Not instructional. Generic/parody names.",
+ "categories": {
+  "knife": 10,
+  "shiv": 10,
+  "handgun": 10,
+  "rifle": 10,
+  "shotgun": 10,
+  "smg": 10,
+  "machinegun": 10,
+  "explosive": 10
+ },
+ "weapons": [
+  {
+   "id": "knife_folding_pocket_knife",
+   "name": "Folding pocket knife",
+   "category": "knife",
+   "weight_lb": 0.2,
+   "threat": 2,
+   "legal": {
+    "available": true,
+    "price": 25,
+    "ffl_required": false,
+    "nics_check": false,
+    "min_age": 18,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 0
+   },
+   "black_market": {
+    "available": true,
+    "price": 15,
+    "serial": "none",
+    "heat": 2
+   },
+   "law_note": "Generally legal to buy; carry laws vary."
+  },
+  {
+   "id": "knife_hunting_fixed_blade",
+   "name": "Hunting fixed blade",
+   "category": "knife",
+   "weight_lb": 0.6,
+   "threat": 3,
+   "legal": {
+    "available": true,
+    "price": 80,
+    "ffl_required": false,
+    "nics_check": false,
+    "min_age": 18,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 0
+   },
+   "black_market": {
+    "available": true,
+    "price": 60,
+    "serial": "none",
+    "heat": 3
+   },
+   "law_note": "Generally legal to buy; carry laws vary."
+  },
+  {
+   "id": "knife_combat_utility_knife",
+   "name": "Combat utility knife",
+   "category": "knife",
+   "weight_lb": 0.7,
+   "threat": 4,
+   "legal": {
+    "available": true,
+    "price": 70,
+    "ffl_required": false,
+    "nics_check": false,
+    "min_age": 18,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 0
+   },
+   "black_market": {
+    "available": true,
+    "price": 55,
+    "serial": "none",
+    "heat": 4
+   },
+   "law_note": "Generally legal to buy; carry laws vary."
+  },
+  {
+   "id": "knife_karambit",
+   "name": "Karambit",
+   "category": "knife",
+   "weight_lb": 0.4,
+   "threat": 4,
+   "legal": {
+    "available": true,
+    "price": 90,
+    "ffl_required": false,
+    "nics_check": false,
+    "min_age": 18,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 0
+   },
+   "black_market": {
+    "available": true,
+    "price": 70,
+    "serial": "none",
+    "heat": 4
+   },
+   "law_note": "Generally legal to buy; carry laws vary."
+  },
+  {
+   "id": "knife_bowie_knife",
+   "name": "Bowie knife",
+   "category": "knife",
+   "weight_lb": 1.1,
+   "threat": 4,
+   "legal": {
+    "available": true,
+    "price": 110,
+    "ffl_required": false,
+    "nics_check": false,
+    "min_age": 18,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 0
+   },
+   "black_market": {
+    "available": true,
+    "price": 80,
+    "serial": "none",
+    "heat": 4
+   },
+   "law_note": "Generally legal to buy; carry laws vary."
+  },
+  {
+   "id": "knife_switchblade",
+   "name": "Switchblade",
+   "category": "knife",
+   "weight_lb": 0.3,
+   "threat": 3,
+   "legal": {
+    "available": true,
+    "price": 60,
+    "ffl_required": false,
+    "nics_check": false,
+    "min_age": 18,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 0
+   },
+   "black_market": {
+    "available": true,
+    "price": 50,
+    "serial": "none",
+    "heat": 3
+   },
+   "law_note": "Generally legal to buy; carry laws vary."
+  },
+  {
+   "id": "knife_butterfly_knife",
+   "name": "Butterfly knife",
+   "category": "knife",
+   "weight_lb": 0.3,
+   "threat": 3,
+   "legal": {
+    "available": true,
+    "price": 45,
+    "ffl_required": false,
+    "nics_check": false,
+    "min_age": 18,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 0
+   },
+   "black_market": {
+    "available": true,
+    "price": 40,
+    "serial": "none",
+    "heat": 3
+   },
+   "law_note": "Generally legal to buy; carry laws vary."
+  },
+  {
+   "id": "knife_machete",
+   "name": "Machete",
+   "category": "knife",
+   "weight_lb": 1.4,
+   "threat": 4,
+   "legal": {
+    "available": true,
+    "price": 40,
+    "ffl_required": false,
+    "nics_check": false,
+    "min_age": 18,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 0
+   },
+   "black_market": {
+    "available": true,
+    "price": 30,
+    "serial": "none",
+    "heat": 4
+   },
+   "law_note": "Generally legal to buy; carry laws vary."
+  },
+  {
+   "id": "knife_cleaver",
+   "name": "Cleaver",
+   "category": "knife",
+   "weight_lb": 1.2,
+   "threat": 3,
+   "legal": {
+    "available": true,
+    "price": 35,
+    "ffl_required": false,
+    "nics_check": false,
+    "min_age": 18,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 0
+   },
+   "black_market": {
+    "available": true,
+    "price": 25,
+    "serial": "none",
+    "heat": 3
+   },
+   "law_note": "Generally legal to buy; carry laws vary."
+  },
+  {
+   "id": "knife_tactical_tanto",
+   "name": "Tactical tanto",
+   "category": "knife",
+   "weight_lb": 0.7,
+   "threat": 4,
+   "legal": {
+    "available": true,
+    "price": 130,
+    "ffl_required": false,
+    "nics_check": false,
+    "min_age": 18,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 0
+   },
+   "black_market": {
+    "available": true,
+    "price": 95,
+    "serial": "none",
+    "heat": 4
+   },
+   "law_note": "Generally legal to buy; carry laws vary."
+  },
+  {
+   "id": "shiv_toothbrush_shank",
+   "name": "Toothbrush shank",
+   "category": "shiv",
+   "weight_lb": 0.1,
+   "threat": 2,
+   "legal": {
+    "available": false,
+    "price": null,
+    "ffl_required": false,
+    "nics_check": false,
+    "min_age": 0,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 0
+   },
+   "black_market": {
+    "available": true,
+    "price": 20,
+    "serial": "none",
+    "heat": 2
+   },
+   "law_note": "Improvised. Illegal to carry concealed; black-market/craft only."
+  },
+  {
+   "id": "shiv_sharpened_spoon",
+   "name": "Sharpened spoon",
+   "category": "shiv",
+   "weight_lb": 0.1,
+   "threat": 1,
+   "legal": {
+    "available": false,
+    "price": null,
+    "ffl_required": false,
+    "nics_check": false,
+    "min_age": 0,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 0
+   },
+   "black_market": {
+    "available": true,
+    "price": 15,
+    "serial": "none",
+    "heat": 1
+   },
+   "law_note": "Improvised. Illegal to carry concealed; black-market/craft only."
+  },
+  {
+   "id": "shiv_glass_shard_wrap",
+   "name": "Glass shard wrap",
+   "category": "shiv",
+   "weight_lb": 0.1,
+   "threat": 2,
+   "legal": {
+    "available": false,
+    "price": null,
+    "ffl_required": false,
+    "nics_check": false,
+    "min_age": 0,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 0
+   },
+   "black_market": {
+    "available": true,
+    "price": 10,
+    "serial": "none",
+    "heat": 2
+   },
+   "law_note": "Improvised. Illegal to carry concealed; black-market/craft only."
+  },
+  {
+   "id": "shiv_filed_rebar_spike",
+   "name": "Filed rebar spike",
+   "category": "shiv",
+   "weight_lb": 0.5,
+   "threat": 3,
+   "legal": {
+    "available": false,
+    "price": null,
+    "ffl_required": false,
+    "nics_check": false,
+    "min_age": 0,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 0
+   },
+   "black_market": {
+    "available": true,
+    "price": 25,
+    "serial": "none",
+    "heat": 3
+   },
+   "law_note": "Improvised. Illegal to carry concealed; black-market/craft only."
+  },
+  {
+   "id": "shiv_prison_made_shank",
+   "name": "Prison-made shank",
+   "category": "shiv",
+   "weight_lb": 0.2,
+   "threat": 3,
+   "legal": {
+    "available": false,
+    "price": null,
+    "ffl_required": false,
+    "nics_check": false,
+    "min_age": 0,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 0
+   },
+   "black_market": {
+    "available": true,
+    "price": 40,
+    "serial": "none",
+    "heat": 3
+   },
+   "law_note": "Improvised. Illegal to carry concealed; black-market/craft only."
+  },
+  {
+   "id": "shiv_ice_pick_shiv",
+   "name": "Ice-pick shiv",
+   "category": "shiv",
+   "weight_lb": 0.2,
+   "threat": 3,
+   "legal": {
+    "available": false,
+    "price": null,
+    "ffl_required": false,
+    "nics_check": false,
+    "min_age": 0,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 0
+   },
+   "black_market": {
+    "available": true,
+    "price": 30,
+    "serial": "none",
+    "heat": 3
+   },
+   "law_note": "Improvised. Illegal to carry concealed; black-market/craft only."
+  },
+  {
+   "id": "shiv_razor_knuckles",
+   "name": "Razor knuckles",
+   "category": "shiv",
+   "weight_lb": 0.2,
+   "threat": 2,
+   "legal": {
+    "available": false,
+    "price": null,
+    "ffl_required": false,
+    "nics_check": false,
+    "min_age": 0,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 0
+   },
+   "black_market": {
+    "available": true,
+    "price": 35,
+    "serial": "none",
+    "heat": 2
+   },
+   "law_note": "Improvised. Illegal to carry concealed; black-market/craft only."
+  },
+  {
+   "id": "shiv_screwdriver_shiv",
+   "name": "Screwdriver shiv",
+   "category": "shiv",
+   "weight_lb": 0.3,
+   "threat": 2,
+   "legal": {
+    "available": false,
+    "price": null,
+    "ffl_required": false,
+    "nics_check": false,
+    "min_age": 0,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 0
+   },
+   "black_market": {
+    "available": true,
+    "price": 18,
+    "serial": "none",
+    "heat": 2
+   },
+   "law_note": "Improvised. Illegal to carry concealed; black-market/craft only."
+  },
+  {
+   "id": "shiv_bike_spoke_pick",
+   "name": "Bike-spoke pick",
+   "category": "shiv",
+   "weight_lb": 0.1,
+   "threat": 2,
+   "legal": {
+    "available": false,
+    "price": null,
+    "ffl_required": false,
+    "nics_check": false,
+    "min_age": 0,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 0
+   },
+   "black_market": {
+    "available": true,
+    "price": 12,
+    "serial": "none",
+    "heat": 2
+   },
+   "law_note": "Improvised. Illegal to carry concealed; black-market/craft only."
+  },
+  {
+   "id": "shiv_padlock_in_sock",
+   "name": "Padlock-in-sock",
+   "category": "shiv",
+   "weight_lb": 0.6,
+   "threat": 2,
+   "legal": {
+    "available": false,
+    "price": null,
+    "ffl_required": false,
+    "nics_check": false,
+    "min_age": 0,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 0
+   },
+   "black_market": {
+    "available": true,
+    "price": 8,
+    "serial": "none",
+    "heat": 2
+   },
+   "law_note": "Improvised. Illegal to carry concealed; black-market/craft only."
+  },
+  {
+   "id": "handgun_striker_9_compact",
+   "name": "Striker 9 Compact",
+   "category": "handgun",
+   "weight_lb": 1.5,
+   "threat": 5,
+   "legal": {
+    "available": true,
+    "price": 520,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 3
+   },
+   "black_market": {
+    "available": true,
+    "price": 650,
+    "serial": "filed",
+    "heat": 6
+   },
+   "law_note": "FFL + NICS check, 21+, serialized and on record."
+  },
+  {
+   "id": "handgun_m_p_pattern_9mm",
+   "name": "M&P-pattern 9mm",
+   "category": "handgun",
+   "weight_lb": 1.6,
+   "threat": 5,
+   "legal": {
+    "available": true,
+    "price": 480,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 3
+   },
+   "black_market": {
+    "available": true,
+    "price": 600,
+    "serial": "filed",
+    "heat": 6
+   },
+   "law_note": "FFL + NICS check, 21+, serialized and on record."
+  },
+  {
+   "id": "handgun_p320_pattern_9mm",
+   "name": "P320-pattern 9mm",
+   "category": "handgun",
+   "weight_lb": 1.7,
+   "threat": 5,
+   "legal": {
+    "available": true,
+    "price": 550,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 3
+   },
+   "black_market": {
+    "available": true,
+    "price": 700,
+    "serial": "filed",
+    "heat": 6
+   },
+   "law_note": "FFL + NICS check, 21+, serialized and on record."
+  },
+  {
+   "id": "handgun_pocket_380",
+   "name": "Pocket .380",
+   "category": "handgun",
+   "weight_lb": 0.8,
+   "threat": 4,
+   "legal": {
+    "available": true,
+    "price": 280,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 3
+   },
+   "black_market": {
+    "available": true,
+    "price": 400,
+    "serial": "filed",
+    "heat": 5
+   },
+   "law_note": "FFL + NICS check, 21+, serialized and on record."
+  },
+  {
+   "id": "handgun_1911_45",
+   "name": "1911 .45",
+   "category": "handgun",
+   "weight_lb": 2.4,
+   "threat": 6,
+   "legal": {
+    "available": true,
+    "price": 700,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 3
+   },
+   "black_market": {
+    "available": true,
+    "price": 850,
+    "serial": "filed",
+    "heat": 7
+   },
+   "law_note": "FFL + NICS check, 21+, serialized and on record."
+  },
+  {
+   "id": "handgun_92_pattern_9mm",
+   "name": "92-pattern 9mm",
+   "category": "handgun",
+   "weight_lb": 2.1,
+   "threat": 5,
+   "legal": {
+    "available": true,
+    "price": 600,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 3
+   },
+   "black_market": {
+    "available": true,
+    "price": 720,
+    "serial": "filed",
+    "heat": 6
+   },
+   "law_note": "FFL + NICS check, 21+, serialized and on record."
+  },
+  {
+   "id": "handgun_38_snub_revolver",
+   "name": ".38 snub revolver",
+   "category": "handgun",
+   "weight_lb": 1.4,
+   "threat": 4,
+   "legal": {
+    "available": true,
+    "price": 400,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 3
+   },
+   "black_market": {
+    "available": true,
+    "price": 520,
+    "serial": "filed",
+    "heat": 5
+   },
+   "law_note": "FFL + NICS check, 21+, serialized and on record."
+  },
+  {
+   "id": "handgun_hand_cannon_50",
+   "name": "Hand-cannon .50",
+   "category": "handgun",
+   "weight_lb": 4.5,
+   "threat": 7,
+   "legal": {
+    "available": true,
+    "price": 1800,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 3
+   },
+   "black_market": {
+    "available": true,
+    "price": 2400,
+    "serial": "filed",
+    "heat": 8
+   },
+   "law_note": "FFL + NICS check, 21+, serialized and on record."
+  },
+  {
+   "id": "handgun_budget_9mm_hi_point_ish",
+   "name": "Budget 9mm (Hi-Point-ish)",
+   "category": "handgun",
+   "weight_lb": 2.4,
+   "threat": 4,
+   "legal": {
+    "available": true,
+    "price": 180,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 3
+   },
+   "black_market": {
+    "available": true,
+    "price": 300,
+    "serial": "filed",
+    "heat": 5
+   },
+   "law_note": "FFL + NICS check, 21+, serialized and on record."
+  },
+  {
+   "id": "handgun_polymer_40",
+   "name": "Polymer .40",
+   "category": "handgun",
+   "weight_lb": 1.6,
+   "threat": 5,
+   "legal": {
+    "available": true,
+    "price": 420,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 3
+   },
+   "black_market": {
+    "available": true,
+    "price": 560,
+    "serial": "filed",
+    "heat": 6
+   },
+   "law_note": "FFL + NICS check, 21+, serialized and on record."
+  },
+  {
+   "id": "rifle_ar_pattern_5_56",
+   "name": "AR-pattern 5.56",
+   "category": "rifle",
+   "weight_lb": 6.5,
+   "threat": 7,
+   "legal": {
+    "available": true,
+    "price": 900,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 18,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 3
+   },
+   "black_market": {
+    "available": true,
+    "price": 1600,
+    "serial": "filed",
+    "heat": 8
+   },
+   "law_note": "FFL + NICS check, 18+, serialized."
+  },
+  {
+   "id": "rifle_ak_pattern_7_62",
+   "name": "AK-pattern 7.62",
+   "category": "rifle",
+   "weight_lb": 7.5,
+   "threat": 7,
+   "legal": {
+    "available": true,
+    "price": 950,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 18,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 3
+   },
+   "black_market": {
+    "available": true,
+    "price": 1700,
+    "serial": "filed",
+    "heat": 8
+   },
+   "law_note": "FFL + NICS check, 18+, serialized."
+  },
+  {
+   "id": "rifle_22_plinker",
+   "name": ".22 plinker",
+   "category": "rifle",
+   "weight_lb": 4.5,
+   "threat": 3,
+   "legal": {
+    "available": true,
+    "price": 300,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 18,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 3
+   },
+   "black_market": {
+    "available": true,
+    "price": 450,
+    "serial": "filed",
+    "heat": 4
+   },
+   "law_note": "FFL + NICS check, 18+, serialized."
+  },
+  {
+   "id": "rifle_bolt_action_hunter_308",
+   "name": "Bolt-action hunter .308",
+   "category": "rifle",
+   "weight_lb": 7.8,
+   "threat": 6,
+   "legal": {
+    "available": true,
+    "price": 700,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 18,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 3
+   },
+   "black_market": {
+    "available": true,
+    "price": 1000,
+    "serial": "filed",
+    "heat": 7
+   },
+   "law_note": "FFL + NICS check, 18+, serialized."
+  },
+  {
+   "id": "rifle_mini_ranch_rifle",
+   "name": "Mini ranch rifle",
+   "category": "rifle",
+   "weight_lb": 6.8,
+   "threat": 6,
+   "legal": {
+    "available": true,
+    "price": 1100,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 18,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 3
+   },
+   "black_market": {
+    "available": true,
+    "price": 1600,
+    "serial": "filed",
+    "heat": 7
+   },
+   "law_note": "FFL + NICS check, 18+, serialized."
+  },
+  {
+   "id": "rifle_sks_7_62",
+   "name": "SKS 7.62",
+   "category": "rifle",
+   "weight_lb": 8.5,
+   "threat": 6,
+   "legal": {
+    "available": true,
+    "price": 500,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 18,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 3
+   },
+   "black_market": {
+    "available": true,
+    "price": 800,
+    "serial": "filed",
+    "heat": 7
+   },
+   "law_note": "FFL + NICS check, 18+, serialized."
+  },
+  {
+   "id": "rifle_lever_action_30_30",
+   "name": "Lever-action .30-30",
+   "category": "rifle",
+   "weight_lb": 6.7,
+   "threat": 5,
+   "legal": {
+    "available": true,
+    "price": 600,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 18,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 3
+   },
+   "black_market": {
+    "available": true,
+    "price": 850,
+    "serial": "filed",
+    "heat": 6
+   },
+   "law_note": "FFL + NICS check, 18+, serialized."
+  },
+  {
+   "id": "rifle_precision_308",
+   "name": "Precision .308",
+   "category": "rifle",
+   "weight_lb": 9.5,
+   "threat": 7,
+   "legal": {
+    "available": true,
+    "price": 1600,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 18,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 3
+   },
+   "black_market": {
+    "available": true,
+    "price": 2400,
+    "serial": "filed",
+    "heat": 8
+   },
+   "law_note": "FFL + NICS check, 18+, serialized."
+  },
+  {
+   "id": "rifle_pcc_9mm_carbine",
+   "name": "PCC 9mm carbine",
+   "category": "rifle",
+   "weight_lb": 6.0,
+   "threat": 5,
+   "legal": {
+    "available": true,
+    "price": 650,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 18,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 3
+   },
+   "black_market": {
+    "available": true,
+    "price": 950,
+    "serial": "filed",
+    "heat": 6
+   },
+   "law_note": "FFL + NICS check, 18+, serialized."
+  },
+  {
+   "id": "rifle_battle_rifle_308",
+   "name": "Battle rifle .308",
+   "category": "rifle",
+   "weight_lb": 9.2,
+   "threat": 7,
+   "legal": {
+    "available": true,
+    "price": 1900,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 18,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 3
+   },
+   "black_market": {
+    "available": true,
+    "price": 2900,
+    "serial": "filed",
+    "heat": 8
+   },
+   "law_note": "FFL + NICS check, 18+, serialized."
+  },
+  {
+   "id": "shotgun_pump_12ga",
+   "name": "Pump 12ga",
+   "category": "shotgun",
+   "weight_lb": 7.0,
+   "threat": 6,
+   "legal": {
+    "available": true,
+    "price": 350,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 18,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 3
+   },
+   "black_market": {
+    "available": true,
+    "price": 550,
+    "serial": "filed",
+    "heat": 7
+   },
+   "law_note": "FFL + NICS check, 18+, serialized."
+  },
+  {
+   "id": "shotgun_tactical_pump_12ga",
+   "name": "Tactical pump 12ga",
+   "category": "shotgun",
+   "weight_lb": 7.2,
+   "threat": 6,
+   "legal": {
+    "available": true,
+    "price": 500,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 18,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 3
+   },
+   "black_market": {
+    "available": true,
+    "price": 750,
+    "serial": "filed",
+    "heat": 7
+   },
+   "law_note": "FFL + NICS check, 18+, serialized."
+  },
+  {
+   "id": "shotgun_semi_auto_12ga",
+   "name": "Semi-auto 12ga",
+   "category": "shotgun",
+   "weight_lb": 7.5,
+   "threat": 6,
+   "legal": {
+    "available": true,
+    "price": 800,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 18,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 3
+   },
+   "black_market": {
+    "available": true,
+    "price": 1200,
+    "serial": "filed",
+    "heat": 7
+   },
+   "law_note": "FFL + NICS check, 18+, serialized."
+  },
+  {
+   "id": "shotgun_double_barrel",
+   "name": "Double-barrel",
+   "category": "shotgun",
+   "weight_lb": 6.8,
+   "threat": 5,
+   "legal": {
+    "available": true,
+    "price": 450,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 18,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 3
+   },
+   "black_market": {
+    "available": true,
+    "price": 650,
+    "serial": "filed",
+    "heat": 6
+   },
+   "law_note": "FFL + NICS check, 18+, serialized."
+  },
+  {
+   "id": "shotgun_sawed_off_illegal_sbs",
+   "name": "Sawed-off (illegal SBS)",
+   "category": "shotgun",
+   "weight_lb": 5.5,
+   "threat": 6,
+   "legal": {
+    "available": false,
+    "price": null,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 18,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 3
+   },
+   "black_market": {
+    "available": true,
+    "price": 900,
+    "serial": "filed",
+    "heat": 7
+   },
+   "law_note": "FFL + NICS check, 18+, serialized."
+  },
+  {
+   "id": "shotgun_youth_20ga",
+   "name": "Youth 20ga",
+   "category": "shotgun",
+   "weight_lb": 6.0,
+   "threat": 4,
+   "legal": {
+    "available": true,
+    "price": 300,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 18,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 3
+   },
+   "black_market": {
+    "available": true,
+    "price": 450,
+    "serial": "filed",
+    "heat": 5
+   },
+   "law_note": "FFL + NICS check, 18+, serialized."
+  },
+  {
+   "id": "shotgun_riot_12ga",
+   "name": "Riot 12ga",
+   "category": "shotgun",
+   "weight_lb": 7.4,
+   "threat": 6,
+   "legal": {
+    "available": true,
+    "price": 600,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 18,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 3
+   },
+   "black_market": {
+    "available": true,
+    "price": 900,
+    "serial": "filed",
+    "heat": 7
+   },
+   "law_note": "FFL + NICS check, 18+, serialized."
+  },
+  {
+   "id": "shotgun_bullpup_12ga",
+   "name": "Bullpup 12ga",
+   "category": "shotgun",
+   "weight_lb": 7.0,
+   "threat": 6,
+   "legal": {
+    "available": true,
+    "price": 1100,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 18,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 3
+   },
+   "black_market": {
+    "available": true,
+    "price": 1700,
+    "serial": "filed",
+    "heat": 7
+   },
+   "law_note": "FFL + NICS check, 18+, serialized."
+  },
+  {
+   "id": "shotgun_coach_gun",
+   "name": "Coach gun",
+   "category": "shotgun",
+   "weight_lb": 6.5,
+   "threat": 5,
+   "legal": {
+    "available": true,
+    "price": 400,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 18,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 3
+   },
+   "black_market": {
+    "available": true,
+    "price": 600,
+    "serial": "filed",
+    "heat": 6
+   },
+   "law_note": "FFL + NICS check, 18+, serialized."
+  },
+  {
+   "id": "shotgun_mag_fed_12ga",
+   "name": "Mag-fed 12ga",
+   "category": "shotgun",
+   "weight_lb": 7.8,
+   "threat": 6,
+   "legal": {
+    "available": true,
+    "price": 700,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 18,
+    "serialized": true,
+    "nfa": false,
+    "tax_stamp": 0,
+    "wait_days": 3
+   },
+   "black_market": {
+    "available": true,
+    "price": 1100,
+    "serial": "filed",
+    "heat": 7
+   },
+   "law_note": "FFL + NICS check, 18+, serialized."
+  },
+  {
+   "id": "smg_mp_pattern_smg",
+   "name": "MP-pattern SMG",
+   "category": "smg",
+   "weight_lb": 6.8,
+   "threat": 8,
+   "legal": {
+    "available": true,
+    "price": 22000,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": true,
+    "tax_stamp": 200,
+    "wait_days": 300
+   },
+   "black_market": {
+    "available": true,
+    "price": 3200,
+    "serial": "filed",
+    "heat": 10
+   },
+   "law_note": "Full-auto = NFA: Form 4, $200 stamp, ~10-month wait, transferable-only."
+  },
+  {
+   "id": "smg_uzi_pattern_smg",
+   "name": "Uzi-pattern SMG",
+   "category": "smg",
+   "weight_lb": 7.7,
+   "threat": 7,
+   "legal": {
+    "available": true,
+    "price": 18000,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": true,
+    "tax_stamp": 200,
+    "wait_days": 300
+   },
+   "black_market": {
+    "available": true,
+    "price": 2600,
+    "serial": "filed",
+    "heat": 10
+   },
+   "law_note": "Full-auto = NFA: Form 4, $200 stamp, ~10-month wait, transferable-only."
+  },
+  {
+   "id": "smg_mac_pattern_machine_pistol",
+   "name": "MAC-pattern machine pistol",
+   "category": "smg",
+   "weight_lb": 6.3,
+   "threat": 7,
+   "legal": {
+    "available": true,
+    "price": 12000,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": true,
+    "tax_stamp": 200,
+    "wait_days": 300
+   },
+   "black_market": {
+    "available": true,
+    "price": 1800,
+    "serial": "filed",
+    "heat": 10
+   },
+   "law_note": "Full-auto = NFA: Form 4, $200 stamp, ~10-month wait, transferable-only."
+  },
+  {
+   "id": "smg_scorpion_pattern",
+   "name": "Scorpion-pattern",
+   "category": "smg",
+   "weight_lb": 5.0,
+   "threat": 7,
+   "legal": {
+    "available": true,
+    "price": 16000,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": true,
+    "tax_stamp": 200,
+    "wait_days": 300
+   },
+   "black_market": {
+    "available": true,
+    "price": 2400,
+    "serial": "filed",
+    "heat": 10
+   },
+   "law_note": "Full-auto = NFA: Form 4, $200 stamp, ~10-month wait, transferable-only."
+  },
+  {
+   "id": "smg_grease_gun_style",
+   "name": "Grease-gun style",
+   "category": "smg",
+   "weight_lb": 8.0,
+   "threat": 6,
+   "legal": {
+    "available": true,
+    "price": 14000,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": true,
+    "tax_stamp": 200,
+    "wait_days": 300
+   },
+   "black_market": {
+    "available": true,
+    "price": 2000,
+    "serial": "filed",
+    "heat": 9
+   },
+   "law_note": "Full-auto = NFA: Form 4, $200 stamp, ~10-month wait, transferable-only."
+  },
+  {
+   "id": "smg_ppsh_pattern",
+   "name": "PPSh-pattern",
+   "category": "smg",
+   "weight_lb": 8.0,
+   "threat": 7,
+   "legal": {
+    "available": true,
+    "price": 15000,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": true,
+    "tax_stamp": 200,
+    "wait_days": 300
+   },
+   "black_market": {
+    "available": true,
+    "price": 2200,
+    "serial": "filed",
+    "heat": 10
+   },
+   "law_note": "Full-auto = NFA: Form 4, $200 stamp, ~10-month wait, transferable-only."
+  },
+  {
+   "id": "smg_micro_smg",
+   "name": "Micro SMG",
+   "category": "smg",
+   "weight_lb": 5.5,
+   "threat": 7,
+   "legal": {
+    "available": true,
+    "price": 20000,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": true,
+    "tax_stamp": 200,
+    "wait_days": 300
+   },
+   "black_market": {
+    "available": true,
+    "price": 2800,
+    "serial": "filed",
+    "heat": 10
+   },
+   "law_note": "Full-auto = NFA: Form 4, $200 stamp, ~10-month wait, transferable-only."
+  },
+  {
+   "id": "smg_suppressed_smg",
+   "name": "Suppressed SMG",
+   "category": "smg",
+   "weight_lb": 7.2,
+   "threat": 8,
+   "legal": {
+    "available": true,
+    "price": 25000,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": true,
+    "tax_stamp": 200,
+    "wait_days": 300
+   },
+   "black_market": {
+    "available": true,
+    "price": 3800,
+    "serial": "filed",
+    "heat": 10
+   },
+   "law_note": "Full-auto = NFA: Form 4, $200 stamp, ~10-month wait, transferable-only."
+  },
+  {
+   "id": "smg_sten_pattern",
+   "name": "Sten-pattern",
+   "category": "smg",
+   "weight_lb": 6.5,
+   "threat": 6,
+   "legal": {
+    "available": true,
+    "price": 13000,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": true,
+    "tax_stamp": 200,
+    "wait_days": 300
+   },
+   "black_market": {
+    "available": true,
+    "price": 1600,
+    "serial": "filed",
+    "heat": 9
+   },
+   "law_note": "Full-auto = NFA: Form 4, $200 stamp, ~10-month wait, transferable-only."
+  },
+  {
+   "id": "smg_p90_pattern_pdw",
+   "name": "P90-pattern PDW",
+   "category": "smg",
+   "weight_lb": 6.6,
+   "threat": 8,
+   "legal": {
+    "available": true,
+    "price": 28000,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": true,
+    "tax_stamp": 200,
+    "wait_days": 300
+   },
+   "black_market": {
+    "available": true,
+    "price": 4200,
+    "serial": "filed",
+    "heat": 10
+   },
+   "law_note": "Full-auto = NFA: Form 4, $200 stamp, ~10-month wait, transferable-only."
+  },
+  {
+   "id": "machinegun_squad_lmg_5_56",
+   "name": "Squad LMG 5.56",
+   "category": "machinegun",
+   "weight_lb": 17.0,
+   "threat": 9,
+   "legal": {
+    "available": true,
+    "price": 35000,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": true,
+    "tax_stamp": 200,
+    "wait_days": 300
+   },
+   "black_market": {
+    "available": true,
+    "price": 6500,
+    "serial": "filed",
+    "heat": 10
+   },
+   "law_note": "NFA belt-fed; legal transferables are rare + extremely expensive."
+  },
+  {
+   "id": "machinegun_gpmg_7_62",
+   "name": "GPMG 7.62",
+   "category": "machinegun",
+   "weight_lb": 24.0,
+   "threat": 9,
+   "legal": {
+    "available": true,
+    "price": 45000,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": true,
+    "tax_stamp": 200,
+    "wait_days": 300
+   },
+   "black_market": {
+    "available": true,
+    "price": 9000,
+    "serial": "filed",
+    "heat": 10
+   },
+   "law_note": "NFA belt-fed; legal transferables are rare + extremely expensive."
+  },
+  {
+   "id": "machinegun_belt_fed_50_hmg",
+   "name": "Belt-fed .50 HMG",
+   "category": "machinegun",
+   "weight_lb": 84.0,
+   "threat": 10,
+   "legal": {
+    "available": true,
+    "price": 120000,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": true,
+    "tax_stamp": 200,
+    "wait_days": 300
+   },
+   "black_market": {
+    "available": true,
+    "price": 20000,
+    "serial": "filed",
+    "heat": 10
+   },
+   "law_note": "NFA belt-fed; legal transferables are rare + extremely expensive."
+  },
+  {
+   "id": "machinegun_light_mg_carbine",
+   "name": "Light MG carbine",
+   "category": "machinegun",
+   "weight_lb": 12.0,
+   "threat": 8,
+   "legal": {
+    "available": true,
+    "price": 30000,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": true,
+    "tax_stamp": 200,
+    "wait_days": 300
+   },
+   "black_market": {
+    "available": true,
+    "price": 5500,
+    "serial": "filed",
+    "heat": 10
+   },
+   "law_note": "NFA belt-fed; legal transferables are rare + extremely expensive."
+  },
+  {
+   "id": "machinegun_pkm_pattern",
+   "name": "PKM-pattern",
+   "category": "machinegun",
+   "weight_lb": 17.5,
+   "threat": 9,
+   "legal": {
+    "available": true,
+    "price": 40000,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": true,
+    "tax_stamp": 200,
+    "wait_days": 300
+   },
+   "black_market": {
+    "available": true,
+    "price": 7500,
+    "serial": "filed",
+    "heat": 10
+   },
+   "law_note": "NFA belt-fed; legal transferables are rare + extremely expensive."
+  },
+  {
+   "id": "machinegun_m60_pattern",
+   "name": "M60-pattern",
+   "category": "machinegun",
+   "weight_lb": 23.0,
+   "threat": 9,
+   "legal": {
+    "available": true,
+    "price": 42000,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": true,
+    "tax_stamp": 200,
+    "wait_days": 300
+   },
+   "black_market": {
+    "available": true,
+    "price": 8000,
+    "serial": "filed",
+    "heat": 10
+   },
+   "law_note": "NFA belt-fed; legal transferables are rare + extremely expensive."
+  },
+  {
+   "id": "machinegun_minigun_display",
+   "name": "Minigun (display)",
+   "category": "machinegun",
+   "weight_lb": 60.0,
+   "threat": 10,
+   "legal": {
+    "available": true,
+    "price": 250000,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": true,
+    "tax_stamp": 200,
+    "wait_days": 300
+   },
+   "black_market": {
+    "available": true,
+    "price": 45000,
+    "serial": "filed",
+    "heat": 10
+   },
+   "law_note": "NFA belt-fed; legal transferables are rare + extremely expensive."
+  },
+  {
+   "id": "machinegun_rpk_pattern_lmg",
+   "name": "RPK-pattern LMG",
+   "category": "machinegun",
+   "weight_lb": 11.0,
+   "threat": 8,
+   "legal": {
+    "available": true,
+    "price": 28000,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": true,
+    "tax_stamp": 200,
+    "wait_days": 300
+   },
+   "black_market": {
+    "available": true,
+    "price": 5000,
+    "serial": "filed",
+    "heat": 10
+   },
+   "law_note": "NFA belt-fed; legal transferables are rare + extremely expensive."
+  },
+  {
+   "id": "machinegun_mg42_pattern",
+   "name": "MG42-pattern",
+   "category": "machinegun",
+   "weight_lb": 25.0,
+   "threat": 9,
+   "legal": {
+    "available": true,
+    "price": 55000,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": true,
+    "tax_stamp": 200,
+    "wait_days": 300
+   },
+   "black_market": {
+    "available": true,
+    "price": 10000,
+    "serial": "filed",
+    "heat": 10
+   },
+   "law_note": "NFA belt-fed; legal transferables are rare + extremely expensive."
+  },
+  {
+   "id": "machinegun_vintage_bar",
+   "name": "Vintage BAR",
+   "category": "machinegun",
+   "weight_lb": 19.0,
+   "threat": 8,
+   "legal": {
+    "available": true,
+    "price": 38000,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": true,
+    "tax_stamp": 200,
+    "wait_days": 300
+   },
+   "black_market": {
+    "available": true,
+    "price": 7000,
+    "serial": "filed",
+    "heat": 10
+   },
+   "law_note": "NFA belt-fed; legal transferables are rare + extremely expensive."
+  },
+  {
+   "id": "explosive_pipe_device",
+   "name": "Pipe device",
+   "category": "explosive",
+   "weight_lb": 2.0,
+   "threat": 8,
+   "legal": {
+    "available": false,
+    "price": null,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": true,
+    "tax_stamp": 200,
+    "wait_days": 300
+   },
+   "black_market": {
+    "available": true,
+    "price": 400,
+    "serial": "filed",
+    "heat": 10
+   },
+   "law_note": "Destructive device (NFA). Effectively unobtainable legally."
+  },
+  {
+   "id": "explosive_frag_grenade",
+   "name": "Frag grenade",
+   "category": "explosive",
+   "weight_lb": 1.0,
+   "threat": 9,
+   "legal": {
+    "available": false,
+    "price": null,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": true,
+    "tax_stamp": 200,
+    "wait_days": 300
+   },
+   "black_market": {
+    "available": true,
+    "price": 900,
+    "serial": "filed",
+    "heat": 10
+   },
+   "law_note": "Destructive device (NFA). Effectively unobtainable legally."
+  },
+  {
+   "id": "explosive_composition_brick",
+   "name": "Composition brick",
+   "category": "explosive",
+   "weight_lb": 1.3,
+   "threat": 10,
+   "legal": {
+    "available": false,
+    "price": null,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": true,
+    "tax_stamp": 200,
+    "wait_days": 300
+   },
+   "black_market": {
+    "available": true,
+    "price": 3500,
+    "serial": "filed",
+    "heat": 10
+   },
+   "law_note": "Destructive device (NFA). Effectively unobtainable legally."
+  },
+  {
+   "id": "explosive_stick_charge",
+   "name": "Stick charge",
+   "category": "explosive",
+   "weight_lb": 0.5,
+   "threat": 8,
+   "legal": {
+    "available": false,
+    "price": null,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": true,
+    "tax_stamp": 200,
+    "wait_days": 300
+   },
+   "black_market": {
+    "available": true,
+    "price": 600,
+    "serial": "filed",
+    "heat": 10
+   },
+   "law_note": "Destructive device (NFA). Effectively unobtainable legally."
+  },
+  {
+   "id": "explosive_molotov",
+   "name": "Molotov",
+   "category": "explosive",
+   "weight_lb": 1.5,
+   "threat": 5,
+   "legal": {
+    "available": false,
+    "price": null,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": true,
+    "tax_stamp": 200,
+    "wait_days": 300
+   },
+   "black_market": {
+    "available": true,
+    "price": 20,
+    "serial": "filed",
+    "heat": 8
+   },
+   "law_note": "Destructive device (NFA). Effectively unobtainable legally."
+  },
+  {
+   "id": "explosive_improvised_roadside_device",
+   "name": "Improvised roadside device",
+   "category": "explosive",
+   "weight_lb": 6.0,
+   "threat": 10,
+   "legal": {
+    "available": false,
+    "price": null,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": true,
+    "tax_stamp": 200,
+    "wait_days": 300
+   },
+   "black_market": {
+    "available": true,
+    "price": 1200,
+    "serial": "filed",
+    "heat": 10
+   },
+   "law_note": "Destructive device (NFA). Effectively unobtainable legally."
+  },
+  {
+   "id": "explosive_smoke_incendiary",
+   "name": "Smoke/incendiary",
+   "category": "explosive",
+   "weight_lb": 1.2,
+   "threat": 6,
+   "legal": {
+    "available": false,
+    "price": null,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": true,
+    "tax_stamp": 200,
+    "wait_days": 300
+   },
+   "black_market": {
+    "available": true,
+    "price": 150,
+    "serial": "filed",
+    "heat": 9
+   },
+   "law_note": "Destructive device (NFA). Effectively unobtainable legally."
+  },
+  {
+   "id": "explosive_det_cord_bundle",
+   "name": "Det cord bundle",
+   "category": "explosive",
+   "weight_lb": 2.0,
+   "threat": 8,
+   "legal": {
+    "available": false,
+    "price": null,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": true,
+    "tax_stamp": 200,
+    "wait_days": 300
+   },
+   "black_market": {
+    "available": true,
+    "price": 800,
+    "serial": "filed",
+    "heat": 10
+   },
+   "law_note": "Destructive device (NFA). Effectively unobtainable legally."
+  },
+  {
+   "id": "explosive_thermite_pack",
+   "name": "Thermite pack",
+   "category": "explosive",
+   "weight_lb": 1.8,
+   "threat": 8,
+   "legal": {
+    "available": false,
+    "price": null,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": true,
+    "tax_stamp": 200,
+    "wait_days": 300
+   },
+   "black_market": {
+    "available": true,
+    "price": 700,
+    "serial": "filed",
+    "heat": 10
+   },
+   "law_note": "Destructive device (NFA). Effectively unobtainable legally."
+  },
+  {
+   "id": "explosive_breaching_charge",
+   "name": "Breaching charge",
+   "category": "explosive",
+   "weight_lb": 2.5,
+   "threat": 9,
+   "legal": {
+    "available": false,
+    "price": null,
+    "ffl_required": true,
+    "nics_check": true,
+    "min_age": 21,
+    "serialized": true,
+    "nfa": true,
+    "tax_stamp": 200,
+    "wait_days": 300
+   },
+   "black_market": {
+    "available": true,
+    "price": 1500,
+    "serial": "filed",
+    "heat": 10
+   },
+   "law_note": "Destructive device (NFA). Effectively unobtainable legally."
+  }
+ ]
+}

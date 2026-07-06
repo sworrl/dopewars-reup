@@ -1,6 +1,10 @@
 <div align="center">
 
-<img src="docs/hero.jpg" alt="Dope Wars: Re-Up" width="100%">
+<img src="docs/logo.png" alt="Dope Wars: Re-Up" width="600">
+
+<br><br>
+
+<img src="docs/banner.jpg" alt="" width="100%">
 
 <br>
 

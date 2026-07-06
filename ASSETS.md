@@ -20,7 +20,9 @@ game does not depict or glamorize drug use.
 | App / launcher icon | 1 | Imagen 4 Ultra | one-off prompt | AI-generated, wants real art |
 | Menu background | 1 | Imagen 4 Ultra | one-off prompt | AI-generated, wants real art |
 | Loading / boot art | 1 | Imagen 4 Ultra | `gen_boot_art.py` | AI-generated, wants real art |
-| Cosmetic catalog | 100 defined | none yet | pending | No art yet, needs to be made |
+| Cosmetic emblems | 12 | Imagen 4 Ultra | one-off wave | AI-generated, wired to catalog |
+| Cosmetic catalog (rest) | 88 defined | none yet | pending | No art yet (titles/accents are text/color; badges/frames/etc. pending) |
+| Brand logo + hero banner | 2 | Imagen art + composed wordmark | one-off | AI + composited, wants real logo pass |
 | Fonts (Big Shoulders Display, Plus Jakarta Sans) | 4 files | Google Fonts, SIL OFL | n/a | Licensed typefaces, not AI |
 
 **Totals:** 57 AI-generated images in the shipping game, plus 100 cosmetic items defined in the

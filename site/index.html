@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dope Wars: Re-Up</title>
+<meta name="description" content="A realistic drug-trade MMO on a real US map. Buy low, sell high, stay off the radar. The Wire, not GTA.">
+<meta property="og:title" content="Dope Wars: Re-Up">
+<meta property="og:description" content="A realistic drug-trade MMO on a real US map. The Wire, not GTA.">
+<meta property="og:image" content="assets/banner.jpg">
+<style>
+  @font-face{font-family:"Shoulders";src:url("assets/fonts/BigShouldersDisplay-Black.ttf");font-weight:900;font-display:swap}
+  @font-face{font-family:"Jakarta";src:url("assets/fonts/PlusJakartaSans-SemiBold.ttf");font-weight:600;font-display:swap}
+  @font-face{font-family:"Jakarta";src:url("assets/fonts/PlusJakartaSans-Bold.ttf");font-weight:800;font-display:swap}
+  :root{--ink:#0a0b0e;--panel:#14161c;--line:#262a33;--text:#e7e8ec;--mut:#8b909c;--red:#eb3340;--amber:#e6cb3c}
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--ink);color:var(--text);font-family:"Jakarta",system-ui,sans-serif;line-height:1.6}
+  a{color:var(--red);text-decoration:none}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+  h2{font-family:"Shoulders",sans-serif;font-weight:900;text-transform:uppercase;font-size:clamp(30px,5vw,50px);letter-spacing:.01em;margin:0 0 6px}
+  .ey{font-family:ui-monospace,monospace;font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--red)}
+  section{padding:clamp(56px,9vw,110px) 0;border-top:1px solid var(--line)}
+
+  /* hero */
+  #hero{position:relative;min-height:96vh;display:flex;flex-direction:column;justify-content:center;text-align:center;overflow:hidden;border:0}
+  #gl{position:absolute;inset:0;width:100%;height:100%;z-index:0}
+  #hero .veil{position:absolute;inset:0;z-index:1;background:radial-gradient(120% 90% at 50% 40%,transparent,rgba(10,11,14,.7) 80%)}
+  #hero .inner{position:relative;z-index:2;padding:24px}
+  #hero img.logo{width:min(560px,86vw);filter:drop-shadow(0 10px 40px rgba(0,0,0,.6));opacity:0;animation:rise .9s .1s forwards}
+  #hero p.tag{max-width:60ch;margin:24px auto 0;font-size:clamp(17px,2vw,22px);color:#c7cad1;opacity:0;animation:rise .9s .28s forwards}
+  @keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+  .cta{margin-top:34px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;opacity:0;animation:rise .9s .44s forwards}
+  .btn{font-weight:800;padding:15px 26px;border-radius:11px;border:1px solid transparent;font-size:15px;cursor:pointer}
+  .btn.red{background:var(--red);color:#fff}
+  .btn.ghost{background:transparent;border-color:var(--line);color:var(--text)}
+  .btn:hover{transform:translateY(-2px)}
+  .scroll{position:absolute;bottom:26px;left:0;right:0;z-index:2;color:var(--mut);font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase}
+
+  /* pitch */
+  .lede{font-size:clamp(20px,2.6vw,30px);line-height:1.4;max-width:24ch;font-weight:800}
+  .lede b{color:var(--red)}
+  .two{display:grid;grid-template-columns:1fr 1.3fr;gap:40px;align-items:center}
+  .two p{color:#c3c6cd;margin:0 0 14px}
+  @media(max-width:760px){.two{grid-template-columns:1fr}}
+
+  /* shots */
+  .shots{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:32px}
+  .shot{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .shot img{width:100%;display:block}
+  .shot .cap{padding:12px 14px}
+  .shot b{display:block;font-size:14px}
+  .shot span{font-size:12.5px;color:var(--mut)}
+  @media(max-width:900px){.shots{grid-template-columns:repeat(2,1fr)}}
+
+  /* features */
+  .feat{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:32px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px;transition:border-color .2s,transform .2s}
+  .card:hover{border-color:#3a1c20;transform:translateY(-3px)}
+  .card h3{font-family:"Shoulders",sans-serif;text-transform:uppercase;font-size:22px;margin:0 0 8px;color:var(--text)}
+  .card p{margin:0;color:var(--mut);font-size:14.5px}
+  .card .k{font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.16em;color:var(--red);text-transform:uppercase}
+  @media(max-width:820px){.feat{grid-template-columns:1fr}}
+
+  /* pillars */
+  .pill{display:flex;gap:26px;flex-wrap:wrap;justify-content:center;margin-top:24px}
+  .pill div{flex:1;min-width:240px;text-align:center;padding:26px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+  .pill b{display:block;font-family:"Shoulders",sans-serif;text-transform:uppercase;font-size:26px;color:var(--red);margin-bottom:6px}
+  .pill span{color:var(--mut);font-size:14px}
+
+  /* install */
+  #install{text-align:center}
+  .steps{max-width:560px;margin:22px auto 0;text-align:left;color:var(--mut);font-size:15px}
+  .steps li{margin:6px 0}
+  code{font-family:ui-monospace,monospace;background:var(--panel);border:1px solid var(--line);padding:2px 7px;border-radius:5px;font-size:13px;color:var(--amber)}
+
+  footer{border-top:1px solid var(--line);padding:40px 0;text-align:center;color:var(--mut);font-size:14px}
+  footer b{color:var(--text)}
+  footer .sub{font-size:12px;color:#5b6069;margin-top:8px}
+</style>
+</head>
+<body>
+
+<section id="hero">
+  <canvas id="gl"></canvas>
+  <div class="veil"></div>
+  <div class="inner wrap">
+    <img class="logo" src="assets/logo.png" alt="Dope Wars: Re-Up">
+    <p class="tag">Start broke in a rust-belt river town. Buy low, sell high, move weight, stay off the radar. On the real map, in real cities, with real prices. <b style="color:#fff">The Wire, not GTA.</b></p>
+    <div class="cta">
+      <a class="btn red" href="#install">Get the game</a>
+      <a class="btn ghost" href="https://github.com/sworrl/dopewars-reup">Source &amp; docs</a>
+    </div>
+  </div>
+  <div class="scroll">scroll ↓</div>
+</section>
+
+<section>
+  <div class="wrap two">
+    <div class="lede">The world keeps moving when you close the app. Your <b>crew keeps pushing</b>. Your <b>phone keeps draining</b>. Rivals keep moving.</div>
+    <div>
+      <p>You are a small operator in a real American city, rendered from actual OpenStreetMap data. Prices move by region and demand. Product has weight and takes up space. Police run on dice and heat, not scripted cutscenes.</p>
+      <p>It is modeled on real reporting: DEA and NIDA pricing, FBI and CDC regional stats. It is framed to educate, not glamorize. Nobody is shown using.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="ey">// the streets</div>
+    <h2>See it move</h2>
+    <div class="shots">
+      <div class="shot"><img src="assets/screens/map.jpg" alt="Map"><div class="cap"><b>Town level</b><span>Real streets, your blocks.</span></div></div>
+      <div class="shot"><img src="assets/screens/market.jpg" alt="Market"><div class="cap"><b>The market</b><span>Server-set prices, art that scales with weight.</span></div></div>
+      <div class="shot"><img src="assets/screens/travel.jpg" alt="Travel"><div class="cap"><b>Plot a trip</b><span>Real routes, per-vehicle carry limits.</span></div></div>
+      <div class="shot"><img src="assets/screens/phone.jpg" alt="Phone"><div class="cap"><b>Your phone is exposure</b><span>Flash GraphineOS, go dark.</span></div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="ey">// systems online</div>
+    <h2>Everything is a decision</h2>
+    <div class="feat">
+      <div class="card"><div class="k">Geography</div><h3>Real map</h3><p>Actual OSM streets and OSRM routes. Trips cost real distance times mode speed. Stores sit at real coordinates under parody names.</p></div>
+      <div class="card"><div class="k">Economy</div><h3>Live market</h3><p>Real baseline prices drift by region and demand. The server sets every price, so it cannot be forged. Product art changes with weight.</p></div>
+      <div class="card"><div class="k">Logistics</div><h3>Weight is real</h3><p>Carry it, sell it down, or delegate a stash to a trap-house crew that pushes it while you sleep, for a skim and some heat.</p></div>
+      <div class="card"><div class="k">Gear</div><h3>The phone</h3><p>Burner is anonymous but dumb. Flagship is capable but tracked. Hardened OS keeps you dark. A cracked screen degrades the display.</p></div>
+      <div class="card"><div class="k">Prestige</div><h3>Cred, not cash</h3><p>An earned currency for 100 cosmetic items. Emblems, titles, nameplates, badges. Never bought with real money, never an advantage.</p></div>
+      <div class="card"><div class="k">Online</div><h3>Unseen rivals</h3><p>Opted-in players share the map. You notice each other only through observed crime or a perception check. Whispers can be overheard.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap" style="text-align:center">
+    <div class="ey">// house rules</div>
+    <h2>How it makes money</h2>
+    <div class="pill">
+      <div><b>No ads</b><span>None. Not now, not ever.</span></div>
+      <div><b>No pay-to-win</b><span>Money buys playtime, never advantage.</span></div>
+      <div><b>Earned, not bought</b><span>Cosmetics are earned or granted. Cred is not for sale.</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="install">
+  <div class="wrap">
+    <div class="ey">// get in</div>
+    <h2>Install</h2>
+    <p style="color:var(--mut);max-width:52ch;margin:8px auto 0">Sideload the signed 35 MB APK. A browser installer (WebUSB, no tools) is coming with the first public release.</p>
+    <ol class="steps">
+      <li>Grab the APK from <a href="https://github.com/sworrl/dopewars-reup/releases">Releases</a>.</li>
+      <li>Run <code>adb install dopewars-reup.apk</code>, or use the web installer.</li>
+      <li>Verify it is genuine: <code>sha256sum -c SHA256SUMS.txt</code> and <code>apksigner verify --print-certs</code>.</li>
+    </ol>
+    <div class="cta" style="animation:none;opacity:1">
+      <a class="btn red" href="https://github.com/sworrl/dopewars-reup/releases">Releases</a>
+      <a class="btn ghost" href="https://github.com/sworrl/dopewars-reup">GitHub</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <b>Dope Wars: Re-Up</b> &nbsp;·&nbsp; No ads. No pay-to-win. Ever.
+    <div class="sub">Fiction. The crisis it draws from is not. Art is AI-generated placeholder; artists wanted. Licensing pending. Dev build.</div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var c=document.getElementById('gl'),gl=c.getContext('webgl')||c.getContext('experimental-webgl');
+  if(!gl){c.style.background='#0a0b0e';return;}
+  var vs='attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
+  var fs=['precision highp float;uniform vec2 u_res;uniform float u_time;',
+  'float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}',
+  'float noise(vec2 p){vec2 i=floor(p),f=fract(p);float a=hash(i),b=hash(i+vec2(1,0)),c=hash(i+vec2(0,1)),d=hash(i+vec2(1,1));vec2 u=f*f*(3.-2.*f);return mix(mix(a,b,u.x),mix(c,d,u.x),u.y);}',
+  'float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<5;i++){v+=a*noise(p);p*=2.02;a*=.5;}return v;}',
+  'void main(){vec2 p=(gl_FragCoord.xy-.5*u_res)/u_res.y;float t=u_time*.02;',
+  'float n=fbm(p*3.2+vec2(0.,t));float contour=abs(fract(n*7.0)-.5);float lines=smoothstep(.05,0.,contour);',
+  'vec3 col=vec3(.03,.035,.048)+vec3(.09,.10,.13)*lines*.5;float route=0.;',
+  'for(int i=0;i<3;i++){float fi=float(i);float x=.5*sin(p.y*1.4+t*3.+fi*2.3)*(.22+.06*fi)+(fi-1.)*.4;float d=abs(p.x-x);float fl=fract(p.y*.6-u_time*(.12+.05*fi));route+=smoothstep(.010,0.,d)*(.55+.45*fl);}',
+  'col+=vec3(.92,.20,.25)*route*.5;float vig=smoothstep(1.3,.4,length(p));col*=vig;col+=.006;gl_FragColor=vec4(col,1.);}'].join('\n');
+  function sh(t,s){var o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);return o;}
+  var pr=gl.createProgram();gl.attachShader(pr,sh(gl.VERTEX_SHADER,vs));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,fs));gl.linkProgram(pr);gl.useProgram(pr);
+  var bf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,bf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+  var lo=gl.getAttribLocation(pr,'p');gl.enableVertexAttribArray(lo);gl.vertexAttribPointer(lo,2,gl.FLOAT,false,0,0);
+  var uR=gl.getUniformLocation(pr,'u_res'),uT=gl.getUniformLocation(pr,'u_time'),dpr=Math.min(devicePixelRatio||1,1.5);
+  function sz(){c.width=c.clientWidth*dpr;c.height=c.clientHeight*dpr;gl.viewport(0,0,c.width,c.height);}
+  sz();addEventListener('resize',sz);
+  var reduce=matchMedia('(prefers-reduced-motion:reduce)').matches,t0=null;
+  function fr(ts){if(t0===null)t0=ts;gl.uniform2f(uR,c.width,c.height);gl.uniform1f(uT,(ts-t0)/1000);gl.drawArrays(gl.TRIANGLES,0,3);if(!reduce)requestAnimationFrame(fr);}
+  requestAnimationFrame(fr);
+})();
+</script>
+</body>
+</html>

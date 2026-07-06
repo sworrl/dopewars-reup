@@ -472,9 +472,36 @@ func buy_phone(listing: Dictionary) -> bool:
 	phone = listing.duplicate(true)
 	phone["battery"] = 100
 	phone["os"] = "stock"
+	phone["damage"] = 0            # pristine; wears with use, shows through the diegetic frame
 	phone_changed.emit()
 	save_to_disk()
 	return true
+
+## Physical wear, 0 (pristine) .. 100 (shattered). Drives the diegetic phone frame's cracks.
+func phone_damage() -> int:
+	return clampi(int(phone.get("damage", 0)), 0, 100)
+
+func phone_condition() -> String:
+	var d := phone_damage()
+	if d >= 75: return "shattered"
+	if d >= 45: return "cracked"
+	if d >= 20: return "scuffed"
+	return "pristine"
+
+## Repair the screen/body. Costs more for pricier phones and worse damage. Returns {ok, error, cost}.
+func repair_phone() -> Dictionary:
+	if not has_phone():
+		return {"ok": false, "error": "no phone"}
+	var d := phone_damage()
+	if d <= 0:
+		return {"ok": false, "error": "nothing to fix"}
+	var cost := int(round(20.0 + float(int(phone.get("tier", 0))) * 15.0 + float(d) * 2.0))
+	if not change_cash(-cost):
+		return {"ok": false, "error": "can't afford $%d" % cost}
+	phone["damage"] = 0
+	phone_changed.emit()
+	save_to_disk()
+	return {"ok": true, "cost": cost}
 
 ## Charge the phone. kind "wired" (fast) or "wireless" (convenient, some phones can't).
 func charge_phone(kind: String) -> bool:
@@ -501,6 +528,9 @@ func drain_phone() -> void:
 	if not has_phone():
 		return
 	phone["battery"] = maxi(0, phone_battery() - int(phone.get("drain_per_trip", 0)))
+	# Trips also wear the phone a little (jostling, drops). Cheaper phones aren't tougher here — the
+	# wear shows through the diegetic frame as scuffs → cracks → a shattered screen.
+	phone["damage"] = clampi(phone_damage() + randi_range(1, 3), 0, 100)
 	phone_changed.emit()
 
 # ---- trap houses --------------------------------------------------------

@@ -958,6 +958,15 @@ func _populate_phone_panel(content: VBoxContainer, dlg: AcceptDialog, rebuild: C
 		hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		content.add_child(hint)
 
+	# Physical condition (drives the diegetic phone frame's cracks).
+	var dmg := PlayerState.phone_damage()
+	var cond_lbl := Label.new()
+	cond_lbl.text = "Condition: %s (%d%% wear)" % [PlayerState.phone_condition().capitalize(), dmg]
+	cond_lbl.add_theme_font_size_override("font_size", 24)
+	cond_lbl.add_theme_color_override("font_color",
+		Color(0.35, 0.75, 0.45) if dmg < 20 else (Color(0.90, 0.68, 0.20) if dmg < 45 else ACCENT))
+	content.add_child(cond_lbl)
+
 	# Actions.
 	var wired := Button.new()
 	wired.text = "Charge (wired)  +%d%%" % int(p.get("charge_wired", 0))
@@ -975,6 +984,21 @@ func _populate_phone_panel(content: VBoxContainer, dlg: AcceptDialog, rebuild: C
 	wireless.disabled = wl_amt <= 0 or bat >= 100
 	wireless.pressed.connect(func(): if PlayerState.charge_phone("wireless"): rebuild.call())
 	content.add_child(wireless)
+
+	if dmg > 0:
+		var repair := Button.new()
+		var repair_cost := int(round(20.0 + float(int(p.get("tier", 0))) * 15.0 + float(dmg) * 2.0))
+		repair.text = "Repair screen  ·  $%s" % _comma(repair_cost)
+		repair.custom_minimum_size = Vector2(0, 96)
+		repair.add_theme_font_size_override("font_size", 24)
+		repair.pressed.connect(func():
+			var r := PlayerState.repair_phone()
+			if r.get("ok", false):
+				Notify.good("Screen repaired for $%s." % _comma(int(r.get("cost", 0))), "Phone")
+			else:
+				Notify.warn(String(r.get("error", "can't repair")), "Phone")
+			rebuild.call())
+		content.add_child(repair)
 
 	if PlayerState.phone_can_flash_graphene():
 		var flash := Button.new()

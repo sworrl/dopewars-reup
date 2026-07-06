@@ -42,7 +42,3 @@ This game uses real CDC overdose data, DEA threat assessments, and county crime 
 ## Funding
 
 Free to play. No ads, ever. No pay-to-win, ever. Monetization is purely cosmetic IAP, a $5/season cosmetic battle pass, an optional cosmetic supporter sub, and paid DLC story/region expansions. Donations welcome off-store via GitHub Sponsors / Liberapay / OpenCollective.
-
-## Reference
-
-The original `druglord2.exe` (Dope Wars clone, 1998-ish abandonware) lives in `../reference/` for mechanic reference. None of its code is used; this is a clean reimplementation.

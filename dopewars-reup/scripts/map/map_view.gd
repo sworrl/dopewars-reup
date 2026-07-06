@@ -52,20 +52,67 @@ func _process(dt: float) -> void:
 		_reposition_markers()
 	_refresh_visible_tiles()
 
+var _touches: Dictionary = {}       # finger index → screen pos (multi-touch, for pinch-to-zoom)
+var _pinch_base: float = 0.0
+const PINCH_IN := 1.35              # spread this much → zoom in one tile level
+const PINCH_OUT := 0.74            # pinch this much → zoom out one tile level
+
 func _unhandled_input(ev: InputEvent) -> void:
 	if ev is InputEventMouseButton:
 		var mb := ev as InputEventMouseButton
 		if mb.button_index == MOUSE_BUTTON_LEFT:
 			_handle_press_release(mb.pressed, mb.position)
+		elif mb.pressed and mb.button_index == MOUSE_BUTTON_WHEEL_UP:
+			_zoom_at(mb.position, 1)      # desktop: wheel zooms
+		elif mb.pressed and mb.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			_zoom_at(mb.position, -1)
 	elif ev is InputEventScreenTouch:
 		var st := ev as InputEventScreenTouch
-		_handle_press_release(st.pressed, st.position)
+		if st.pressed:
+			_touches[st.index] = st.position
+		else:
+			_touches.erase(st.index)
+		if _touches.size() >= 2:
+			_press_active = false        # two fingers → pinch, not pan/tap
+			_pinch_base = 0.0            # re-baseline on the next drag
+		else:
+			_pinch_base = 0.0
+			_handle_press_release(st.pressed, st.position)
 	elif ev is InputEventMouseMotion and _press_active:
 		var mm := ev as InputEventMouseMotion
 		_handle_motion(mm.position, mm.relative)
-	elif ev is InputEventScreenDrag and _press_active:
+	elif ev is InputEventScreenDrag:
 		var sd := ev as InputEventScreenDrag
-		_handle_motion(sd.position, sd.relative)
+		_touches[sd.index] = sd.position
+		if _touches.size() >= 2:
+			_handle_pinch()
+		elif _press_active:
+			_handle_motion(sd.position, sd.relative)
+
+## Two-finger pinch: when the finger spread changes past a threshold, step the tile zoom, keeping the
+## pinch midpoint fixed.
+func _handle_pinch() -> void:
+	var pts: Array = _touches.values()
+	var d: float = (pts[0] as Vector2).distance_to(pts[1] as Vector2)
+	if _pinch_base <= 0.0:
+		_pinch_base = d
+		return
+	var ratio := d / _pinch_base
+	if ratio >= PINCH_IN:
+		_zoom_at(((pts[0] + pts[1]) * 0.5), 1)
+		_pinch_base = d
+	elif ratio <= PINCH_OUT:
+		_zoom_at(((pts[0] + pts[1]) * 0.5), -1)
+		_pinch_base = d
+
+## Zoom one tile level toward/away, keeping the point under `screen_pos` roughly fixed.
+func _zoom_at(screen_pos: Vector2, delta: int) -> void:
+	var nz := clampi(zoom + delta, 3, 18)
+	if nz == zoom:
+		return
+	var world := camera.get_screen_center_position() - get_viewport_rect().size * 0.5 + screen_pos
+	var ll := Geo.world_px_to_latlon(world, zoom)
+	set_zoom(nz, ll.x, ll.y)
 
 func _handle_press_release(pressed: bool, screen_pos: Vector2) -> void:
 	if pressed:

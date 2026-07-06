@@ -58,6 +58,10 @@ window/vsync/vsync_mode=3
 
 theme/custom_font="res://assets/fonts/PlusJakartaSans-SemiBold.ttf"
 theme/default_font_size=32
+; Touch drag-to-scroll: with deadzone 0 a ScrollContainer never steals a drag that starts on a child
+; button, so only the scrollbar scrolls (the Pixel symptom). A small deadzone lets content-area drags
+; scroll everywhere. Applies to every ScrollContainer in the game.
+common/default_scroll_deadzone=24
 
 [physics]
 

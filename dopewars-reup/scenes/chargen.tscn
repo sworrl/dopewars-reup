@@ -37,7 +37,6 @@ anchor_bottom = 1.0
 [node name="V" type="VBoxContainer" parent="Scroll"]
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_vertical = 3
 theme_override_constants/separation = 14
 custom_minimum_size = Vector2(0, 4200)
 

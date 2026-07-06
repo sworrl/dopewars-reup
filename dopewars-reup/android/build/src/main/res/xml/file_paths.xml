@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- FileProvider roots the self-updater can share with the system package installer. `user://` (where
-     the downloaded APK lands) maps to the app's internal files dir; the extra roots are defensive. -->
-<paths>
-    <files-path name="internal" path="." />
-    <cache-path name="cache" path="." />
-    <external-files-path name="ext_files" path="." />
-</paths>

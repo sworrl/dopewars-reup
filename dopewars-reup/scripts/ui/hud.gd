@@ -925,6 +925,15 @@ func _populate_comms(content: VBoxContainer, state: Dictionary, rebuild: Callabl
 		await rebuild.call())
 	content.add_child(pres)
 
+	# Go unlimited (opens the web checkout — free is capped at 40 online actions/day).
+	var upgrade := Button.new()
+	upgrade.theme = ThemeFactory.make(ACCENT)
+	upgrade.custom_minimum_size = Vector2(0, 76)
+	upgrade.add_theme_font_size_override("font_size", 22)
+	upgrade.text = "Go unlimited (remove the daily cap)"
+	upgrade.pressed.connect(func(): PlayerState.open_upgrade_page())
+	content.add_child(upgrade)
+
 	# Tabs.
 	var chips := HBoxContainer.new()
 	chips.add_theme_constant_override("separation", 6)

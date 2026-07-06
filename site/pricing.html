@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dope Wars: Re-Up — Go Unlimited</title>
+<style>
+  :root { --bg:#0b0d12; --card:#12151d; --line:#232838; --red:#eb3340; --text:#e9ebf0; --muted:#8b92a3; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.5 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; }
+  .wrap { max-width:960px; margin:0 auto; padding:48px 20px 80px; }
+  h1 { font-size:2.2rem; margin:0 0 8px; }
+  h1 span { color:var(--red); }
+  .sub { color:var(--muted); margin:0 0 8px; }
+  .free { color:var(--muted); font-size:.95rem; margin:0 0 36px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:18px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:24px; display:flex; flex-direction:column; }
+  .card.best { border-color:var(--red); box-shadow:0 0 0 1px var(--red) inset; }
+  .tag { font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:var(--red); font-weight:700; }
+  .price { font-size:2rem; font-weight:800; margin:6px 0 2px; }
+  .per { color:var(--muted); font-size:.9rem; }
+  ul { list-style:none; padding:0; margin:16px 0 20px; color:var(--muted); font-size:.92rem; }
+  ul li { padding:4px 0 4px 22px; position:relative; }
+  ul li::before { content:"→"; color:var(--red); position:absolute; left:0; }
+  .btn { margin-top:auto; display:block; text-align:center; text-decoration:none; background:var(--red);
+         color:#fff; font-weight:700; padding:13px; border-radius:10px; }
+  .btn.ghost { background:transparent; color:var(--text); border:1px solid var(--line); }
+  .beta { margin:28px 0 0; padding:16px 18px; border:1px dashed var(--line); border-radius:12px; color:var(--muted); font-size:.9rem; }
+  .beta b { color:var(--text); }
+  .note { color:var(--muted); font-size:.82rem; margin-top:28px; }
+  .warn { color:#e6cb3c; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1><span>RE-UP</span> — go unlimited</h1>
+  <p class="sub">The Wire, not GTA. No ads, no pay-to-win — ever. You're only paying for playtime.</p>
+  <p class="free">Free forever: play the whole game offline, and online with <b>40 actions/day</b>.
+     Upgrading just removes the daily cap. It never buys an advantage.</p>
+
+  <div class="grid">
+    <div class="card">
+      <div class="tag">Monthly</div>
+      <div class="price">$3.99<span class="per"> /mo</span></div>
+      <ul><li>Unlimited online play</li><li>Cancel anytime</li></ul>
+      <a class="btn ghost" data-link="STRIPE_LINK_MONTHLY" href="#">Subscribe</a>
+    </div>
+    <div class="card best">
+      <div class="tag">Yearly · best value</div>
+      <div class="price">$29<span class="per"> /yr</span></div>
+      <ul><li>Unlimited online play</li><li>~40% off monthly</li></ul>
+      <a class="btn" data-link="STRIPE_LINK_YEARLY" href="#">Subscribe</a>
+    </div>
+    <div class="card">
+      <div class="tag">Lifetime</div>
+      <div class="price">$79<span class="per"> once</span></div>
+      <ul><li>Unlimited, forever</li><li>One payment, done</li></ul>
+      <a class="btn ghost" data-link="STRIPE_LINK_LIFETIME" href="#">Buy once</a>
+    </div>
+  </div>
+
+  <div class="beta">
+    <b>Beta supporters get it cheap — and keep that price.</b> Subscribe during the beta and your rate
+    is locked in for good, even after prices go up. That's Stripe's default for existing subscribers.
+    Beta links: <a class="btn ghost" style="display:inline;padding:2px 8px" data-link="STRIPE_LINK_BETA_MONTHLY" href="#">beta monthly</a>
+    <a class="btn ghost" style="display:inline;padding:2px 8px" data-link="STRIPE_LINK_BETA_YEARLY" href="#">beta yearly</a>
+  </div>
+
+  <p class="note" id="acct"></p>
+  <p class="note">Payment is handled by <b>Stripe</b>. We only capture billing details at purchase — free play needs no email or personal info.</p>
+</div>
+
+<script>
+  // The app opens this page as pricing.html?u=<your-account-id>. We attach it to Stripe as the
+  // client_reference_id so the webhook grants access to the right account.
+  var uid = new URLSearchParams(location.search).get("u") || "";
+  document.querySelectorAll("a[data-link]").forEach(function (a) {
+    var base = a.getAttribute("data-link");           // replaced with your real Stripe Payment Link
+    if (base && base.indexOf("http") === 0) {
+      a.href = base + (base.indexOf("?") < 0 ? "?" : "&") + "client_reference_id=" + encodeURIComponent(uid);
+    } else {
+      a.addEventListener("click", function (e) { e.preventDefault(); alert("Payment links not configured yet."); });
+    }
+  });
+  var el = document.getElementById("acct");
+  el.textContent = uid ? ("Purchasing for account " + uid.slice(0, 8) + "… — keep this tab open after paying.")
+                       : "Tip: open this page from the app's “Get more” button so your purchase links to your account.";
+</script>
+</body>
+</html>

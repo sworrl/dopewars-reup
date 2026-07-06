@@ -455,6 +455,13 @@ func apply_server_state(s: Dictionary) -> void:
 	position_changed.emit(lat, lon)
 	Notify.good("Online account synced — %s" % handle, "Backend")
 
+## Open the web checkout (Stripe) tied to this account. Payment happens on the site, not in-app, so
+## there's no store cut and no in-app-purchase requirement for the FOSS/sideload builds.
+const PRICING_URL := "https://dopewars.falcontechnix.com/pricing.html"
+func open_upgrade_page() -> void:
+	var acct := Supa.user_id
+	OS.shell_open(PRICING_URL + ("?u=" + acct if acct != "" else ""))
+
 func _rpc_err(r: Dictionary) -> String:
 	var j: Variant = r.get("json")
 	if typeof(j) == TYPE_DICTIONARY and (j as Dictionary).has("message"):

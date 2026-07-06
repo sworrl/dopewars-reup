@@ -824,6 +824,7 @@ func _show_arms() -> void:
 			c.queue_free()
 		for w in Weapons.by_category(state["cat"]):
 			list.add_child(_arms_row(w, _arms_rebuild))
+		Anim.pass_touch(list)
 	for cat in Weapons.categories():
 		var chip := Button.new()
 		chip.theme = ThemeFactory.make(ACCENT)
@@ -1407,6 +1408,7 @@ func _show_locker() -> void:
 			c.queue_free()
 		for item in Cosmetics.by_category(state["cat"]):
 			list.add_child(_build_cosmetic_row(item, rebuild_cb))
+		Anim.pass_touch(list)
 
 	# chips need `rebuild` to exist; wire after definition
 	for cat in Cosmetics.categories():
@@ -2191,6 +2193,7 @@ func show_market() -> void:
 		var row := _build_market_row(city_id, d, refresh_status)
 		list.add_child(row)
 		rows.append(row)
+	Anim.pass_touch(list)
 
 	# Size to the actual logical viewport — hardcoded px overflowed the ~830px
 	# logical width (window/stretch/scale=1.3) and pushed Sell off-screen.

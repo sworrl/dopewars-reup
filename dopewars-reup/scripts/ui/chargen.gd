@@ -55,6 +55,7 @@ func _ready() -> void:
 	_set_class_dependent_visibility(false)
 	_refresh_summary()
 	Anim.wire_button_haptics(self)
+	Anim.pass_touch($Scroll)          # let drags over class/stat buttons still scroll the page
 	Anim.fade_in(self, 0.3)
 
 # ---- class picker ---------------------------------------------------------
@@ -236,6 +237,7 @@ func _rebuild_perk_list() -> void:
 		btn.button_pressed = (perk.id == _picked_perk)
 		btn.toggled.connect(_on_perk_toggled.bind(perk.id))
 		perk_list.add_child(btn)
+	Anim.pass_touch(perk_list)         # new perk buttons must also pass drags to the scroll
 
 func _on_perk_toggled(pressed: bool, perk_id: String) -> void:
 	if pressed:

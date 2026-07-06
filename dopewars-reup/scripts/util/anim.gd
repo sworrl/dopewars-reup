@@ -10,6 +10,16 @@ extends Node
 
 var _reduced_motion: bool = false
 
+## Let touch-drags scroll THROUGH buttons and rows. A Button's default MOUSE_FILTER_STOP swallows a
+## drag that starts on it, so you can only scroll from the gaps. Setting interactive controls to
+## MOUSE_FILTER_PASS lets the drag reach the ScrollContainer while they stay tappable; text inputs
+## keep STOP so they can focus. Call on a scroll list's content after (re)building it.
+static func pass_touch(node: Node) -> void:
+	if node is Control and not (node is ScrollContainer or node is LineEdit or node is TextEdit or node is SpinBox):
+		(node as Control).mouse_filter = Control.MOUSE_FILTER_PASS
+	for c in node.get_children():
+		pass_touch(c)
+
 func set_reduced_motion(on: bool) -> void:
 	_reduced_motion = on
 

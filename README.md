@@ -117,6 +117,10 @@ What is built, and what is still locked.
 | Multiplayer backend: crews, presence, earshot/whisper/crew comms | ✅ server built + adversarially tested |
 | Client wired to live backend: server-authoritative market + buildings, state reconcile on login | ✅ live (verified vs live DB) |
 | Multiplayer client UI: crews, local/crew chat, whisper inbox, presence + proximity awareness | ✅ live (RPCs verified vs live DB) |
+| Freemium pay-to-play: free = capped online (server-counted), pay = unlimited — all server-enforced | ✅ live (adversarially verified 8/8) |
+| Web payments (Stripe): monthly/yearly/lifetime + grandfathered beta, webhook → grant | ✅ built + verified (needs your Stripe keys to go live) |
+| Account management: change password, save/upgrade (email), sign out | ✅ live (verified vs GoTrue) |
+| Profiles: level-gated avatars (private storage, RLS) + frame embellishments | ✅ backend + display (custom-upload picker pending) |
 | Human-made art replacing the AI placeholders | 🔒 wanted (see below) |
 
 ---

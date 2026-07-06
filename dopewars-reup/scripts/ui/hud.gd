@@ -925,6 +925,21 @@ func _populate_comms(content: VBoxContainer, state: Dictionary, rebuild: Callabl
 		await rebuild.call())
 	content.add_child(pres)
 
+	# Live freemium status (server-computed — never trusted to the client).
+	var st := await Supa.call_rpc("my_play_status")
+	var stj: Variant = st.get("json")
+	if typeof(stj) == TYPE_DICTIONARY and (stj as Dictionary).get("ok", false):
+		var sd := stj as Dictionary
+		var status := Label.new()
+		if bool(sd.get("unlimited", false)):
+			status.text = "Online: unlimited ✓"
+			status.add_theme_color_override("font_color", Color(0.35, 0.75, 0.45))
+		else:
+			status.text = "Free online: %d / %d actions left today" % [int(sd.get("remaining", 0)), int(sd.get("daily_cap", 0))]
+			status.add_theme_color_override("font_color", Color(0.90, 0.68, 0.20))
+		status.add_theme_font_size_override("font_size", 22)
+		content.add_child(status)
+
 	# Go unlimited (opens the web checkout — free is capped at 40 online actions/day).
 	var upgrade := Button.new()
 	upgrade.theme = ThemeFactory.make(ACCENT)
@@ -1963,6 +1978,13 @@ func show_market() -> void:
 	var vp := get_viewport().get_visible_rect().size
 	dlg.popup_centered(Vector2i(int(vp.x * 0.96), int(vp.y * 0.92)))
 
+## A free player who hit today's cap gets nudged to upgrade instead of a raw error.
+func _market_error(e: String) -> void:
+	if "daily_limit" in e:
+		Notify.warn("Daily free limit reached — Comms → Go unlimited to remove the cap.", "Market")
+	else:
+		Notify.warn(e, "Market")
+
 func _build_market_row(city_id: String, drug: Dictionary, refresh_status: Callable) -> Control:
 	var row := PanelContainer.new()
 	row.add_theme_stylebox_override("panel", _glass_row_stylebox())
@@ -2042,14 +2064,14 @@ func _build_market_row(city_id: String, drug: Dictionary, refresh_status: Callab
 	buy.pressed.connect(func():
 		var res: Dictionary = await PlayerState.buy_drug(drug.id, int(amt.value), city_id)
 		if not res.get("ok", false):
-			Notify.warn(String(res.get("error", "can't buy")), "Market")
+			_market_error(String(res.get("error", "can't buy")))
 		refresh_row.call()
 		refresh_status.call())
 
 	sell.pressed.connect(func():
 		var res: Dictionary = await PlayerState.sell_drug(drug.id, int(amt.value), city_id)
 		if not res.get("ok", false):
-			Notify.warn(String(res.get("error", "can't sell")), "Market")
+			_market_error(String(res.get("error", "can't sell")))
 		refresh_row.call()
 		refresh_status.call())
 

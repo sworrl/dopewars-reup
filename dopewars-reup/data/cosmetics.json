@@ -418,7 +418,7 @@
    "cost": 250,
    "supporter_only": false,
    "source": "store",
-   "art": ""
+   "art": "res://assets/sprites/cosmetics/nameplate_concrete.png"
   },
   {
    "id": "nameplate_neon_alley",
@@ -428,7 +428,7 @@
    "cost": 500,
    "supporter_only": false,
    "source": "store",
-   "art": ""
+   "art": "res://assets/sprites/cosmetics/nameplate_neon_alley.png"
   },
   {
    "id": "nameplate_evidence_locker",
@@ -438,7 +438,7 @@
    "cost": 1200,
    "supporter_only": false,
    "source": "store",
-   "art": ""
+   "art": "res://assets/sprites/cosmetics/nameplate_evidence_locker.png"
   },
   {
    "id": "nameplate_rust_rain",
@@ -448,7 +448,7 @@
    "cost": 500,
    "supporter_only": false,
    "source": "store",
-   "art": ""
+   "art": "res://assets/sprites/cosmetics/nameplate_rust_rain.png"
   },
   {
    "id": "nameplate_blacktop",
@@ -458,7 +458,7 @@
    "cost": 250,
    "supporter_only": false,
    "source": "store",
-   "art": ""
+   "art": "res://assets/sprites/cosmetics/nameplate_blacktop.png"
   },
   {
    "id": "nameplate_pill_bottle",
@@ -468,7 +468,7 @@
    "cost": 1200,
    "supporter_only": false,
    "source": "store",
-   "art": ""
+   "art": "res://assets/sprites/cosmetics/nameplate_pill_bottle.png"
   },
   {
    "id": "nameplate_turnpike",
@@ -478,7 +478,7 @@
    "cost": 250,
    "supporter_only": false,
    "source": "store",
-   "art": ""
+   "art": "res://assets/sprites/cosmetics/nameplate_turnpike.png"
   },
   {
    "id": "nameplate_riverfront",
@@ -488,7 +488,7 @@
    "cost": 500,
    "supporter_only": false,
    "source": "store",
-   "art": ""
+   "art": "res://assets/sprites/cosmetics/nameplate_riverfront.png"
   },
   {
    "id": "nameplate_section_8",
@@ -498,7 +498,7 @@
    "cost": 1200,
    "supporter_only": false,
    "source": "store",
-   "art": ""
+   "art": "res://assets/sprites/cosmetics/nameplate_section_8.png"
   },
   {
    "id": "nameplate_cut_corners",
@@ -508,7 +508,7 @@
    "cost": 500,
    "supporter_only": false,
    "source": "store",
-   "art": ""
+   "art": "res://assets/sprites/cosmetics/nameplate_cut_corners.png"
   },
   {
    "id": "nameplate_cold_open",
@@ -518,7 +518,7 @@
    "cost": 3000,
    "supporter_only": false,
    "source": "store",
-   "art": ""
+   "art": "res://assets/sprites/cosmetics/nameplate_cold_open.png"
   },
   {
    "id": "nameplate_static",
@@ -528,7 +528,7 @@
    "cost": 250,
    "supporter_only": false,
    "source": "store",
-   "art": ""
+   "art": "res://assets/sprites/cosmetics/nameplate_static.png"
   },
   {
    "id": "nameplate_burner_static",
@@ -538,7 +538,7 @@
    "cost": 500,
    "supporter_only": false,
    "source": "store",
-   "art": ""
+   "art": "res://assets/sprites/cosmetics/nameplate_burner_static.png"
   },
   {
    "id": "nameplate_trap_house_3am",
@@ -548,7 +548,7 @@
    "cost": 3000,
    "supporter_only": false,
    "source": "store",
-   "art": ""
+   "art": "res://assets/sprites/cosmetics/nameplate_trap_house_3am.png"
   },
   {
    "id": "nameplate_gold_foil",
@@ -558,7 +558,7 @@
    "cost": 0,
    "supporter_only": true,
    "source": "supporter",
-   "art": ""
+   "art": "res://assets/sprites/cosmetics/nameplate_gold_foil.png"
   },
   {
    "id": "frame_barbed_wire",

@@ -1,0 +1,40 @@
+# No-secrets build check. Green = the Godot project imports and boots without script/parse errors.
+# Signing + publishing releases stays LOCAL (the release keystore never touches GitHub) — see tools/release.sh.
+name: Build check
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: 4.6.2-stable
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Godot ${{ env.GODOT_VERSION }} (headless)
+        run: |
+          GV="$GODOT_VERSION"
+          curl -sL -o godot.zip "https://github.com/godotengine/godot/releases/download/$GV/Godot_v${GV}_linux.x86_64.zip"
+          unzip -q godot.zip
+          sudo mv "Godot_v${GV}_linux.x86_64" /usr/local/bin/godot
+          sudo chmod +x /usr/local/bin/godot
+          godot --version
+
+      - name: Import + compile/boot check
+        run: |
+          cd dopewars-reup
+          # Import resources (parses every script + .tscn), then boot headless for a few frames.
+          godot --headless --import 2>&1 | tee /tmp/import.log || true
+          godot --headless --quit-after 12 2>&1 | tee /tmp/run.log || true
+          # Fail on any real script/parse/scene-load error. (Headless GLES/audio/vulkan noise is ignored.)
+          if grep -qiE "SCRIPT ERROR|Parse Error|Compile Error|Failed to load script|Cannot open file|Invalid call" /tmp/import.log /tmp/run.log; then
+            echo "::error::compile/boot errors:"
+            grep -iE "SCRIPT ERROR|Parse Error|Compile Error|Failed to load script|Cannot open file|Invalid call" /tmp/import.log /tmp/run.log | head -40
+            exit 1
+          fi
+          echo "Build check passed — project imports and boots clean."

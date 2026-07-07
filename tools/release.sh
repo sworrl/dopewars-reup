@@ -49,12 +49,15 @@ echo ">> 4/6 checksums"
 
 echo ">> 5/6 update manifest (latest.json — the in-app Updater polls this)"
 REPO="${REPO:-sworrl/dopewars-reup}"
+# TAG is the git/release tag the assets live under. Defaults to v<version>, but override for suffixed
+# tags (e.g. TAG=v0.2.3-beta) so the manifest URL points at the actual release.
+TAG="${TAG:-v$VERSION}"
 APK_SHA="$(sha256sum "$APK" | cut -d' ' -f1)"
 NOTES="${NOTES:-See the release notes on GitHub.}"
 cat > "$OUT/latest.json" <<JSON
 {
   "version": "$VERSION",
-  "url": "https://github.com/$REPO/releases/download/v$VERSION/$(basename "$APK")",
+  "url": "https://github.com/$REPO/releases/download/$TAG/$(basename "$APK")",
   "sha256": "$APK_SHA",
   "notes": "$NOTES"
 }

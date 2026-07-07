@@ -45,3 +45,6 @@ Thumbs.db
 
 # assets/generated/** (full-res art) and android/build/libs/** (native libs) ARE committed so the
 # repo builds out of the box. Move both to Git LFS if the repo gets unwieldy.
+
+# one-of-one unique item defs (must never be public / datamineable)
+backend/private/

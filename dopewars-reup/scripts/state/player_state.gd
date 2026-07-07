@@ -72,6 +72,7 @@ signal aircraft_changed()
 
 # Owned weapons (ids from Weapons). busted_before = a record (fails the NICS legal background check).
 var weapons: Array = []
+var uniques: Array = []                  # one-of-one relics: [{code,name,category,threat,flavor}] — online only
 var busted_before: bool = false
 signal weapons_changed()
 
@@ -434,6 +435,8 @@ func owns_weapon(id: String) -> bool:
 ## Buy legally from an FFL / knife shop: NICS background check (a record = auto-deny, like real life),
 ## serial goes on record (traceable), NFA classes add the $200 stamp. Returns {ok, price, error}.
 func buy_weapon_legal(id: String) -> Dictionary:
+	if _online:
+		return await _buy_weapon_online(id, false)
 	var w := Weapons.by_id(id)
 	if w.is_empty():
 		return {"ok": false, "error": "no such weapon"}
@@ -456,6 +459,8 @@ func buy_weapon_legal(id: String) -> Dictionary:
 ## Buy off the black market: no check, no serial — but illegal iron draws heat, and the buy can go
 ## bad (sting/scam): a failed stealth/streetwise roll loses the cash AND gives you a record.
 func buy_weapon_black(id: String) -> Dictionary:
+	if _online:
+		return await _buy_weapon_online(id, true)
 	var w := Weapons.by_id(id)
 	if w.is_empty():
 		return {"ok": false, "error": "no such weapon"}
@@ -477,8 +482,29 @@ func buy_weapon_black(id: String) -> Dictionary:
 	save_to_disk()
 	return {"ok": true, "price": price, "serial": "none", "roll": r.text("clean", "close", "DEX")}
 
+## Server-authoritative weapon buy (online): cash is deducted + ownership recorded on the server, then
+## we re-sync so the Arsenal + cash reflect the truth. Legality/heat UX stays client-side.
+func _buy_weapon_online(id: String, black: bool) -> Dictionary:
+	var r := await Supa.call_rpc("buy_weapon", {"p_id": id, "p_black": black})
+	var j: Variant = r.get("json")
+	if r.get("ok", false) and typeof(j) == TYPE_DICTIONARY and (j as Dictionary).get("ok", false):
+		var st := await Supa.call_rpc("get_my_state")
+		if st.get("ok", false) and typeof(st.get("json")) == TYPE_DICTIONARY:
+			apply_server_state(st["json"])
+		return {"ok": true, "price": int((j as Dictionary).get("price", 0)), "serial": "none" if black else "on record"}
+	return {"ok": false, "error": _rpc_err(r)}
+
 ## Sell a weapon to a fence — no questions, but they take a cut (~45% of street value).
 func sell_weapon(id: String) -> Dictionary:
+	if _online:
+		var r := await Supa.call_rpc("sell_weapon", {"p_id": id})
+		var j: Variant = r.get("json")
+		if r.get("ok", false) and typeof(j) == TYPE_DICTIONARY and (j as Dictionary).get("ok", false):
+			var st := await Supa.call_rpc("get_my_state")
+			if st.get("ok", false) and typeof(st.get("json")) == TYPE_DICTIONARY:
+				apply_server_state(st["json"])
+			return {"ok": true, "payout": int((j as Dictionary).get("payout", 0))}
+		return {"ok": false, "error": _rpc_err(r)}
 	if id not in weapons:
 		return {"ok": false, "error": "you don't own that"}
 	var payout := int(Weapons.black_price(Weapons.by_id(id)) * 0.45)
@@ -495,6 +521,8 @@ func combat_power() -> int:
 	var wep := 0
 	for wid in weapons:
 		wep = maxi(wep, int(Weapons.by_id(String(wid)).get("threat", 0)))
+	for u in uniques:                                # a one-of-one relic outclasses any catalog piece
+		wep = maxi(wep, int((u as Dictionary).get("threat", 0)))
 	return base + wep - int(injury / 15)
 
 func add_injury(n: int) -> void:
@@ -643,6 +671,13 @@ func apply_server_state(s: Dictionary) -> void:
 	if typeof(cos) == TYPE_ARRAY:
 		owned_cosmetics = (cos as Array).duplicate()
 
+	var wps: Variant = s.get("weapons", null)
+	if typeof(wps) == TYPE_ARRAY:
+		weapons = (wps as Array).duplicate()
+	var uqs: Variant = s.get("uniques", null)
+	if typeof(uqs) == TYPE_ARRAY:
+		uniques = (uqs as Array).duplicate()
+
 	# Server buildings rows (no name column) → local keyed dict; synthesize a name from the kind.
 	var blds: Variant = s.get("buildings", [])
 	if typeof(blds) == TYPE_ARRAY:
@@ -663,6 +698,7 @@ func apply_server_state(s: Dictionary) -> void:
 	cred_changed.emit(cred)
 	inventory_changed.emit()
 	cosmetics_changed.emit()
+	weapons_changed.emit()
 	buildings_changed.emit()
 	position_changed.emit(lat, lon)
 	Notify.good("Online account synced — %s" % handle, "Backend")

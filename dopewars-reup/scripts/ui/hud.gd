@@ -999,17 +999,6 @@ func _char_arsenal(parent: Control) -> void:
 	head.add_theme_font_size_override("font_size", 24)
 	head.add_theme_color_override("font_color", ACCENT)
 	parent.add_child(head)
-	if PlayerState.weapons.is_empty():
-		parent.add_child(_char_empty("Unarmed. You're running on fists and nerve — hit Arms to gear up."))
-		return
-	# the weapon actually driving your power (highest threat) gets a badge
-	var best_id := ""
-	var best_threat := -1
-	for wid in PlayerState.weapons:
-		var t := int(Weapons.by_id(String(wid)).get("threat", 0))
-		if t > best_threat:
-			best_threat = t
-			best_id = String(wid)
 	var scroll := ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -1018,8 +1007,40 @@ func _char_arsenal(parent: Control) -> void:
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	grid.add_theme_constant_override("separation", 8)
 	scroll.add_child(grid)
+	# One-of-one relics first — the rarest thing you can own.
+	if not PlayerState.uniques.is_empty():
+		var uh := Label.new()
+		uh.text = "◆ One of One"
+		uh.add_theme_font_size_override("font_size", 20)
+		uh.add_theme_color_override("font_color", Color(0.95, 0.8, 0.35))
+		grid.add_child(uh)
+		for u in PlayerState.uniques:
+			grid.add_child(_unique_card(u as Dictionary))
+	if PlayerState.weapons.is_empty() and PlayerState.uniques.is_empty():
+		parent.remove_child(scroll)
+		scroll.queue_free()
+		parent.add_child(_char_empty("Unarmed. You're running on fists and nerve — hit Arms to gear up."))
+		return
+	# the weapon actually driving your power (highest threat) gets a badge, unless a relic outclasses it
+	var best_id := ""
+	var best_threat := -1
 	for wid in PlayerState.weapons:
-		grid.add_child(_weapon_card(String(wid), String(wid) == best_id))
+		var t := int(Weapons.by_id(String(wid)).get("threat", 0))
+		if t > best_threat:
+			best_threat = t
+			best_id = String(wid)
+	var relic_leads := false
+	for u in PlayerState.uniques:
+		if int((u as Dictionary).get("threat", 0)) >= best_threat:
+			relic_leads = true
+	if not PlayerState.weapons.is_empty():
+		var wh := Label.new()
+		wh.text = "Firearms & blades"
+		wh.add_theme_font_size_override("font_size", 20)
+		wh.add_theme_color_override("font_color", Color(0.72, 0.75, 0.82))
+		grid.add_child(wh)
+		for wid in PlayerState.weapons:
+			grid.add_child(_weapon_card(String(wid), String(wid) == best_id and not relic_leads))
 	Anim.pass_touch(grid)
 
 func _weapon_card(wid: String, is_best: bool) -> Control:
@@ -1051,6 +1072,51 @@ func _weapon_card(wid: String, is_best: bool) -> Control:
 	pw.add_theme_font_size_override("font_size", 28)
 	pw.add_theme_color_override("font_color", ACCENT if is_best else Color(0.7, 0.72, 0.78))
 	hb.add_child(pw)
+	return row
+
+## A one-of-one relic card — gilded, with its mystery flavor. There is exactly one of these in the world.
+func _unique_card(u: Dictionary) -> Control:
+	var gold := Color(0.95, 0.8, 0.35)
+	var row := PanelContainer.new()
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.16, 0.13, 0.05, 0.9)
+	sb.border_color = gold
+	sb.set_border_width_all(3)
+	sb.set_corner_radius_all(14)
+	sb.content_margin_left = 12
+	sb.content_margin_right = 12
+	sb.content_margin_top = 10
+	sb.content_margin_bottom = 10
+	row.add_theme_stylebox_override("panel", sb)
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 4)
+	row.add_child(col)
+	var top := HBoxContainer.new()
+	top.add_theme_constant_override("separation", 8)
+	col.add_child(top)
+	var nm := Label.new()
+	nm.text = String(u.get("name", "Relic"))
+	nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	nm.add_theme_font_size_override("font_size", 24)
+	nm.add_theme_color_override("font_color", gold)
+	top.add_child(nm)
+	var pw := Label.new()
+	pw.text = "+%d" % int(u.get("threat", 0))
+	pw.add_theme_font_size_override("font_size", 26)
+	pw.add_theme_color_override("font_color", gold)
+	top.add_child(pw)
+	var badge := Label.new()
+	badge.text = "◆ ONE OF ONE  ·  %s" % String(u.get("category", "relic")).capitalize()
+	badge.add_theme_font_size_override("font_size", 14)
+	badge.add_theme_color_override("font_color", Color(0.85, 0.72, 0.4))
+	col.add_child(badge)
+	if String(u.get("flavor", "")) != "":
+		var fl := Label.new()
+		fl.text = String(u.get("flavor"))
+		fl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		fl.add_theme_font_size_override("font_size", 16)
+		fl.add_theme_color_override("font_color", Color(0.78, 0.76, 0.7))
+		col.add_child(fl)
 	return row
 
 # ---- packages tab -------------------------------------------------------
@@ -1281,7 +1347,7 @@ func _arms_row(w: Dictionary, refresh: Callable) -> Control:
 			lb.text = "Legal"
 			lb.add_theme_font_size_override("font_size", 18)
 			lb.pressed.connect(func():
-				var r := PlayerState.buy_weapon_legal(String(w.id))
+				var r: Dictionary = await PlayerState.buy_weapon_legal(String(w.id))
 				if r.get("ok", false):
 					Notify.good("%s — serial on record." % w.name, "Arms")
 				else:
@@ -1293,7 +1359,7 @@ func _arms_row(w: Dictionary, refresh: Callable) -> Control:
 		bb.text = "Black"
 		bb.add_theme_font_size_override("font_size", 18)
 		bb.pressed.connect(func():
-			var r := PlayerState.buy_weapon_black(String(w.id))
+			var r: Dictionary = await PlayerState.buy_weapon_black(String(w.id))
 			if r.get("ok", false):
 				Notify.good("%s — no serial." % w.name, "Arms")
 			else:
@@ -1306,7 +1372,7 @@ func _arms_row(w: Dictionary, refresh: Callable) -> Control:
 		sell.text = "Fence"
 		sell.add_theme_font_size_override("font_size", 18)
 		sell.pressed.connect(func():
-			var r := PlayerState.sell_weapon(String(w.id))
+			var r: Dictionary = await PlayerState.sell_weapon(String(w.id))
 			if r.get("ok", false):
 				Notify.good("Fenced %s for $%s." % [w.name, _comma(int(r.get("payout", 0)))], "Arms")
 			refresh.call())
@@ -2684,6 +2750,23 @@ func _reveal_contents(col: VBoxContainer, c: Dictionary) -> void:
 		col.add_child(_loot_line("%s CRED" % _comma(int(c.get("cred", 0))), Color(0.85, 0.65, 0.25)))
 	if int(c.get("xp", 0)) > 0:
 		col.add_child(_loot_line("%d XP" % int(c.get("xp", 0)), Color(0.35, 0.7, 0.95)))
+	# a rolled one-of-one relic — the headline of the box
+	if c.get("rolled_unique") is Dictionary:
+		var u: Dictionary = c.get("rolled_unique")
+		var gold := Color(0.95, 0.8, 0.35)
+		col.add_child(_loot_line("◆ ONE OF ONE — %s" % String(u.get("name", "relic")), gold))
+		if String(u.get("flavor", "")) != "":
+			var fl := Label.new()
+			fl.text = String(u.get("flavor"))
+			fl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			fl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			fl.add_theme_font_size_override("font_size", 15)
+			fl.add_theme_color_override("font_color", Color(0.8, 0.76, 0.66))
+			col.add_child(fl)
+	if c.get("weapons") is Array:
+		for wid in (c.get("weapons") as Array):
+			var wn := String(Weapons.by_id(String(wid)).get("name", wid))
+			col.add_child(_loot_line("%s  ·  power %d" % [wn, int(Weapons.by_id(String(wid)).get("threat", 0))], Color(0.8, 0.55, 0.45)))
 	if c.get("cosmetics") is Array:
 		for cid in (c.get("cosmetics") as Array):
 			var cos := Cosmetics.by_id(String(cid))

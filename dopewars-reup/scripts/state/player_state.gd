@@ -760,9 +760,21 @@ func _on_signed_in(ok: bool) -> void:
 	var res := await Supa.call_rpc("get_my_state")
 	if res.get("ok", false) and typeof(res.get("json")) == TYPE_DICTIONARY:
 		apply_server_state(res["json"])
+	var ps := await Supa.call_rpc("my_play_status")
+	if ps.get("ok", false) and typeof(ps.get("json")) == TYPE_DICTIONARY:
+		var pj: Dictionary = ps["json"]
+		online_tier = String(pj.get("tier", ""))
+		online_unlimited = bool(pj.get("unlimited", false))
+		play_status_changed.emit()
 	await _check_packages()
 
 signal package_ready(pkg: Dictionary)   # {id, name, description, contents} — a welcome/care package to claim
+signal packages_changed                 # the pending-package list changed (granted or opened)
+signal play_status_changed              # online tier / entitlement refreshed
+
+var pending_packages: Array = []        # unopened boxes: [{id, name, description, contents}] — shown as mystery boxes
+var online_tier: String = ""            # server tier (founder/premium/beta/free/…) once synced
+var online_unlimited: bool = false      # true = no daily cap (paid/founder/lifetime)
 
 ## After login, surface any packages waiting to be claimed (welcome kit, care drops, event rewards).
 func _check_packages() -> void:
@@ -771,8 +783,13 @@ func _check_packages() -> void:
 	var r := await Supa.call_rpc("my_pending_packages")
 	var j: Variant = r.get("json")
 	if r.get("ok", false) and typeof(j) == TYPE_ARRAY:
-		for pkg in j:
-			package_ready.emit(pkg)
+		# Packages sit as unopened mystery boxes (Character → Packages) until the player opens them —
+		# contents stay hidden. Just nudge that they're waiting.
+		pending_packages = (j as Array).duplicate()
+		packages_changed.emit()
+		if not pending_packages.is_empty():
+			var n := pending_packages.size()
+			Notify.info("%d unopened package%s waiting — Character → Packages." % [n, "" if n == 1 else "s"], "Mail")
 
 ## Claim a queued package — the server applies the contents; we re-sync authoritative state after.
 func claim_package(pkg_id: int) -> Dictionary:
@@ -782,6 +799,11 @@ func claim_package(pkg_id: int) -> Dictionary:
 		var st := await Supa.call_rpc("get_my_state")
 		if st.get("ok", false) and typeof(st.get("json")) == TYPE_DICTIONARY:
 			apply_server_state(st["json"])
+		for i in range(pending_packages.size()):
+			if int(pending_packages[i].get("id", -1)) == pkg_id:
+				pending_packages.remove_at(i)
+				break
+		packages_changed.emit()
 		return {"ok": true, "contents": (j as Dictionary).get("contents", {})}
 	return {"ok": false, "error": _rpc_err(r)}
 

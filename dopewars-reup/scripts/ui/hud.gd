@@ -58,7 +58,6 @@ func _ready() -> void:
 	PlayerState.travel_canceled.connect(_refresh)
 	PlayerState.travel_arrived.connect(_on_arrived)
 	PlayerState.busted_at_airport.connect(_on_busted)
-	PlayerState.package_ready.connect(_show_package)
 	PlayerState.street_encounter.connect(_show_encounter)
 	PlayerState.notoriety_changed.connect(func(_n): _refresh())
 	PlayerState.injury_changed.connect(func(_n): _refresh())
@@ -782,7 +781,7 @@ func _build_arms_button() -> void:
 
 # ---- character sheet ----------------------------------------------------
 
-const _CHAR_TABS := ["Profile", "Stash", "Arsenal"]
+const _CHAR_TABS := ["Profile", "Stash", "Arsenal", "Packages"]
 const _STAT_ORDER := ["STR", "DEX", "CON", "INT", "WIS", "CHA"]
 var _char_body: Control
 var _char_dlg: AcceptDialog
@@ -833,7 +832,8 @@ func _char_show(idx: int, tab_btns: Array) -> void:
 	match idx:
 		0: _char_profile(_char_body)
 		1: _char_stash(_char_body)
-		_: _char_arsenal(_char_body)
+		2: _char_arsenal(_char_body)
+		_: _char_packages(_char_body, tab_btns)
 
 # ---- profile tab --------------------------------------------------------
 
@@ -891,6 +891,15 @@ func _char_profile(parent: Control) -> void:
 	chips.add_child(_char_chip("Heat %d" % PlayerState.notoriety, _heat_color(PlayerState.notoriety)))
 	if PlayerState.injury > 0:
 		chips.add_child(_char_chip("Hurt %d%%" % PlayerState.injury, Color(0.9, 0.3, 0.3)))
+	# Online tier — top-tier / all-access shows as a gold badge.
+	if PlayerState.online_tier != "":
+		var tier_txt := PlayerState.online_tier.capitalize()
+		if PlayerState.online_unlimited:
+			tier_txt += "  ·  All-Access"
+		chips.add_child(_char_chip(tier_txt, Color(0.9, 0.72, 0.3)))
+	var owned_cos := PlayerState.owned_cosmetics.size()
+	if owned_cos > 0:
+		chips.add_child(_char_chip("%d/100 cosmetics" % owned_cos, Color(0.55, 0.75, 0.55)))
 	# stat bars
 	var sh := Label.new()
 	sh.text = "Stats"
@@ -1043,6 +1052,58 @@ func _weapon_card(wid: String, is_best: bool) -> Control:
 	pw.add_theme_color_override("font_color", ACCENT if is_best else Color(0.7, 0.72, 0.78))
 	hb.add_child(pw)
 	return row
+
+# ---- packages tab -------------------------------------------------------
+
+func _char_packages(parent: Control, tab_btns: Array) -> void:
+	var head := Label.new()
+	head.text = "Unopened packages"
+	head.add_theme_font_size_override("font_size", 24)
+	head.add_theme_color_override("font_color", ACCENT)
+	parent.add_child(head)
+	if PlayerState.pending_packages.is_empty():
+		parent.add_child(_char_empty("No packages waiting. Care drops and event rewards land here as sealed boxes."))
+		return
+	var hint := Label.new()
+	hint.text = "Tap a box to open it — you won't know what's inside until you do."
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	hint.add_theme_font_size_override("font_size", 15)
+	hint.add_theme_color_override("font_color", Color(0.58, 0.6, 0.66))
+	parent.add_child(hint)
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	parent.add_child(scroll)
+	var grid := HFlowContainer.new()
+	grid.add_theme_constant_override("h_separation", 14)
+	grid.add_theme_constant_override("v_separation", 14)
+	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(grid)
+	for pkg in PlayerState.pending_packages:
+		grid.add_child(_package_tile(pkg, tab_btns))
+	Anim.pass_touch(grid)
+
+## A tappable sealed box in the Packages grid.
+func _package_tile(pkg: Dictionary, tab_btns: Array) -> Control:
+	var kind := _pkg_kind(pkg)
+	var card := VBoxContainer.new()
+	card.add_theme_constant_override("separation", 6)
+	var btn := Button.new()
+	btn.flat = true
+	btn.custom_minimum_size = Vector2(150, 150)
+	btn.add_child(_package_box(kind, 150.0))
+	btn.pressed.connect(func(): _open_package(pkg, func():
+		if is_instance_valid(_char_body):
+			_char_show(3, tab_btns)))
+	card.add_child(btn)
+	var nm := Label.new()
+	nm.text = String(pkg.get("name", "Package"))
+	nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	nm.custom_minimum_size = Vector2(150, 0)
+	nm.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	nm.add_theme_font_size_override("font_size", 16)
+	card.add_child(nm)
+	return card
 
 # ---- character-sheet helpers -------------------------------------------
 
@@ -2550,46 +2611,170 @@ func show_market() -> void:
 	var vp := get_viewport().get_visible_rect().size
 	dlg.popup_centered(Vector2i(int(vp.x * 0.96), int(vp.y * 0.92)))
 
-## A welcome/care package landed — show what's inside and claim it.
-func _show_package(pkg: Dictionary) -> void:
+## Open an unopened mystery box: its contents stay SEALED until you hit Open, then they're revealed and
+## claimed (server-authoritative). Called from the Character → Packages tab.
+func _open_package(pkg: Dictionary, on_claimed := Callable()) -> void:
 	var dlg := AcceptDialog.new()
 	dlg.title = String(pkg.get("name", "Package"))
-	dlg.ok_button_text = "Claim it"
+	dlg.get_ok_button().visible = false
 	add_child(dlg)
 	_glassify_dialog(dlg)
+	dlg.canceled.connect(func(): dlg.queue_free())
+	var vp := get_viewport().get_visible_rect().size
 	var col := VBoxContainer.new()
-	col.add_theme_constant_override("separation", 10)
+	col.add_theme_constant_override("separation", 14)
+	col.custom_minimum_size = Vector2(vp.x * 0.8, 0)
 	dlg.add_child(col)
 	col.add_child(_sheet_header(String(pkg.get("name", "Package"))))
-	var desc := Label.new()
-	desc.text = String(pkg.get("description", ""))
-	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	desc.custom_minimum_size = Vector2(get_viewport().get_visible_rect().size.x * 0.8, 0)
-	desc.add_theme_font_size_override("font_size", 24)
-	col.add_child(desc)
-	# Contents summary.
-	var c: Dictionary = pkg.get("contents", {})
-	var parts: Array = []
-	if int(c.get("cash", 0)) > 0: parts.append("$%s" % _comma(int(c.get("cash", 0))))
-	if int(c.get("cred", 0)) > 0: parts.append("%s CRED" % _comma(int(c.get("cred", 0))))
-	if int(c.get("xp", 0)) > 0: parts.append("%d XP" % int(c.get("xp", 0)))
-	if c.get("cosmetics") is Array and not (c.get("cosmetics") as Array).is_empty():
-		parts.append("%d cosmetic(s)" % (c.get("cosmetics") as Array).size())
-	if not parts.is_empty():
-		var cl := Label.new()
-		cl.text = "Inside: " + ", ".join(parts)
-		cl.add_theme_font_size_override("font_size", 22)
-		cl.add_theme_color_override("font_color", ACCENT)
-		col.add_child(cl)
-	dlg.confirmed.connect(func():
+	var kind := _pkg_kind(pkg)
+	var box := _package_box(kind, 220.0)
+	box.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	col.add_child(box)
+	var seal := Label.new()
+	seal.text = "Sealed — open to reveal what's inside."
+	seal.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	seal.add_theme_font_size_override("font_size", 20)
+	seal.add_theme_color_override("font_color", Color(0.7, 0.72, 0.78))
+	col.add_child(seal)
+	var open_btn := Button.new()
+	open_btn.theme = ThemeFactory.make(ACCENT)
+	open_btn.text = "Open"
+	open_btn.custom_minimum_size = Vector2(0, 84)
+	open_btn.add_theme_font_size_override("font_size", 26)
+	col.add_child(open_btn)
+	open_btn.pressed.connect(func():
+		open_btn.disabled = true
+		seal.text = "Opening…"
+		var t := box.create_tween()
+		t.set_loops(3)
+		t.tween_property(box, "rotation", 0.08, 0.05)
+		t.tween_property(box, "rotation", -0.08, 0.05)
+		t.tween_property(box, "rotation", 0.0, 0.03)
 		var r: Dictionary = await PlayerState.claim_package(int(pkg.get("id", 0)))
-		if r.get("ok", false):
-			Notify.good("Claimed — enjoy.", String(pkg.get("name", "Package")))
-		else:
-			Notify.warn(String(r.get("error", "couldn't claim")), "Package")
-		dlg.queue_free())
-	dlg.canceled.connect(func(): dlg.queue_free())
+		if not r.get("ok", false):
+			Notify.warn(String(r.get("error", "couldn't open")), "Package")
+			dlg.queue_free()
+			return
+		box.queue_free()
+		seal.queue_free()
+		open_btn.queue_free()
+		_reveal_contents(col, r.get("contents", {}))
+		if on_claimed.is_valid():
+			on_claimed.call()
+		var done := Button.new()
+		done.theme = ThemeFactory.make(ACCENT)
+		done.text = "Collect"
+		done.custom_minimum_size = Vector2(0, 84)
+		done.add_theme_font_size_override("font_size", 26)
+		done.pressed.connect(func(): dlg.queue_free())
+		col.add_child(done))
 	dlg.popup_centered()
+
+## Build the "you got" reveal list from a claimed package's contents, with rarity-colored cosmetic names.
+func _reveal_contents(col: VBoxContainer, c: Dictionary) -> void:
+	var h := Label.new()
+	h.text = "You got"
+	h.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	h.add_theme_font_size_override("font_size", 26)
+	h.add_theme_color_override("font_color", Color(0.35, 0.8, 0.45))
+	col.add_child(h)
+	if int(c.get("cash", 0)) > 0:
+		col.add_child(_loot_line("$%s cash" % _comma(int(c.get("cash", 0))), Color(0.35, 0.75, 0.45)))
+	if int(c.get("cred", 0)) > 0:
+		col.add_child(_loot_line("%s CRED" % _comma(int(c.get("cred", 0))), Color(0.85, 0.65, 0.25)))
+	if int(c.get("xp", 0)) > 0:
+		col.add_child(_loot_line("%d XP" % int(c.get("xp", 0)), Color(0.35, 0.7, 0.95)))
+	if c.get("cosmetics") is Array:
+		for cid in (c.get("cosmetics") as Array):
+			var cos := Cosmetics.by_id(String(cid))
+			var rarity := String(cos.get("rarity", "common"))
+			var nm := "%s  ·  %s" % [String(cos.get("name", cid)), rarity.capitalize()]
+			col.add_child(_loot_line(nm, Cosmetics.rarity_color(rarity)))
+	if c.get("inventory") is Dictionary:
+		for drug in (c.get("inventory") as Dictionary).keys():
+			var g := int((c.get("inventory") as Dictionary)[drug])
+			col.add_child(_loot_line("%dg %s" % [g, String(Drugs.by_id(String(drug)).get("name", drug))], Color(0.7, 0.72, 0.8)))
+
+func _loot_line(text: String, col: Color) -> Control:
+	var p := PanelContainer.new()
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(col.r, col.g, col.b, 0.15)
+	sb.border_color = col
+	sb.set_border_width_all(2)
+	sb.set_corner_radius_all(12)
+	sb.content_margin_left = 14
+	sb.content_margin_right = 14
+	sb.content_margin_top = 10
+	sb.content_margin_bottom = 10
+	p.add_theme_stylebox_override("panel", sb)
+	var l := Label.new()
+	l.text = text
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	l.add_theme_font_size_override("font_size", 22)
+	l.add_theme_color_override("font_color", Color(0.95, 0.96, 0.98))
+	p.add_child(l)
+	return p
+
+# ---- mystery-box art (drawn, by kind) -----------------------------------
+
+func _pkg_kind(pkg: Dictionary) -> String:
+	var n := String(pkg.get("name", "")).to_lower()
+	if "welcome" in n or "pioneer" in n: return "welcome"
+	if "supporter" in n: return "supporter"
+	if "award" in n: return "award"
+	return "care"
+
+func _pkg_color(kind: String) -> Color:
+	match kind:
+		"welcome": return Color(0.9, 0.72, 0.28)     # gold
+		"supporter": return Color(0.6, 0.42, 0.85)   # purple
+		"award": return ACCENT                        # red
+		_: return Color(0.3, 0.6, 0.9)                # care blue
+
+## A drawn present/crate — a distinct box per kind, no emoji. Rotatable (pivot centered) for the shake.
+func _package_box(kind: String, px: float) -> Control:
+	var col := _pkg_color(kind)
+	var wrap := Control.new()
+	wrap.custom_minimum_size = Vector2(px, px)
+	wrap.size = Vector2(px, px)
+	wrap.pivot_offset = Vector2(px * 0.5, px * 0.5)
+	# body
+	var body := Panel.new()
+	var bsb := StyleBoxFlat.new()
+	bsb.bg_color = Color(col.r * 0.6, col.g * 0.6, col.b * 0.6, 1.0)
+	bsb.border_color = col
+	bsb.set_border_width_all(4)
+	bsb.set_corner_radius_all(14)
+	body.add_theme_stylebox_override("panel", bsb)
+	body.position = Vector2(px * 0.12, px * 0.28)
+	body.size = Vector2(px * 0.76, px * 0.62)
+	wrap.add_child(body)
+	# lid
+	var lid := Panel.new()
+	var lsb := StyleBoxFlat.new()
+	lsb.bg_color = col
+	lsb.set_corner_radius_all(10)
+	lid.add_theme_stylebox_override("panel", lsb)
+	lid.position = Vector2(px * 0.06, px * 0.18)
+	lid.size = Vector2(px * 0.88, px * 0.16)
+	wrap.add_child(lid)
+	# vertical ribbon
+	var ribbon := ColorRect.new()
+	ribbon.color = Color(col.r, col.g, col.b, 0.9)
+	ribbon.position = Vector2(px * 0.44, px * 0.18)
+	ribbon.size = Vector2(px * 0.12, px * 0.72)
+	wrap.add_child(ribbon)
+	# the mystery mark
+	var q := Label.new()
+	q.text = "?"
+	q.add_theme_font_size_override("font_size", int(px * 0.34))
+	q.add_theme_color_override("font_color", Color(1, 1, 1, 0.92))
+	q.position = Vector2(px * 0.5 - px * 0.1, px * 0.4)
+	q.size = Vector2(px * 0.2, px * 0.3)
+	q.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	q.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	wrap.add_child(q)
+	return wrap
 
 ## You got jumped on arrival — Fight (your weapons + power), Run (stealth), or Pay.
 func _show_encounter(enc: Dictionary) -> void:

@@ -767,6 +767,356 @@ func _build_arms_button() -> void:
 	btn.pressed.connect(Anim.tap_press.bind(btn))
 	add_child(btn)
 
+	var me := Button.new()
+	me.theme = ThemeFactory.make(ACCENT)
+	me.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	me.offset_left = 20
+	me.offset_right = 250
+	me.offset_top = 626
+	me.offset_bottom = 716
+	me.text = "Character"
+	me.add_theme_font_size_override("font_size", 24)
+	me.pressed.connect(_show_character)
+	me.pressed.connect(Anim.tap_press.bind(me))
+	add_child(me)
+
+# ---- character sheet ----------------------------------------------------
+
+const _CHAR_TABS := ["Profile", "Stash", "Arsenal"]
+const _STAT_ORDER := ["STR", "DEX", "CON", "INT", "WIS", "CHA"]
+var _char_body: Control
+var _char_dlg: AcceptDialog
+
+## The player's character sheet — a visual, tabbed identity screen: portrait + stats, what you're
+## holding, and your arsenal. Tap the tabs (or the item cards) to move around.
+func _show_character() -> void:
+	var dlg := AcceptDialog.new()
+	dlg.title = "Character"
+	dlg.ok_button_text = "Close"
+	add_child(dlg)
+	_glassify_dialog(dlg)
+	dlg.confirmed.connect(func(): dlg.queue_free())
+	dlg.canceled.connect(func(): dlg.queue_free())
+	_char_dlg = dlg
+	var vp := get_viewport().get_visible_rect().size
+	var root := VBoxContainer.new()
+	root.add_theme_constant_override("separation", 12)
+	root.custom_minimum_size = Vector2(vp.x * 0.92, vp.y * 0.84)
+	dlg.add_child(root)
+	var tabs := HBoxContainer.new()
+	tabs.add_theme_constant_override("separation", 8)
+	root.add_child(tabs)
+	var tab_btns: Array = []
+	for i in _CHAR_TABS.size():
+		var tb := Button.new()
+		tb.theme = ThemeFactory.make(ACCENT)
+		tb.text = _CHAR_TABS[i]
+		tb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		tb.custom_minimum_size = Vector2(0, 70)
+		tb.add_theme_font_size_override("font_size", 22)
+		var idx := i
+		tb.pressed.connect(func(): _char_show(idx, tab_btns))
+		tabs.add_child(tb)
+		tab_btns.append(tb)
+	_char_body = VBoxContainer.new()
+	_char_body.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_char_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	root.add_child(_char_body)
+	_char_show(0, tab_btns)
+	dlg.popup_centered(Vector2i(int(vp.x * 0.96), int(vp.y * 0.92)))
+
+func _char_show(idx: int, tab_btns: Array) -> void:
+	for i in tab_btns.size():
+		tab_btns[i].modulate = Color(1, 1, 1, 1.0 if i == idx else 0.45)
+	for c in _char_body.get_children():
+		c.queue_free()
+	match idx:
+		0: _char_profile(_char_body)
+		1: _char_stash(_char_body)
+		_: _char_arsenal(_char_body)
+
+# ---- profile tab --------------------------------------------------------
+
+func _char_profile(parent: Control) -> void:
+	var top := HBoxContainer.new()
+	top.add_theme_constant_override("separation", 16)
+	parent.add_child(top)
+	# class portrait
+	var port_path := "res://assets/sprites/portraits/%s.png" % PlayerState.class_id
+	if ResourceLoader.exists(port_path):
+		var pf := PanelContainer.new()
+		pf.add_theme_stylebox_override("panel", _glass_row_stylebox())
+		var tex := TextureRect.new()
+		tex.texture = load(port_path)
+		tex.custom_minimum_size = Vector2(200, 200)
+		tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		pf.add_child(tex)
+		top.add_child(pf)
+	var idcol := VBoxContainer.new()
+	idcol.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	idcol.add_theme_constant_override("separation", 4)
+	top.add_child(idcol)
+	var name_lbl := Label.new()
+	name_lbl.text = PlayerState.handle if PlayerState.handle != "" else "—"
+	name_lbl.add_theme_font_size_override("font_size", 40)
+	name_lbl.add_theme_color_override("font_color", ACCENT)
+	idcol.add_child(name_lbl)
+	var cls := CharClasses.by_id(PlayerState.class_id)
+	var cls_lbl := Label.new()
+	cls_lbl.text = "%s  ·  Level %d" % [String(cls.get("name", PlayerState.class_id)), PlayerState.level()]
+	cls_lbl.add_theme_font_size_override("font_size", 22)
+	cls_lbl.add_theme_color_override("font_color", Color(0.8, 0.82, 0.88))
+	idcol.add_child(cls_lbl)
+	# XP bar toward next level
+	var lv := PlayerState.level()
+	var floor_xp := PlayerState.xp_for_level(lv)
+	var next_xp := PlayerState.xp_for_level(lv + 1)
+	var xp_frac := clampf(float(PlayerState.xp - floor_xp) / maxf(float(next_xp - floor_xp), 1.0), 0.0, 1.0)
+	idcol.add_child(_char_bar(xp_frac, Color(0.35, 0.7, 0.95), 16))
+	var xp_lbl := Label.new()
+	xp_lbl.text = "%d XP  ·  %d to level %d" % [PlayerState.xp, PlayerState.xp_to_next_level(), lv + 1]
+	xp_lbl.add_theme_font_size_override("font_size", 16)
+	xp_lbl.add_theme_color_override("font_color", Color(0.6, 0.63, 0.7))
+	idcol.add_child(xp_lbl)
+	# status chips
+	var chips := HFlowContainer.new()
+	chips.add_theme_constant_override("h_separation", 6)
+	chips.add_theme_constant_override("v_separation", 6)
+	parent.add_child(chips)
+	chips.add_child(_char_chip("$%s cash" % _comma(PlayerState.cash), Color(0.35, 0.75, 0.45)))
+	chips.add_child(_char_chip("%s CRED" % _comma(PlayerState.cred), Color(0.85, 0.65, 0.25)))
+	chips.add_child(_char_chip("Power %d" % PlayerState.combat_power(), Color(0.9, 0.4, 0.35)))
+	chips.add_child(_char_chip("Respect %d" % PlayerState.respect, Color(0.55, 0.6, 0.95)))
+	chips.add_child(_char_chip("Heat %d" % PlayerState.notoriety, _heat_color(PlayerState.notoriety)))
+	if PlayerState.injury > 0:
+		chips.add_child(_char_chip("Hurt %d%%" % PlayerState.injury, Color(0.9, 0.3, 0.3)))
+	# stat bars
+	var sh := Label.new()
+	sh.text = "Stats"
+	sh.add_theme_font_size_override("font_size", 22)
+	sh.add_theme_color_override("font_color", Color(0.85, 0.85, 0.9))
+	parent.add_child(sh)
+	for st in _STAT_ORDER:
+		var v := int(PlayerState.stats.get(st, 10))
+		var m := PlayerState.stat_mod(st)
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 10)
+		parent.add_child(row)
+		var nl := Label.new()
+		nl.text = st
+		nl.custom_minimum_size = Vector2(56, 0)
+		nl.add_theme_font_size_override("font_size", 20)
+		row.add_child(nl)
+		var bar := _char_bar(clampf(float(v) / 20.0, 0.0, 1.0), Color(0.9, 0.4, 0.35), 22)
+		bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(bar)
+		var vl := Label.new()
+		vl.text = "%d  (%+d)" % [v, m]
+		vl.custom_minimum_size = Vector2(96, 0)
+		vl.add_theme_font_size_override("font_size", 20)
+		vl.add_theme_color_override("font_color", Color(0.8, 0.82, 0.88))
+		row.add_child(vl)
+
+# ---- stash tab ----------------------------------------------------------
+
+func _char_stash(parent: Control) -> void:
+	var carried := PlayerState.grams_carried()
+	var head := Label.new()
+	head.text = "Carrying %dg  ·  est. street value $%s" % [carried, _comma(_stash_value())]
+	head.add_theme_font_size_override("font_size", 22)
+	head.add_theme_color_override("font_color", Color(0.85, 0.85, 0.9))
+	parent.add_child(head)
+	# carry "heat" bar — the more you hold, the more attention on arrival (2kg = high risk)
+	parent.add_child(_char_bar(clampf(float(carried) / 2000.0, 0.0, 1.0), _heat_color(int(carried / 20)), 16))
+	var hint := Label.new()
+	hint.text = "The more you carry, the more heat you draw arriving somewhere. Stash at a trap house before you travel heavy."
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	hint.add_theme_font_size_override("font_size", 15)
+	hint.add_theme_color_override("font_color", Color(0.58, 0.6, 0.66))
+	parent.add_child(hint)
+	if PlayerState.inventory.is_empty():
+		parent.add_child(_char_empty("Nothing on you. Hit the Market to pick up product."))
+		return
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	parent.add_child(scroll)
+	var grid := VBoxContainer.new()
+	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	grid.add_theme_constant_override("separation", 8)
+	scroll.add_child(grid)
+	for drug_id in PlayerState.inventory.keys():
+		grid.add_child(_drug_card(String(drug_id), int(PlayerState.inventory[drug_id])))
+	Anim.pass_touch(grid)
+
+func _drug_card(drug_id: String, grams: int) -> Control:
+	var d := Drugs.by_id(drug_id)
+	var row := PanelContainer.new()
+	row.add_theme_stylebox_override("panel", _glass_row_stylebox())
+	var hb := HBoxContainer.new()
+	hb.add_theme_constant_override("separation", 12)
+	row.add_child(hb)
+	# category color stripe
+	var stripe := ColorRect.new()
+	stripe.color = _drug_color(String(d.get("category", "")))
+	stripe.custom_minimum_size = Vector2(10, 0)
+	hb.add_child(stripe)
+	var col := VBoxContainer.new()
+	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hb.add_child(col)
+	var nm := Label.new()
+	nm.text = String(d.get("name", drug_id))
+	nm.add_theme_font_size_override("font_size", 24)
+	col.add_child(nm)
+	var sub := Label.new()
+	var val := int(grams * float(d.get("base_price_per_g", 0)))
+	sub.text = "%dg  ·  ~$%s  ·  %s" % [grams, _comma(val), String(d.get("category", "")).capitalize()]
+	sub.add_theme_font_size_override("font_size", 17)
+	sub.add_theme_color_override("font_color", Color(0.72, 0.75, 0.82))
+	col.add_child(sub)
+	var qty := Label.new()
+	qty.text = "%dg" % grams
+	qty.add_theme_font_size_override("font_size", 28)
+	qty.add_theme_color_override("font_color", ACCENT)
+	hb.add_child(qty)
+	return row
+
+# ---- arsenal tab --------------------------------------------------------
+
+func _char_arsenal(parent: Control) -> void:
+	var head := Label.new()
+	head.text = "Combat power %d" % PlayerState.combat_power()
+	head.add_theme_font_size_override("font_size", 24)
+	head.add_theme_color_override("font_color", ACCENT)
+	parent.add_child(head)
+	if PlayerState.weapons.is_empty():
+		parent.add_child(_char_empty("Unarmed. You're running on fists and nerve — hit Arms to gear up."))
+		return
+	# the weapon actually driving your power (highest threat) gets a badge
+	var best_id := ""
+	var best_threat := -1
+	for wid in PlayerState.weapons:
+		var t := int(Weapons.by_id(String(wid)).get("threat", 0))
+		if t > best_threat:
+			best_threat = t
+			best_id = String(wid)
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	parent.add_child(scroll)
+	var grid := VBoxContainer.new()
+	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	grid.add_theme_constant_override("separation", 8)
+	scroll.add_child(grid)
+	for wid in PlayerState.weapons:
+		grid.add_child(_weapon_card(String(wid), String(wid) == best_id))
+	Anim.pass_touch(grid)
+
+func _weapon_card(wid: String, is_best: bool) -> Control:
+	var w := Weapons.by_id(wid)
+	var row := PanelContainer.new()
+	row.add_theme_stylebox_override("panel", _glass_row_stylebox())
+	var hb := HBoxContainer.new()
+	hb.add_theme_constant_override("separation", 12)
+	row.add_child(hb)
+	var stripe := ColorRect.new()
+	stripe.color = ACCENT if is_best else Color(0.4, 0.42, 0.5)
+	stripe.custom_minimum_size = Vector2(10, 0)
+	hb.add_child(stripe)
+	var col := VBoxContainer.new()
+	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hb.add_child(col)
+	var nm := Label.new()
+	nm.text = String(w.get("name", wid)) + ("   ★ drawn" if is_best else "")
+	nm.add_theme_font_size_override("font_size", 23)
+	col.add_child(nm)
+	var sub := Label.new()
+	var legality := ("legal / FFL" if Weapons.legal_available(w) else "black-market only")
+	sub.text = "%s  ·  power %d  ·  %s" % [String(w.get("category", "")).capitalize(), int(w.get("threat", 0)), legality]
+	sub.add_theme_font_size_override("font_size", 17)
+	sub.add_theme_color_override("font_color", Color(0.72, 0.75, 0.82))
+	col.add_child(sub)
+	var pw := Label.new()
+	pw.text = "+%d" % int(w.get("threat", 0))
+	pw.add_theme_font_size_override("font_size", 28)
+	pw.add_theme_color_override("font_color", ACCENT if is_best else Color(0.7, 0.72, 0.78))
+	hb.add_child(pw)
+	return row
+
+# ---- character-sheet helpers -------------------------------------------
+
+func _char_bar(frac: float, color: Color, h: int) -> Control:
+	var wrap := Control.new()
+	wrap.custom_minimum_size = Vector2(0, h)
+	wrap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var bg := ColorRect.new()
+	bg.color = Color(1, 1, 1, 0.1)
+	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bg.anchor_right = 1.0
+	bg.anchor_bottom = 1.0
+	wrap.add_child(bg)
+	var fill := ColorRect.new()
+	fill.color = color
+	fill.set_anchors_preset(Control.PRESET_FULL_RECT)
+	fill.anchor_bottom = 1.0
+	fill.anchor_right = clampf(frac, 0.0, 1.0)
+	wrap.add_child(fill)
+	return wrap
+
+func _char_chip(text: String, color: Color) -> Control:
+	var p := PanelContainer.new()
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(color.r, color.g, color.b, 0.2)
+	sb.border_color = color
+	sb.set_border_width_all(2)
+	sb.set_corner_radius_all(14)
+	sb.content_margin_left = 12
+	sb.content_margin_right = 12
+	sb.content_margin_top = 6
+	sb.content_margin_bottom = 6
+	p.add_theme_stylebox_override("panel", sb)
+	var l := Label.new()
+	l.text = text
+	l.add_theme_font_size_override("font_size", 18)
+	l.add_theme_color_override("font_color", Color(0.92, 0.93, 0.96))
+	p.add_child(l)
+	return p
+
+func _char_empty(text: String) -> Control:
+	var l := Label.new()
+	l.text = text
+	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	l.add_theme_font_size_override("font_size", 20)
+	l.add_theme_color_override("font_color", Color(0.6, 0.62, 0.68))
+	l.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	return l
+
+func _stash_value() -> int:
+	var v := 0
+	for drug_id in PlayerState.inventory.keys():
+		v += int(int(PlayerState.inventory[drug_id]) * float(Drugs.by_id(String(drug_id)).get("base_price_per_g", 0)))
+	return v
+
+func _heat_color(n: int) -> Color:
+	if n >= 60:
+		return Color(0.9, 0.3, 0.3)
+	if n >= 30:
+		return Color(0.9, 0.6, 0.25)
+	return Color(0.5, 0.7, 0.4)
+
+func _drug_color(cat: String) -> Color:
+	match cat:
+		"cannabis": return Color(0.4, 0.7, 0.4)
+		"stimulant": return Color(0.9, 0.55, 0.25)
+		"opioid": return Color(0.75, 0.35, 0.35)
+		"psychedelic": return Color(0.6, 0.45, 0.85)
+		"dissociative": return Color(0.4, 0.6, 0.85)
+		"depressant": return Color(0.5, 0.5, 0.6)
+		_: return Color(0.6, 0.62, 0.7)
+
 var _arms_rebuild: Callable
 
 func _show_arms() -> void:
@@ -2276,6 +2626,10 @@ func _show_encounter(enc: Dictionary) -> void:
 		b.custom_minimum_size = Vector2(0, 84)
 		b.add_theme_font_size_override("font_size", 26)
 		b.pressed.connect(func():
+			if String(act[1]) == "fight":
+				dlg.queue_free()
+				await _play_fight(enc)
+				return
 			var r: Dictionary = PlayerState.resolve_encounter(enc, String(act[1]))
 			if r.get("won", false):
 				Notify.good(String(r.get("text", "")), "Street")
@@ -2284,6 +2638,18 @@ func _show_encounter(enc: Dictionary) -> void:
 			dlg.queue_free())
 		col.add_child(b)
 	dlg.popup_centered()
+
+## Play an interactive VS mini-game for a street fight; the result drives the consequences.
+func _play_fight(enc: Dictionary) -> void:
+	var mg = preload("res://scripts/ui/minigames.gd").new()
+	add_child(mg)
+	var res: Dictionary = await mg.run("random", PlayerState.combat_power(), int(enc.get("power", 3)))
+	mg.queue_free()
+	var r: Dictionary = PlayerState.apply_fight_outcome(enc, bool(res.get("won", false)))
+	if r.get("won", false):
+		Notify.good(String(r.get("text", "")), "Street")
+	else:
+		Notify.warn(String(r.get("text", "")), "Street")
 
 ## A free player who hit today's cap gets nudged to upgrade instead of a raw error.
 func _market_error(e: String) -> void:

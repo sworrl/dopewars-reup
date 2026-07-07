@@ -538,22 +538,10 @@ func resolve_encounter(enc: Dictionary, action: String) -> Dictionary:
 	if enc.get("kind") == "cop_stop":
 		return _resolve_cop(enc, action)
 	if action == "fight":
+		# Dice fallback (used only if the interactive mini-game can't run); normally the HUD
+		# plays a VS mini-game and calls apply_fight_outcome() with the result.
 		var o := Challenge.fight(combat_power(), int(enc.get("power", 3)), "You", String(enc.get("name", "them")))
-		if o.winner >= 0:
-			var take := randi_range(50, 400)
-			change_cash(take)
-			add_notoriety(3)
-			add_respect(randi_range(2, 6))                # winning builds your rep
-			add_injury(randi_range(0, 8))                 # even a win leaves a mark
-			return {"ok": true, "won": true, "log": o.log,
-				"text": "%s You held them off — grabbed $%d." % [o.summary(), take]}
-		var lost := mini(int(enc.get("threat_cash", 0)), cash)
-		change_cash(-lost)
-		var seized := _seize_random_drug()
-		add_notoriety(-4)
-		add_injury(randi_range(12, 28))                    # losing a fight leaves you hurt
-		return {"ok": true, "won": false, "log": o.log,
-			"text": "%s They rolled you for $%d%s." % [o.summary(), lost, seized]}
+		return apply_fight_outcome(enc, o.winner >= 0, o.summary(), o.log)
 	elif action == "flee":
 		var r := stealth_check(12 + int(enc.get("power", 3)))
 		if r.success:
@@ -565,6 +553,26 @@ func resolve_encounter(enc: Dictionary, action: String) -> Dictionary:
 		var pay := mini(int(int(enc.get("threat_cash", 0)) * 0.5), cash)
 		change_cash(-pay)
 		return {"ok": true, "won": false, "text": "You paid them off — $%d, no blood." % pay}
+
+## Apply the consequences of a fight the player already resolved — via the interactive VS mini-game
+## (preferred) or the dice fallback. Keeps win/lose effects in one place so both paths agree.
+func apply_fight_outcome(enc: Dictionary, won: bool, summary := "", log := []) -> Dictionary:
+	var pre: String = (summary + " ") if summary != "" else ""
+	if won:
+		var take := randi_range(50, 400)
+		change_cash(take)
+		add_notoriety(3)
+		add_respect(randi_range(2, 6))                # winning builds your rep
+		add_injury(randi_range(0, 8))                 # even a win leaves a mark
+		return {"ok": true, "won": true, "log": log,
+			"text": "%sYou held them off — grabbed $%d." % [pre, take]}
+	var lost := mini(int(enc.get("threat_cash", 0)), cash)
+	change_cash(-lost)
+	var seized := _seize_random_drug()
+	add_notoriety(-4)
+	add_injury(randi_range(12, 28))                    # losing a fight leaves you hurt
+	return {"ok": true, "won": false, "log": log,
+		"text": "%sThey rolled you for $%d%s." % [pre, lost, seized]}
 
 func _seize_random_drug() -> String:
 	if inventory.is_empty():

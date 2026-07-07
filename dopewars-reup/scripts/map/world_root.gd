@@ -5,7 +5,7 @@ extends Node2D
 
 @onready var map: MapView = $MapView as MapView
 
-const LOCAL_ZOOM := 14   # town / block level — your operations and influence
+const LOCAL_ZOOM := 16   # STREET level — you see the actual block you're standing on
 const REGION_ZOOM := 9   # regional — cities + travel routes
 
 var _player_marker: MapMarker

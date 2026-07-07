@@ -110,9 +110,31 @@ func _show_step(n: int) -> void:
 	$Scroll.scroll_vertical = 0
 
 func _next_step() -> void:
-	if _step == 0 and _picked_class_id == "":
-		return                          # must pick a class first
+	# Per-step validation — the wizard replaced the old begin_btn.disabled gate, so every
+	# requirement is enforced here, with a toast saying exactly what's missing.
+	match _step:
+		0:
+			if handle_edit.text.strip_edges() == "":
+				Notify.warn("Pick a handle first — the streets need a name.", "Hold up")
+				return
+			if _picked_class_id == "":
+				Notify.warn("Pick who you are — choose a class.", "Hold up")
+				return
+		1:
+			if not _is_bonus_satisfied():
+				var c := CharClasses.by_id(_picked_class_id)
+				Notify.warn("Spend all %d bonus points first (%d spent)." % [int(c.bonus_points), _spent_points()], "Hold up")
+				return
+		2:
+			if _picked_perk == "":
+				Notify.warn("Pick a starter perk.", "Hold up")
+				return
 	if _step == _steps.size() - 1:
+		# Belt-and-suspenders: full re-check before committing the character.
+		if handle_edit.text.strip_edges() == "" or _picked_class_id == "" \
+				or _picked_perk == "" or not _is_bonus_satisfied():
+			Notify.warn("Something's missing — swipe back and check each step.", "Hold up")
+			return
 		_on_begin()
 		return
 	_show_step(_step + 1)
@@ -383,5 +405,10 @@ func _on_begin() -> void:
 	var c := CharClasses.by_id(_picked_class_id)
 	PlayerState.cash = int(c.get("starting_cash", PlayerState.STARTING_CASH))
 	PlayerState.xp = int(c.get("starting_xp", 0))
+	# Spawn in a neighborhood that fits the class's means (real Steubenville property-value tiers):
+	# pharma bro / trust fund up in Braybarton, the rough classes down in LaBelle.
+	if c.has("spawn_lat") and c.has("spawn_lon"):
+		PlayerState.lat = float(c.get("spawn_lat"))
+		PlayerState.lon = float(c.get("spawn_lon"))
 	PlayerState.save_to_disk()
 	get_tree().change_scene_to_file(MAP_SCENE)

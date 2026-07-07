@@ -52,11 +52,87 @@ func _ready() -> void:
 	_build_class_rows()
 	_build_stat_rows()
 	begin_btn.pressed.connect(_on_begin)
-	_set_class_dependent_visibility(false)
 	_refresh_summary()
 	Anim.wire_button_haptics(self)
 	Anim.pass_touch($Scroll)          # let drags over class/stat buttons still scroll the page
+	_setup_wizard()                   # single-page steps + swipe, no long scroll
 	Anim.fade_in(self, 0.3)
+
+# ---- single-page step wizard (no scrolling; swipe or Back/Next) -----------
+
+var _step := 0
+var _steps: Array = []
+var _back_btn: Button
+var _next_btn: Button
+var _dots: Label
+const _STEP_TITLES := ["Who you are", "Your stats", "Your edge", "Confirm"]
+
+func _setup_wizard() -> void:
+	var inner := $Scroll/V/Pad/Inner
+	_steps = [
+		[inner.get_node("HandleLabel"), inner.get_node("HandleEdit"), inner.get_node("ClassHeader"), inner.get_node("ClassList")],
+		[inner.get_node("StatsHeader"), inner.get_node("PointsLabel"), inner.get_node("StatsBox")],
+		[inner.get_node("PerkHeader"), inner.get_node("PerkList")],
+		[inner.get_node("SummaryHeader"), inner.get_node("Summary")],
+	]
+	_dots = Label.new()
+	_dots.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_dots.add_theme_font_size_override("font_size", 22)
+	inner.add_child(_dots)
+	var nav := HBoxContainer.new()
+	nav.add_theme_constant_override("separation", 12)
+	inner.add_child(nav)
+	_back_btn = Button.new()
+	_back_btn.text = "Back"
+	_back_btn.custom_minimum_size = Vector2(0, 96)
+	_back_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_back_btn.pressed.connect(_prev_step)
+	nav.add_child(_back_btn)
+	_next_btn = Button.new()
+	_next_btn.custom_minimum_size = Vector2(0, 96)
+	_next_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_next_btn.pressed.connect(_next_step)
+	nav.add_child(_next_btn)
+	begin_btn.visible = false          # the wizard's "Begin" is the last-step Next
+	_show_step(0)
+
+func _show_step(n: int) -> void:
+	_step = clampi(n, 0, _steps.size() - 1)
+	for i in _steps.size():
+		for node in _steps[i]:
+			node.visible = (i == _step)
+	_back_btn.disabled = _step == 0
+	var last := _step == _steps.size() - 1
+	_next_btn.text = "Begin" if last else "Next  ›"
+	_dots.text = "%s   (%d/%d)" % [_STEP_TITLES[_step], _step + 1, _steps.size()]
+	if last:
+		_refresh_summary()
+	$Scroll.scroll_vertical = 0
+
+func _next_step() -> void:
+	if _step == 0 and _picked_class_id == "":
+		return                          # must pick a class first
+	if _step == _steps.size() - 1:
+		_on_begin()
+		return
+	_show_step(_step + 1)
+
+func _prev_step() -> void:
+	_show_step(_step - 1)
+
+var _swipe_x := 0.0
+func _unhandled_input(ev: InputEvent) -> void:
+	# Horizontal swipe changes step (Back/Next still work). Vertical drags stay for scrolling.
+	if ev is InputEventScreenTouch:
+		var t := ev as InputEventScreenTouch
+		if t.pressed:
+			_swipe_x = t.position.x
+		else:
+			var dx := t.position.x - _swipe_x
+			if dx <= -120.0:
+				_next_step()
+			elif dx >= 120.0:
+				_prev_step()
 
 # ---- class picker ---------------------------------------------------------
 
@@ -96,7 +172,6 @@ func _on_class_toggled(pressed: bool, class_id: String) -> void:
 	# Tint the whole UI with this class's accent color.
 	theme = ThemeFactory.make(ThemeFactory.accent_for_class(class_id))
 	_refresh_stat_rows()
-	_set_class_dependent_visibility(true)
 	_picked_perk = c.get("default_perk", "")
 	_rebuild_perk_list()
 	_refresh_summary()

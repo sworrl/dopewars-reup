@@ -22,6 +22,22 @@ static func bust() -> void:
 	if not _enabled: return
 	Input.start_joy_vibration(0, 0.85, 0.95, 0.60)
 
+## Mini-game feedback (touch + pad). Short + tasteful — a tick on a good input, firmer on win/loss.
+static func hit() -> void:
+	if not _enabled: return
+	Input.start_joy_vibration(0, 0.0, 0.4, 0.06)
+	Input.vibrate_handheld(15)
+
+static func win() -> void:
+	if not _enabled: return
+	Input.start_joy_vibration(0, 0.5, 0.8, 0.25)
+	Input.vibrate_handheld(60)
+
+static func loss() -> void:
+	if not _enabled: return
+	Input.start_joy_vibration(0, 0.7, 0.85, 0.35)
+	Input.vibrate_handheld(90)
+
 static func pulse_triple() -> void:
 	if not _enabled: return
 	# Used for "robbery defense window opened" alert (when wired in v0.3).

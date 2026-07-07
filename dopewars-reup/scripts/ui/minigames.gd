@@ -74,6 +74,21 @@ func _intro(game: String) -> void:
 	sub.queue_free()
 
 func _outro(won: bool, score: float) -> void:
+	# a quick full-screen flash sells the result
+	var flash := ColorRect.new()
+	flash.color = Color(0.35, 0.8, 0.45, 0.0) if won else Color(0.9, 0.2, 0.25, 0.0)
+	flash.set_anchors_preset(Control.PRESET_FULL_RECT)
+	flash.anchor_right = 1.0
+	flash.anchor_bottom = 1.0
+	flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_root.add_child(flash)
+	var ft := flash.create_tween()
+	ft.tween_property(flash, "color:a", 0.35, 0.08)
+	ft.tween_property(flash, "color:a", 0.0, 0.5)
+	if won:
+		Rumble.win()
+	else:
+		Rumble.loss()
 	var big := _label("YOU WON" if won else "YOU LOST", 60, Color(0.35, 0.8, 0.45) if won else ACCENT, _vp.y * 0.4)
 	big.add_theme_font_override("font", FONT_DISPLAY)
 	_label("performance %d%%" % int(score * 100), 24, Color(0.8, 0.8, 0.85), _vp.y * 0.4 + 90)
@@ -97,6 +112,7 @@ func _shootout() -> float:
 			if alive[0]:
 				alive[0] = false
 				hits += 1
+				Rumble.hit()
 				t.queue_free())
 		hud.text = "Hits: %d" % hits
 		var wait := randf_range(0.55, 0.95)
@@ -144,7 +160,10 @@ func _fistfight() -> float:
 		sb.set_border_width_all(6)
 		sb.set_corner_radius_all(20)
 		b.add_theme_stylebox_override("normal", sb)
-		b.pressed.connect(func(): hit[0] = true)
+		b.pressed.connect(func():
+			if not hit[0]:
+				hit[0] = true
+				Rumble.hit())
 		_root.add_child(b)
 		# shrinking ring = the timing window
 		var ring := b.create_tween()
@@ -190,6 +209,7 @@ func _standoff() -> float:
 		var mx: float = tapped[0] if tapped[0] >= 0 else marker.position.x
 		if mx >= zone.position.x and mx <= zone.position.x + zone.size.x:
 			good += 1
+			Rumble.hit()
 			hud.text = "Clean draw!"
 		else:
 			hud.text = "Off."
@@ -218,8 +238,9 @@ func _getaway() -> float:
 		var tapped_in: Array = [false]
 		var btn := _fullscreen_tap(func():
 			var c := dot.position.x + 30
-			if c >= zone.position.x and c <= zone.position.x + zone.size.x:
-				tapped_in[0] = true)
+			if c >= zone.position.x and c <= zone.position.x + zone.size.x and not tapped_in[0]:
+				tapped_in[0] = true
+				Rumble.hit())
 		var tw := dot.create_tween()
 		tw.tween_property(dot, "position:x", _vp.x - 120, randf_range(0.9, 1.4))
 		await tw.finished

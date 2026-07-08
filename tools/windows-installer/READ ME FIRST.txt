@@ -1,0 +1,52 @@
+DOPE WARS: RE-UP  -  Windows installer for Android
+==================================================
+
+STEP 0:  UNZIP THIS FOLDER FIRST.
+         Right-click the ZIP > "Extract All..." > open the new folder.
+         (Running things from inside the ZIP window will NOT work.)
+
+EASIEST WAY:  double-click  "Install DopeWars.bat"  and follow the steps
+on screen. It installs the game onto your Android phone over a USB cable
+and tells you exactly what to press if anything needs attention.
+
+ONE-TIME PHONE SETUP (only the first time):
+  1. Settings > About phone > tap "Build number" 7 times  (turns on Developer mode)
+  2. Settings > System > Developer options > turn ON "USB debugging"
+  3. Plug the phone into this PC.  When it asks "Allow USB debugging?", tap ALLOW.
+
+Then run "Install DopeWars.bat".  Tap YES / ALLOW on any phone prompts.  Done.
+
+COMMON HICCUPS
+--------------
+"Windows protected your PC"      Click "More info" > "Run anyway".
+                                 (The script just isn't code-signed.)
+
+Nothing happens after plugging   Your USB cable may be charge-only. Try a
+in                               different cable or USB port. If the phone
+                                 still never shows up, install your phone
+                                 maker's USB driver (search "<brand> USB
+                                 driver") and try again.
+
+Phone never asks "Allow USB      Unplug and replug the cable with the phone
+debugging?"                      UNLOCKED. If you tapped Deny earlier, the
+                                 popup comes back on replug.
+
+"Old copy with a different       The installer will offer to remove the old
+signature"                       test build for you. Online progress is safe
+                                 on the server.
+
+NO PC NEEDED / WANT TO SIDELOAD DIRECTLY?
+  The game itself is the file  dopewars-reup.apk  in this folder.
+  Copy it to your phone (or download the APK from the GitHub release on
+  the phone), tap it, and allow "install unknown apps".
+
+WHAT'S IN THIS FOLDER
+  Install DopeWars.bat   the installer script (plain text - open it in
+                         Notepad if you want to see what it does)
+  dopewars-reup.apk      the game, signed by the project
+  adb.exe + two DLLs     Google's official, freely-redistributable Android
+                         Debug Bridge tool, unmodified, from
+                         dl.google.com/android/repository
+
+Nothing here talks to anyone except Google's tool talking to your phone,
+and the game talking to its own server.

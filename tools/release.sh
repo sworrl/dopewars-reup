@@ -44,10 +44,13 @@ echo ">> 3/6 zipalign + sign"
 "$BT/apksigner" sign --ks "$KEYSTORE" --ks-pass "pass:$KS_PASS" \
   --ks-key-alias "$KEY_ALIAS" --key-pass "pass:$KEY_PASS" --out "$APK" /tmp/dwreup-aligned.apk
 
-echo ">> 4/6 checksums"
-( cd "$OUT" && sha256sum "$(basename "$APK")" > SHA256SUMS.txt )
+echo ">> 4/7 windows one-click installer zip"
+"$ROOT/tools/windows-installer/build.sh" "$APK" "$OUT"
 
-echo ">> 5/6 update manifest (latest.json — the in-app Updater polls this)"
+echo ">> 5/7 checksums"
+( cd "$OUT" && sha256sum "$(basename "$APK")" DopeWarsReUp-Windows-Installer.zip > SHA256SUMS.txt )
+
+echo ">> 6/7 update manifest (latest.json — the in-app Updater polls this)"
 REPO="${REPO:-sworrl/dopewars-reup}"
 # TAG is the git/release tag the assets live under. Defaults to v<version>, but override for suffixed
 # tags (e.g. TAG=v0.2.3-beta) so the manifest URL points at the actual release.
@@ -63,13 +66,14 @@ cat > "$OUT/latest.json" <<JSON
 }
 JSON
 
-echo ">> 6/6 signing certificate (publish this fingerprint so users can verify the signer)"
+echo ">> 7/7 signing certificate (publish this fingerprint so users can verify the signer)"
 "$BT/apksigner" verify --print-certs "$APK" | grep -i "SHA-256"
 
 echo
 echo "Built  $APK"
+echo "Win    $OUT/DopeWarsReUp-Windows-Installer.zip"
 echo "Sums   $OUT/SHA256SUMS.txt"
 echo "Manif  $OUT/latest.json  (attach as a release asset named exactly latest.json)"
-echo "Attach all three to the GitHub Release. Users verify with:"
+echo "Attach all four to the GitHub Release. Users verify with:"
 echo "  sha256sum -c SHA256SUMS.txt"
 echo "  apksigner verify --print-certs dopewars-reup-$VERSION.apk   # compare SHA-256 to the published cert"

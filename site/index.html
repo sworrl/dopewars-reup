@@ -149,15 +149,16 @@
   <div class="wrap">
     <div class="ey">// get in</div>
     <h2>Install</h2>
-    <p style="color:var(--mut);max-width:52ch;margin:8px auto 0">Sideload the signed 35 MB APK. A browser installer (WebUSB, no tools) is coming with the first public release.</p>
+    <p style="color:var(--mut);max-width:52ch;margin:8px auto 0">Plug your phone into a computer and install straight from the browser — no tools, like Meshtastic's web flasher. Or grab the signed APK / Windows one-click installer.</p>
     <ol class="steps">
-      <li>Grab the APK from <a href="https://github.com/sworrl/dopewars-reup/releases">Releases</a>.</li>
-      <li>Run <code>adb install dopewars-reup.apk</code>, or use the web installer.</li>
+      <li>Easiest: the <a href="install/">browser installer</a> (Chrome/Edge + USB cable), or open it on your phone to download the APK directly.</li>
+      <li>Old school: grab the APK from <a href="https://github.com/sworrl/dopewars-reup/releases">Releases</a> and <code>adb install</code> it.</li>
       <li>Verify it is genuine: <code>sha256sum -c SHA256SUMS.txt</code> and <code>apksigner verify --print-certs</code>.</li>
     </ol>
     <div class="cta" style="animation:none;opacity:1">
-      <a class="btn red" href="https://github.com/sworrl/dopewars-reup/releases">Releases</a>
-      <a class="btn ghost" href="https://github.com/sworrl/dopewars-reup">GitHub</a>
+      <a class="btn red" href="install/">Install from browser</a>
+      <a class="btn ghost" href="download/latest.apk">Download APK</a>
+      <a class="btn ghost" href="https://github.com/sworrl/dopewars-reup/releases">Releases</a>
     </div>
   </div>
 </section>

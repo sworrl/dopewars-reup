@@ -128,15 +128,26 @@ What is built, and what is still locked.
 ## ▚ Get in
 
 ### Flash from your browser (no tools, like Meshtastic)
-Plug your phone into a desktop and install straight from Chrome. It uses **WebUSB + WebADB**
-([`ya-webadb`](https://github.com/yume-chan/ya-webadb)), the same idea as Meshtastic's web flasher.
+Plug your phone into a desktop and install straight from Chrome at
+**[dopewars.falcontechnix.com/install](https://dopewars.falcontechnix.com/install/)**. It uses
+**WebUSB + WebADB** ([`ya-webadb`](https://github.com/yume-chan/ya-webadb)), the same idea as
+Meshtastic's web flasher. It downloads the latest signed release, checks its SHA-256 against the
+published checksum, and pushes it to the phone.
 
 1. Phone: **Settings → About → tap Build number 7x**, then enable **USB debugging**.
 2. Plug into a desktop Chrome or Edge.
 3. Open the installer, click **Connect**, approve the browser and phone prompts.
 4. Click **Install**.
 
-The installer lives in `web-installer/` and deploys to Cloudflare Pages.
+Opening that page **on the phone itself** offers the APK directly — no cable needed. Stable
+links: [`/download/latest.apk`](https://dopewars.falcontechnix.com/download/latest.apk) ·
+[`/download/windows`](https://dopewars.falcontechnix.com/download/windows) (one-click Windows
+installer). Source in `web-installer/`, deployed with the site.
+
+### Windows one-click (no browser tricks)
+Download **DopeWarsReUp-Windows-Installer.zip** from Releases, unzip, run
+`Install DopeWars.bat`, plug the phone in. It waits for the phone, tells you exactly what to tap,
+and explains every failure in plain English.
 
 ### Manual sideload
 Grab the APK from **Releases** and run `adb install dopewars-reup.apk`. The signed release is about

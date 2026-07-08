@@ -39,6 +39,12 @@ supabase/
    update profiles set tier = 'admin' where id = '<your-auth-user-uuid>';
    ```
    After that, admins promote others via `select admin_set_tier_by_handle('runner_ab12cd34', 'beta');`.
+4. **Beta signups via Telegram** (the site's "Join the beta" form): create a bot with
+   @BotFather, then run `TELEGRAM_BOT_TOKEN=... tools/setup_telegram_bot.sh` — it deploys
+   `beta-signup` + `telegram-webhook`, wires the webhook (with a secret token), and walks you
+   through setting your admin chat id. Every request DMs you; reply **1**/**yes** or tap ✅ to
+   approve (the tester gets a GoTrue invite email and can log in), **2**/**no** or ❌ to deny.
+   `pending` lists the queue.
 
 ## Account levels (built in, ready for testing + the future)
 

@@ -30,3 +30,11 @@ enable_confirmations = false   # flip on before public launch
 
 [functions.travel]
 verify_jwt = true
+
+# Public endpoints: the site's beta form and Telegram's webhook (each does its own auth —
+# honeypot + rate limits, and the X-Telegram-Bot-Api-Secret-Token header respectively).
+[functions.beta-signup]
+verify_jwt = false
+
+[functions.telegram-webhook]
+verify_jwt = false

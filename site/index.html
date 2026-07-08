@@ -163,12 +163,50 @@
   </div>
 </section>
 
+<section id="beta">
+  <div class="wrap" style="text-align:center">
+    <div class="ey">// the list</div>
+    <h2>Join the beta</h2>
+    <p style="color:var(--mut);max-width:52ch;margin:8px auto 22px">Requests are approved by a human. When you're in, you'll get an email invite that logs you straight into the live server.</p>
+    <form id="betaform" style="max-width:460px;margin:0 auto;display:grid;gap:10px;text-align:left">
+      <input name="email" type="email" required maxlength="254" placeholder="you@example.com" autocomplete="email"
+        style="font:inherit;padding:14px 16px;border-radius:11px;border:1px solid var(--line);background:var(--panel);color:var(--text)">
+      <input name="handle" type="text" maxlength="32" placeholder="preferred handle (optional)" autocomplete="off"
+        style="font:inherit;padding:14px 16px;border-radius:11px;border:1px solid var(--line);background:var(--panel);color:var(--text)">
+      <input name="website" type="text" tabindex="-1" autocomplete="off" aria-hidden="true"
+        style="position:absolute;left:-9999px;height:0;width:0;opacity:0">
+      <button class="btn red" type="submit" style="width:100%">Request beta access</button>
+      <div id="betamsg" style="min-height:22px;font-size:14px;color:var(--mut);text-align:center"></div>
+    </form>
+  </div>
+</section>
+
 <footer>
   <div class="wrap">
     <b>Dope Wars: Re-Up</b> &nbsp;·&nbsp; No ads. No pay-to-win. Ever.
     <div class="sub">Fiction. The crisis it draws from is not. Art is AI-generated placeholder; artists wanted. Licensing pending. Dev build.</div>
   </div>
 </footer>
+
+<script>
+(function(){
+  var f=document.getElementById('betaform'),m=document.getElementById('betamsg');
+  f.addEventListener('submit',function(ev){
+    ev.preventDefault();
+    var btn=f.querySelector('button');btn.disabled=true;m.style.color='var(--mut)';m.textContent='Sending…';
+    fetch('https://wnrtrhhdxazqzdcpspsg.supabase.co/functions/v1/beta-signup',{
+      method:'POST',headers:{'content-type':'application/json'},
+      body:JSON.stringify({email:f.email.value,handle:f.handle.value,website:f.website.value})
+    }).then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j}})})
+      .then(function(res){
+        m.style.color=res.ok?'#4fc26b':'var(--red)';
+        m.textContent=(res.j&&(res.j.message||res.j.error))||(res.ok?'Request received.':'Something went wrong — try again.');
+        if(!res.ok)btn.disabled=false;
+      })
+      .catch(function(){m.style.color='var(--red)';m.textContent='Network hiccup — try again.';btn.disabled=false;});
+  });
+})();
+</script>
 
 <script>
 (function(){
